@@ -6,7 +6,8 @@
 | 负责人 | B（A 评审） |
 | 状态 | 待开始 |
 | 依赖 | TASK-000 |
-| 需求 | REQ-006、REQ-007、NFR-003 |
+| MOD | [MOD-03](../../requirements/modules/MOD-03-设备接入与控制.md) |
+| 需求 | [REQ-M03-001](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-001)、[REQ-M03-002](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-002)、[REQ-M03-003](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-003)、[REQ-M03-005](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-005)、[REQ-M03-006](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-006)、[REQ-M03-007](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-007)、[REQ-M03-008](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-008)、[NFR-003](../../requirements/quality/安全与可维护性.md) |
 
 ## 工作与产出
 

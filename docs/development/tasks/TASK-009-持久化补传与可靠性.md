@@ -6,7 +6,8 @@
 | 负责人 | A（B 负责数据库/outbox 协同子任务） |
 | 状态 | 待开始 |
 | 依赖 | TASK-007、TASK-008 |
-| 需求 | REQ-006、REQ-004（重启部分）、NFR-001、NFR-002 |
+| MOD | [MOD-02](../../requirements/modules/MOD-02-安全防护与哨兵.md)、[MOD-04](../../requirements/modules/MOD-04-事件管理与可靠性.md) |
+| 需求 | [REQ-M02-005](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-005)、[REQ-M02-006](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-006)、[REQ-M04-001](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-001)、[REQ-M04-002](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-002)、[REQ-M04-003](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-003)、[REQ-M04-004](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-004)、[REQ-M04-005](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-005)、[REQ-M04-006](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-006)、[REQ-M04-007](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-007)、[REQ-M04-008](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-008)、[NFR-001](../../requirements/quality/性能与资源约束.md)、[NFR-002](../../requirements/quality/可靠性与数据完整性.md) |
 
 ## 工作与产出
 

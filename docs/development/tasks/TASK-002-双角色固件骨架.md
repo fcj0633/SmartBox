@@ -6,7 +6,8 @@
 | 负责人 | A |
 | 状态 | 待开始 |
 | 依赖 | TASK-001 |
-| 需求 | REQ-007、NFR-003 |
+| MOD | [MOD-03](../../requirements/modules/MOD-03-设备接入与控制.md) |
+| 需求 | [REQ-M03-002](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-002)、[REQ-M03-003](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-003)、[REQ-M03-005](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-005)、[REQ-M03-006](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-006)、[REQ-M03-007](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-007)、[REQ-M03-008](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-008)、[NFR-003](../../requirements/quality/安全与可维护性.md) |
 
 ## 工作与产出
 
@@ -14,7 +15,7 @@
 
 ## 完成标准
 
-两个角色 node_id/caps 正确且可分别构建；有编译/链接日志。接板非前提，烧录不属于本任务验收。P1 事件存储适配可用内存但明确不满足 REQ-006。
+两个角色 node_id/caps 正确且可分别构建；有编译/链接日志。接板非前提，烧录不属于本任务验收。P1 事件存储适配可用内存但明确不满足 REQ-M04-001、REQ-M04-002、REQ-M04-003、REQ-M04-004、REQ-M04-005、REQ-M04-006、REQ-M04-007、REQ-M04-008。
 
 ## 验证与收尾
 

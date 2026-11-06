@@ -1,20 +1,20 @@
 # 测试用例目录
 
-用例定义预期，实际结果保存在 reports；当前所有业务用例均未执行。P0 结构检查不等于任何业务 TC 通过。
+TC编号、场景和标准保持不变，当前业务用例未执行。模块映射可跨模块，P1仍只验既有切片。
 
-| 编号 | 用例 | 需求 | 验证层次 |
-|---|---|---|---|
-| TC-001 | [环境规则](TC-001-环境规则.md) | REQ-001 | 软件规则 + 板端 |
-| TC-002 | [姿态与冲击](TC-002-姿态与冲击.md) | REQ-002 | 软件规则 + 板端 |
-| TC-003 | [门证据融合](TC-003-门证据融合.md) | REQ-003 | 软件规则 + 集成 + 动作模拟 |
-| TC-004 | [哨兵与命令状态](TC-004-哨兵与命令状态.md) | REQ-004 | 软件规则 + 集成 + 板端 |
-| TC-005 | [定位与围栏](TC-005-定位与围栏.md) | REQ-005 | 软件规则 + 网页集成 |
-| TC-006 | [事件持久与补传](TC-006-事件持久与补传.md) | REQ-006 | 数据库集成 + 板端掉电 |
-| TC-007 | [MQTT接入与控制](TC-007-MQTT接入与控制.md) | REQ-007 | 契约 + 实际MQTT + 后续板端 |
-| TC-008 | [聚合与过期状态](TC-008-聚合与过期状态.md) | REQ-008 | 集成 + 网页 |
-| TC-009 | [角色与箱体权限](TC-009-角色与箱体权限.md) | REQ-009、NFR-003 | 后端集成 + 网页 |
-| TC-010 | [性能与资源](TC-010-性能与资源.md) | NFR-001 | 实际链路 + 板端测量 |
-| TC-011 | [断网掉电与稳定性](TC-011-断网掉电与稳定性.md) | NFR-002 | 板端 + 服务端稳定性 |
-| TC-012 | [安全与工程一致性](TC-012-安全与工程一致性.md) | NFR-003 | 安全集成 + 静态检查 |
+| TC | MOD | REQ/NFR |
+|---|---|---|
+| [TC-001](TC-001-环境规则.md) | [MOD-01](../../requirements/modules/MOD-01-物流箱运行监测.md) | [REQ-M01-001](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-001)、[REQ-M01-002](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-002)、[REQ-M01-003](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-003)、[REQ-M01-004](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-004) |
+| [TC-002](TC-002-姿态与冲击.md) | [MOD-01](../../requirements/modules/MOD-01-物流箱运行监测.md) | [REQ-M01-005](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-005)、[REQ-M01-006](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-006)、[REQ-M01-007](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-007) |
+| [TC-003](TC-003-门证据融合.md) | [MOD-01](../../requirements/modules/MOD-01-物流箱运行监测.md) | [REQ-M01-004](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-004)、[REQ-M01-008](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-008)、[REQ-M01-009](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-009)、[REQ-M01-010](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-010)、[REQ-M01-011](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-011) |
+| [TC-004](TC-004-哨兵与命令状态.md) | [MOD-02](../../requirements/modules/MOD-02-安全防护与哨兵.md) | [REQ-M02-001](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-001)、[REQ-M02-002](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-002)、[REQ-M02-003](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-003)、[REQ-M02-004](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-004)、[REQ-M02-005](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-005)、[REQ-M02-006](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-006) |
+| [TC-005](TC-005-定位与围栏.md) | [MOD-01](../../requirements/modules/MOD-01-物流箱运行监测.md) | [REQ-M01-012](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-012)、[REQ-M01-013](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-013)、[REQ-M01-014](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-014) |
+| [TC-006](TC-006-事件持久与补传.md) | [MOD-04](../../requirements/modules/MOD-04-事件管理与可靠性.md) | [REQ-M04-001](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-001)、[REQ-M04-002](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-002)、[REQ-M04-003](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-003)、[REQ-M04-004](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-004)、[REQ-M04-005](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-005)、[REQ-M04-006](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-006)、[REQ-M04-007](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-007)、[REQ-M04-008](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-008)、[NFR-002](../../requirements/quality/可靠性与数据完整性.md) |
+| [TC-007](TC-007-MQTT接入与控制.md) | [MOD-03](../../requirements/modules/MOD-03-设备接入与控制.md) | [REQ-M03-001](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-001)、[REQ-M03-002](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-002)、[REQ-M03-003](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-003)、[REQ-M03-004](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-004)、[REQ-M03-005](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-005)、[REQ-M03-006](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-006)、[REQ-M03-007](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-007)、[REQ-M03-008](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-008) |
+| [TC-008](TC-008-聚合与过期状态.md) | [MOD-03](../../requirements/modules/MOD-03-设备接入与控制.md)、[MOD-05](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md) | [REQ-M03-004](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-004)、[REQ-M05-001](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-001)、[REQ-M05-002](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-002)、[REQ-M05-003](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-003)、[REQ-M05-004](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-004)、[REQ-M05-005](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-005) |
+| [TC-009](TC-009-角色与箱体权限.md) | [MOD-05](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md)、[MOD-06](../../requirements/modules/MOD-06-用户与权限管理.md) | [REQ-M05-005](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-005)、[REQ-M06-001](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-001)、[REQ-M06-002](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-002)、[REQ-M06-003](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-003)、[REQ-M06-004](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-004)、[REQ-M06-005](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-005)、[REQ-M06-006](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-006)、[NFR-003](../../requirements/quality/安全与可维护性.md) |
+| [TC-010](TC-010-性能与资源.md) |  | [NFR-001](../../requirements/quality/性能与资源约束.md) |
+| [TC-011](TC-011-断网掉电与稳定性.md) | [MOD-04](../../requirements/modules/MOD-04-事件管理与可靠性.md) | [REQ-M04-005](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-005)、[REQ-M04-006](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-006)、[REQ-M04-007](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-007)、[REQ-M04-008](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-008)、[NFR-002](../../requirements/quality/可靠性与数据完整性.md) |
+| [TC-012](TC-012-安全与工程一致性.md) | [MOD-03](../../requirements/modules/MOD-03-设备接入与控制.md)、[MOD-06](../../requirements/modules/MOD-06-用户与权限管理.md) | [REQ-M03-001](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-001)、[REQ-M03-008](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-008)、[REQ-M06-001](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-001)、[REQ-M06-005](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-005)、[REQ-M06-006](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-006)、[NFR-003](../../requirements/quality/安全与可维护性.md) |
 
-P1 选择 TC-006 的后端事务/去重部分、TC-007、TC-008、TC-009 及 TC-012 的已实现子项；P2 再执行板端采集，完整验收按需求全部关联用例。
+P1依旧选择后端事务、接入、聚合、权限和已实现安全子项；板端采集与长稳在后续阶段验证，模拟不得替代实物。

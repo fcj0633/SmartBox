@@ -6,7 +6,8 @@
 | 负责人 | A |
 | 状态 | 待开始 |
 | 依赖 | TASK-002、TASK-005、TASK-006 |
-| 需求 | REQ-001、REQ-002、REQ-007、NFR-001 |
+| MOD | [MOD-01](../../requirements/modules/MOD-01-物流箱运行监测.md)、[MOD-03](../../requirements/modules/MOD-03-设备接入与控制.md) |
+| 需求 | [REQ-M01-001](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-001)、[REQ-M01-005](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-005)、[REQ-M01-006](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-006)、[REQ-M01-007](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-007)、[REQ-M03-004](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-004)、[REQ-M03-005](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-005)、[NFR-001](../../requirements/quality/性能与资源约束.md) |
 
 ## 工作与产出
 

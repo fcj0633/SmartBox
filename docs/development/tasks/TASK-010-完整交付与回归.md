@@ -6,7 +6,8 @@
 | 负责人 | B（A 负责硬件稳定性子任务） |
 | 状态 | 待开始 |
 | 依赖 | TASK-008、TASK-009 |
-| 需求 | REQ-009、NFR-001、NFR-002、NFR-003 |
+| MOD | [MOD-05](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md)、[MOD-06](../../requirements/modules/MOD-06-用户与权限管理.md) |
+| 需求 | [REQ-M05-005](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-005)、[REQ-M06-003](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-003)、[REQ-M06-005](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-005)、[REQ-M06-006](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-006)、[NFR-001](../../requirements/quality/性能与资源约束.md)、[NFR-002](../../requirements/quality/可靠性与数据完整性.md)、[NFR-003](../../requirements/quality/安全与可维护性.md) |
 
 ## 工作与产出
 

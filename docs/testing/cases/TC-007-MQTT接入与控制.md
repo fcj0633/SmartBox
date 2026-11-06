@@ -2,7 +2,8 @@
 
 | 属性 | 内容 |
 |---|---|
-| 需求 | REQ-007 |
+| MOD | [MOD-03](../../requirements/modules/MOD-03-设备接入与控制.md) |
+| 需求 | [REQ-M03-001](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-001)、[REQ-M03-002](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-002)、[REQ-M03-003](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-003)、[REQ-M03-004](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-004)、[REQ-M03-005](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-005)、[REQ-M03-006](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-006)、[REQ-M03-007](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-007)、[REQ-M03-008](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-008) |
 | 任务 | TASK-001、TASK-002、TASK-003、TASK-004、TASK-005、TASK-006 |
 | 类型 | 契约 + 实际MQTT + 后续板端 |
 | 状态 | 未执行 |
