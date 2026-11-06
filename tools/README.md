@@ -59,3 +59,7 @@ python -m unittest discover -s tests -p test_build_firmware.py -v
 [backend.py](backend.py)统一执行unit/build/bootstrap/run/test/smoke；[backend_smoke.py](backend_smoke.py)启动真实JAR并离线解析冻结Schema校验响应。详细配置、命令、测试清理保护与Windows进程兼容处理见[后端初始化与启动指南](../docs/development/guides/后端数据库初始化与启动.md)。工具不保存/打印密码或JWT，不停止已有端口程序；smoke结束检查自身实际进程与端口已释放。
 
 真实集成必须使用test配置和显式--allow-test-reset，检查实际数据库与账号后只清理项目测试业务数据。运行命令使用dev配置，不自动初始化或重置账号。依赖复用既有.venv契约工具，不安装系统工具。实际结果见[TASK-003报告](../docs/testing/reports/TASK-003-后端与数据库验证报告.md)。
+
+## TASK-004模拟工具设计入口
+
+[任务4](../docs/development/tasks/TASK-004-MQTT与模拟节点.md)集中维护Python命令行模拟器、MQTT单所有者、配置/协议/状态/场景与证据职责。计划在tools/simulator/实现并单独锁定paho-mqtt依赖；本轮没有创建工具或安装依赖，没有可执行模拟命令。真实CLI及退出码在后续实现验证后补齐。Broker和节点只清理自身实例，事件确认测试不得冒充后端保存。
