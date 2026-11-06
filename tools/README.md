@@ -60,6 +60,6 @@ python -m unittest discover -s tests -p test_build_firmware.py -v
 
 真实集成必须使用test配置和显式--allow-test-reset，检查实际数据库与账号后只清理项目测试业务数据。运行命令使用dev配置，不自动初始化或重置账号。依赖复用既有.venv契约工具，不安装系统工具。实际结果见[TASK-003报告](../docs/testing/reports/TASK-003-后端与数据库验证报告.md)。
 
-## TASK-004模拟工具设计入口
+## TASK-004模拟工具入口
 
-[任务4](../docs/development/tasks/TASK-004-MQTT与模拟节点.md)集中维护Python命令行模拟器、MQTT单所有者、配置/协议/状态/场景与证据职责。计划在tools/simulator/实现并单独锁定paho-mqtt依赖；本轮没有创建工具或安装依赖，没有可执行模拟命令。真实CLI及退出码在后续实现验证后补齐。Broker和节点只清理自身实例，事件确认测试不得冒充后端保存。
+[mqtt.py](mqtt.py)提供prepare、broker、node、unit、integration；实现分层和命令见[模拟器说明](simulator/README.md)，[Broker模板](../deploy/mosquitto/README.md)保持与旧服务隔离。项目.venv新增paho-mqtt2.1.0并单独锁定，不改系统Python。默认本地配置在忽略的secrets/mqtt.local.json，不打印密码或以命令行传密码。真实集成自建配置和子进程，确认1883空闲后执行，结束检查进程和端口释放。测试event_ack不能证明数据库保存，storage=DEGRADED不能证明Flash可靠性。实际结果见[TASK-004报告](../docs/testing/reports/TASK-004-MQTT与模拟节点验证报告.md)。

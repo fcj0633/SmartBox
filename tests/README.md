@@ -21,3 +21,7 @@
 [test_sync_firmware.py](test_sync_firmware.py)验证预览零写入、受控删除、未知文件、链接/边界、冲突与恢复；[test_build_firmware.py](test_build_firmware.py)验证Unix备份、归属不明/并发/损坏拒绝与恢复权限。所有负例仅在临时SDK样例执行，Windows和Ubuntu实际结果见[报告](../docs/testing/reports/TASK-002-固件骨架验证报告.md)。不替代TC-007/012完整集成场景。
 
 文档工具临时样例已加入实际firmware与tests/firmware文件，仅补齐新链接输入，没有改变检查规则或历史保护。
+
+## MQTT模拟器与真实Broker检查
+
+[单元与临时配置测试](simulator/test_model.py)通过统一入口.venv/Scripts/python tools/mqtt.py unit执行；真实M01～M13场景由.venv/Scripts/python tools/mqtt.py integration执行，必须使用空闲1883和已有Mosquitto2.0.14，不允许缺Broker静默跳过。场景实现见[scenarios.py](../tools/simulator/scenarios.py)，实际结果见[报告](../docs/testing/reports/TASK-004-MQTT与模拟节点验证报告.md)。只覆盖主机模拟与MQTT，不代表后端保存或板端；文档回归仅补充新工具、测试及部署模板为临时样例输入，未放宽检查器。

@@ -1,0 +1,15 @@
+# SmartBox project process only. Do not install over the Windows service config.
+listener 1883 127.0.0.1
+allow_anonymous false
+allow_zero_length_clientid false
+use_username_as_clientid true
+password_file PASSWORD_FILE
+acl_file ACL_FILE
+persistence false
+# 2.0.14 compares remaining_length + 1 (omits two length bytes at this boundary).
+# 2046 therefore enforces the public 2048-byte full-frame limit on this version.
+max_packet_size 2046
+log_dest stdout
+log_type all
+connection_messages true
+log_timestamp true

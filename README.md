@@ -4,7 +4,7 @@
 
 项目英文名：**SmartBox**。代码仓库：[fcj0633/SmartBox](https://github.com/fcj0633/SmartBox)。
 
-**当前进度：P0基线、P1接口准备、双角色固件骨架及TASK-003后端数据库基础已完成；基础认证与节点查询可运行，完整业务闭环尚未完成。** 官方IA1/SC2例程据用户反馈通过；SmartBox软件准备继续推进，P1 不等待接板；真实采集和硬件结果在 P2 验证。
+**当前进度：P0基线、P1接口准备、双角色固件骨架、TASK-003后端数据库基础及TASK-004双节点MQTT已完成；基础认证与节点查询可运行，完整业务闭环尚未完成。** 官方IA1/SC2例程据用户反馈通过；SmartBox软件准备继续推进，P1 不等待接板；真实采集和硬件结果在 P2 验证。
 
 ## 从这里开始
 
@@ -44,4 +44,8 @@ TASK-001交付入口：[版本矩阵](docs/development/environment/工具与依�
 
 ## 固件骨架交付
 
-[TASK-002](docs/development/tasks/TASK-002-双角色固件骨架.md)、[源码与端口](firmware/README.md)、[构建与检查工具](tools/README.md)、[实际报告](docs/testing/reports/TASK-002-固件骨架验证报告.md)。两角色已实际编译链接并恢复原学习环境；尚未烧录、采集真实数据或联网，TASK-003后端与数据库基础也已完成，见[后端入口](backend/README.md)及[实际报告](docs/testing/reports/TASK-003-后端与数据库验证报告.md)。后续按依赖推进TASK-004，完整业务闭环尚未完成。
+[TASK-002](docs/development/tasks/TASK-002-双角色固件骨架.md)、[源码与端口](firmware/README.md)、[构建与检查工具](tools/README.md)、[实际报告](docs/testing/reports/TASK-002-固件骨架验证报告.md)。两角色已实际编译链接并恢复原学习环境；尚未烧录、采集真实数据或联网，TASK-003后端与数据库基础也已完成，见[后端入口](backend/README.md)及[实际报告](docs/testing/reports/TASK-003-后端与数据库验证报告.md)。后续按依赖推进TASK-005，完整业务闭环尚未完成。
+
+## 双节点MQTT交付
+
+[TASK-004](docs/development/tasks/TASK-004-MQTT与模拟节点.md)已实现项目Broker及Python双节点，37项单元/临时配置与55项真实MQTT检查通过，见[实际报告](docs/testing/reports/TASK-004-MQTT与模拟节点验证报告.md)和[运行说明](tools/simulator/README.md)。本轮进程已停止，本地配置保留；下一步TASK-005接入服务端，模拟确认不表示数据库保存。

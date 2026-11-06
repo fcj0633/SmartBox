@@ -1,0 +1,2 @@
+# Additive to the frozen requirements-contracts.txt; no transitive runtime dependencies.
+paho-mqtt==2.1.0

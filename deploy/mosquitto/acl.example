@@ -1,0 +1,10 @@
+# Illustration only. The preparer generates explicit rules for all five accounts.
+user BOX-0001-ENV
+topic write box/BOX-0001/BOX-0001-ENV/property
+topic write box/BOX-0001/BOX-0001-ENV/heartbeat
+topic write box/BOX-0001/BOX-0001-ENV/event
+topic write box/BOX-0001/BOX-0001-ENV/command_ack
+topic write box/BOX-0001/BOX-0001-ENV/availability
+topic read box/BOX-0001/BOX-0001-ENV/cmd
+topic read box/BOX-0001/BOX-0001-ENV/event_ack
+topic read box/BOX-0001/BOX-0001-ENV/box_state
