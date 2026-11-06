@@ -1,0 +1,14 @@
+import("selected_role.gni")
+assert(sb_role == "ENV" || sb_role == "POSE", "Select exactly one role")
+static_library("smartbox") {
+  sources = [
+    "../app/smartbox_main.c", "../app/smartbox_tasks.c",
+    "../domain/sb_pipeline.c", "../drivers/sb_sensor_mock.c",
+    "../drivers/sb_output_mock.c", "../drivers/sb_platform_cmsis.c",
+    "../services/sb_config.c", "../services/sb_clock.c",
+    "../services/sb_event_buffer.c", "../services/sb_network_stub.c",
+  ]
+  include_dirs = [ "../include", "//utils/native/lite/include",
+                   "//kernel/liteos_m/components/cmsis/2.0" ]
+  defines = [ "SB_ROLE_${sb_role}=1" ]
+}

@@ -27,6 +27,8 @@ class DocumentationChecks(unittest.TestCase):
             if any(x in p.relative_to(ROOT).parts for x in (".git","artifacts","node_modules","target",".venv")):continue
             q=cls.seed/p.relative_to(ROOT);q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
         shutil.copytree(ROOT/"contracts",cls.seed/"contracts",dirs_exist_ok=True)
+        shutil.copytree(ROOT/"firmware",cls.seed/"firmware",dirs_exist_ok=True)
+        shutil.copytree(ROOT/"tests/firmware",cls.seed/"tests/firmware",dirs_exist_ok=True)
         for p in (ROOT/"tools").iterdir():
             if p.is_file():shutil.copy2(p,cls.seed/"tools"/p.name)
         for p in (ROOT/"tests").glob("*.py"):
