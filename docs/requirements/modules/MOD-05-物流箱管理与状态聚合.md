@@ -51,7 +51,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[系统总体设计.md](../../design/architecture/系统总体设计.md) |
-| TASK | [TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
 | TC | [TC-008](../../testing/cases/TC-008-聚合与过期状态.md) |
 
 **目标与业务场景：** 固定归属并声明必需节点，使接入及哨兵使用的关系。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦预配置箱体、节点归属及必需节点。
@@ -86,7 +86,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-008](../../development/tasks/TASK-008-核心规则与业务视图.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-008](../../development/tasks/TASK-008-核心规则与业务视图.md) |
 | TC | [TC-008](../../testing/cases/TC-008-聚合与过期状态.md) |
 
 **目标与业务场景：** 按箱体组合独立维度，使统一快照与online_mask。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦多节点快照与独立状态聚合。
@@ -121,7 +121,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-008](../../development/tasks/TASK-008-核心规则与业务视图.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-008](../../development/tasks/TASK-008-核心规则与业务视图.md) |
 | TC | [TC-008](../../testing/cases/TC-008-聚合与过期状态.md) |
 
 **目标与业务场景：** 表达字段质量和新鲜度，使带过期及质量的快照。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦字段新鲜度与过期。
@@ -156,7 +156,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-008](../../development/tasks/TASK-008-核心规则与业务视图.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-008](../../development/tasks/TASK-008-核心规则与业务视图.md) |
 | TC | [TC-008](../../testing/cases/TC-008-聚合与过期状态.md) |
 
 **目标与业务场景：** 保留可用信息并重同步当前事实，使明确降级及当前快照。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦部分可用、恢复及历史不覆盖实时。
@@ -191,7 +191,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-010](../../development/tasks/TASK-010-完整交付与回归.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-010](../../development/tasks/TASK-010-完整交付与回归.md) |
 | TC | [TC-008](../../testing/cases/TC-008-聚合与过期状态.md)、[TC-009](../../testing/cases/TC-009-角色与箱体权限.md) |
 
 **目标与业务场景：** 稳定分页、筛选和导出内容组织，使事件、轨迹及CSV。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦历史事件、轨迹查询及事件导出。

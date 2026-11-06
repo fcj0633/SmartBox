@@ -54,7 +54,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md) |
-| TASK | [TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
 | TC | [TC-006](../../testing/cases/TC-006-事件持久与补传.md) |
 
 **目标与业务场景：** 形成不重复身份，使供保存/确认/去重使用。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦事件身份与唯一性。
@@ -125,7 +125,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[模块边界与数据流.md](../../design/architecture/模块边界与数据流.md) |
-| TASK | [TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
 | TC | [TC-006](../../testing/cases/TC-006-事件持久与补传.md) |
 
 **目标与业务场景：** 事务持久后确认精确序号，使后端记录及设备可清理范围。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦后端可靠保存与精确业务确认。
@@ -160,7 +160,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[模块边界与数据流.md](../../design/architecture/模块边界与数据流.md) |
-| TASK | [TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
 | TC | [TC-006](../../testing/cases/TC-006-事件持久与补传.md) |
 
 **目标与业务场景：** 校验一致性并幂等记录，使单份业务事件或冲突诊断。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦重复、乱序及同键冲突。
@@ -195,7 +195,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md) |
-| TASK | [TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
 | TC | [TC-006](../../testing/cases/TC-006-事件持久与补传.md)、[TC-011](../../testing/cases/TC-011-断网掉电与稳定性.md) |
 
 **目标与业务场景：** 重订阅后补传并保留原时间/质量，使历史事件与待确认状态。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦断网补传与原始时间保留。
@@ -230,7 +230,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-009](../../development/tasks/TASK-009-持久化补传与可靠性.md) |
 | TC | [TC-006](../../testing/cases/TC-006-事件持久与补传.md)、[TC-011](../../testing/cases/TC-011-断网掉电与稳定性.md) |
 
 **目标与业务场景：** 覆盖最旧未确认并持久记录损失，使累计数及损失范围可见。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦容量覆盖及损失报告。

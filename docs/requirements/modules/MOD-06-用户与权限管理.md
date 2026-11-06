@@ -52,7 +52,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
 | TC | [TC-009](../../testing/cases/TC-009-角色与箱体权限.md)、[TC-012](../../testing/cases/TC-012-安全与工程一致性.md) |
 
 **目标与业务场景：** 验证身份和会话有效期，使访问身份或统一失败。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦登录与会话认证。
@@ -87,7 +87,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
 | TC | [TC-009](../../testing/cases/TC-009-角色与箱体权限.md) |
 
 **目标与业务场景：** 交叉校验功能与范围，使允许或默认拒绝。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦角色及箱体范围授权。
@@ -122,7 +122,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-010](../../development/tasks/TASK-010-完整交付与回归.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-010](../../development/tasks/TASK-010-完整交付与回归.md) |
 | TC | [TC-009](../../testing/cases/TC-009-角色与箱体权限.md) |
 
 **目标与业务场景：** 服务端投影并按角色展示，使必要业务卡片和事件视图。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦字段权限与角色化视图。
@@ -158,7 +158,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
 | TC | [TC-009](../../testing/cases/TC-009-角色与箱体权限.md) |
 
 **目标与业务场景：** 校验布撤防或其他配置权限，使获准请求才交设备控制。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦控制权限。
@@ -193,7 +193,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-010](../../development/tasks/TASK-010-完整交付与回归.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-010](../../development/tasks/TASK-010-完整交付与回归.md) |
 | TC | [TC-009](../../testing/cases/TC-009-角色与箱体权限.md)、[TC-012](../../testing/cases/TC-012-安全与工程一致性.md) |
 
 **目标与业务场景：** 统一范围和字段授权，使一致受控响应。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦REST与WebSocket一致授权。
@@ -228,7 +228,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-010](../../development/tasks/TASK-010-完整交付与回归.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-010](../../development/tasks/TASK-010-完整交付与回归.md) |
 | TC | [TC-009](../../testing/cases/TC-009-角色与箱体权限.md)、[TC-012](../../testing/cases/TC-012-安全与工程一致性.md) |
 
 **目标与业务场景：** 验证范围、脱敏记录，使授权导出与审计依据。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦导出授权与操作审计。

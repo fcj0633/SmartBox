@@ -54,7 +54,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[部署与网络拓扑.md](../../design/architecture/部署与网络拓扑.md) |
-| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
 | TC | [TC-007](../../testing/cases/TC-007-MQTT接入与控制.md)、[TC-012](../../testing/cases/TC-012-安全与工程一致性.md) |
 
 **目标与业务场景：** 核对注册与归属，使接受合法数据或拒绝并诊断。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦设备身份与归属校验。
@@ -89,7 +89,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[部署与网络拓扑.md](../../design/architecture/部署与网络拓扑.md) |
-| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
 | TC | [TC-007](../../testing/cases/TC-007-MQTT接入与控制.md) |
 
 **目标与业务场景：** 连接、订阅、心跳及退避重连，使形成独立双向通信。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦MQTT连接、订阅与恢复。
@@ -125,7 +125,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md) |
-| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
 | TC | [TC-007](../../testing/cases/TC-007-MQTT接入与控制.md) |
 
 **目标与业务场景：** 核对全量满足，使执行支持动作或明确ignored。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦角色能力声明与过滤。
@@ -160,7 +160,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[部署与网络拓扑.md](../../design/architecture/部署与网络拓扑.md) |
-| TASK | [TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-007](../../development/tasks/TASK-007-双板实际采集与输出接入.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md)、[TASK-007](../../development/tasks/TASK-007-双板实际采集与输出接入.md) |
 | TC | [TC-007](../../testing/cases/TC-007-MQTT接入与控制.md)、[TC-008](../../testing/cases/TC-008-聚合与过期状态.md) |
 
 **目标与业务场景：** 判定节点连接在线，使供箱体聚合使用。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦心跳与节点在线判定。
@@ -197,7 +197,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md) |
-| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-007](../../development/tasks/TASK-007-双板实际采集与输出接入.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-007](../../development/tasks/TASK-007-双板实际采集与输出接入.md) |
 | TC | [TC-007](../../testing/cases/TC-007-MQTT接入与控制.md) |
 
 **目标与业务场景：** 保留原始时间质量并限制不安全时间推断，使供融合和历史解释。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦时间质量及未校时控制限制。
@@ -232,7 +232,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[页面与状态设计.md](../../design/frontend/页面与状态设计.md) |
-| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-003](../../development/tasks/TASK-003-后端与数据库骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
 | TC | [TC-007](../../testing/cases/TC-007-MQTT接入与控制.md) |
 
 **目标与业务场景：** 保存下发、节点实际执行、关联回执，使可查询操作结果。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦命令下发、幂等与回执。
@@ -267,7 +267,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md)、[固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md) |
-| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md)、[TASK-006](../../development/tasks/TASK-006-网页与首轮闭环验收.md) |
 | TC | [TC-007](../../testing/cases/TC-007-MQTT接入与控制.md) |
 
 **目标与业务场景：** 按角色和能力执行现有动作，使输出实际状态与原因。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦既有控制命令及执行边界。
@@ -302,7 +302,7 @@
 | 状态 | 继承现行规则；列出的待决部分未获新确认；实现待开始 |
 | 优先级 | 必需；未决规则不因本次迁移获批 |
 | Design | [固件架构与SDK接入.md](../../design/firmware/固件架构与SDK接入.md)、[后端模块与数据模型.md](../../design/backend/后端模块与数据模型.md) |
-| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
+| TASK | [TASK-001](../../development/tasks/TASK-001-冻结接口与工具版本.md)（接口准备）、[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)、[TASK-004](../../development/tasks/TASK-004-MQTT与模拟节点.md)、[TASK-005](../../development/tasks/TASK-005-接入存储与查询闭环.md) |
 | TC | [TC-007](../../testing/cases/TC-007-MQTT接入与控制.md)、[TC-012](../../testing/cases/TC-012-安全与工程一致性.md) |
 
 **目标与业务场景：** 有界校验并拒绝非法输入，使安全错误或诊断计数。适用场景是上表中相关监测、控制或恢复过程；本条验收聚焦版本、容量与非法报文拒绝。
