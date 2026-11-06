@@ -18,3 +18,7 @@ python tools/backend.py run --profile dev
 详细字段与实现边界集中在[TASK-003](../docs/development/tasks/TASK-003-后端与数据库骨架.md)；[实际报告](../docs/testing/reports/TASK-003-后端与数据库验证报告.md)记录17项单元、26项集成和23项独立HTTP检查。总体职责见[后端设计](../docs/design/backend/后端模块与数据模型.md)。
 
 TASK-005继续实现MQTT接入、遥测聚合、事件/outbox保存后确认、命令、WS及业务查询。表和公共投影存在不表示业务闭环完成；不包含前端、真实节点或板端验收。运行账号无DDL权限，数据库迁移与运行账号分离，禁止用其他项目库或H2/SQLite替代集成验证。
+
+## TASK-005详细设计入口
+
+接入、可靠保存、查询/导出、命令和WebSocket详细设计集中在[TASK-005](../docs/development/tasks/TASK-005-接入存储与查询闭环.md)，包括事务提交点、outbox/发布恢复、13表用途及结构缺口、统一授权/投影、S1～S7与验收。此次只完善文档，未创建源码/迁移、安装依赖、启动服务或连接数据库；TASK-005仍待开始。Q-01/Q-02/Q-09/Q-11保留，受影响子项在正式实施前确认，不因任务3/4通过而宣称服务端闭环已实现。
