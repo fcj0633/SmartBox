@@ -2,7 +2,7 @@
 
 关联 REQ-M01-001、REQ-M01-002、REQ-M01-003、REQ-M01-004、REQ-M01-005、REQ-M01-006、REQ-M01-007、REQ-M01-008、REQ-M01-009、REQ-M01-010、REQ-M01-011、REQ-M02-001、REQ-M02-002、REQ-M02-003、REQ-M02-004、REQ-M02-005、REQ-M02-006、REQ-M03-006、REQ-M01-012、REQ-M01-013、REQ-M01-014、REQ-M04-001、REQ-M04-002、REQ-M04-003、REQ-M04-004、REQ-M04-005、REQ-M04-006、REQ-M04-007、REQ-M04-008、REQ-M03-001、REQ-M03-002、REQ-M03-003、REQ-M03-004、REQ-M03-005、REQ-M03-006、REQ-M03-007、REQ-M03-008；TASK-002、007～009。
 
-app 装配任务和角色，domain 实现纯规则，drivers 适配板件，services 包含事件/网络/配置/GPS，include 定义公共类型，build 存 GN 接入。
+app 装配任务和角色，domain承接规则入口并在后续阶段实现纯规则，drivers先提供Mock后接真实板件，services包含事件/网络/配置/GPS，include定义公共类型，build存GN接入。
 
 SensorFrame 内部包含有效位、单位、boot_id、uptime 和可空 UTC；事件身份完整。gps_get_fix 隔离 Mock 和未来真实驱动，不让 SDK 全局变量穿透到业务层。
 
@@ -51,3 +51,7 @@ SDK sample 下新增 logistics_box；一次只构建一个角色，构建后立�
 | MOD-04 | [REQ-M04-007](../../requirements/modules/MOD-04-事件管理与可靠性.md#req-m04-007) |
 
 全局质量：[NFR-001](../../requirements/quality/性能与资源约束.md)、[NFR-002](../../requirements/quality/可靠性与数据完整性.md)。
+
+## TASK-002详细设计入口
+
+骨架目录、公共接口、三线程/工作队列、启动失败处理、互斥角色GN、默认预览同步、构建归档及入口恢复统一维护在[TASK-002](../../development/tasks/TASK-002-双角色固件骨架.md)，本文不重复详细参数。当前由用户独立开发；本轮仅完善设计，尚无源码或SDK构建证据。P1骨架使用Mock及禁用网络桩，不声称已有持久事件或真实MQTT发送；前文持久化后发送为后续目标。

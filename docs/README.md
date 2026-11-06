@@ -37,3 +37,7 @@
 ## TASK-001交付入口
 
 [版本矩阵](development/environment/工具与依赖版本矩阵.md)、[机器契约](../contracts/README.md)、[验证报告](testing/reports/TASK-001-契约验证报告.md)、[冻结与交接](development/iterations/TASK-001-接口评审与交接.md)。业务需求及P0历史验收保持原状态，后续任务按ITER-001依赖推进。
+
+## 当前单人开发与固件骨架设计
+
+当前全部开发与验收由用户独立完成，历史分工只保留当时事实。TASK-002详细设计集中在[任务文档](development/tasks/TASK-002-双角色固件骨架.md)，已完成文档设计但尚未实现；按任务索引和依赖继续开发。
