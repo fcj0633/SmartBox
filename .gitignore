@@ -1,0 +1,26 @@
+# Local secrets
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.yaml
+*.local.json
+secrets/
+# Build and dependency outputs
+**/node_modules/
+**/target/
+frontend/dist/
+**/__pycache__/
+*.pyc
+**/.venv/
+# Editors
+.idea/
+.vscode/
+*.swp
+# Local artifacts and evidence
+artifacts/*
+!artifacts/README.md
+*.log
+# OS
+.DS_Store
+Thumbs.db
