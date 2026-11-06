@@ -1,0 +1,1 @@
+{"v":1,"box_id":"BOX-0001","node_id":"BOX-0001-ENV","boot_id":12,"ts":1793923203000,"ts_src":"SNTP","uptime_ms":33000,"time_uncertainty_ms":100,"request_id":"req-env-001","operation_id":"op-001","result":"ok","code":"completed","actual_state":{"profile_id":"demo"}}

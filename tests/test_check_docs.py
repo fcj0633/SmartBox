@@ -24,9 +24,13 @@ class DocumentationChecks(unittest.TestCase):
         cls.seed.mkdir()
         for directory in checker.REQUIRED_DIRS:(cls.seed/directory).mkdir(parents=True,exist_ok=True)
         for p in ROOT.rglob("*.md"):
-            if any(x in p.relative_to(ROOT).parts for x in (".git","artifacts","node_modules","target")):continue
+            if any(x in p.relative_to(ROOT).parts for x in (".git","artifacts","node_modules","target",".venv")):continue
             q=cls.seed/p.relative_to(ROOT);q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
-        q=cls.seed/"contracts/mqtt/examples.json";shutil.copy2(ROOT/"contracts/mqtt/examples.json",q)
+        shutil.copytree(ROOT/"contracts",cls.seed/"contracts",dirs_exist_ok=True)
+        for p in (ROOT/"tools").iterdir():
+            if p.is_file():shutil.copy2(p,cls.seed/"tools"/p.name)
+        for p in (ROOT/"tests").glob("*.py"):
+            shutil.copy2(p,cls.seed/"tests"/p.name)
         for relative in ("tools/check_docs.py","tests/test_check_docs.py"):
             shutil.copy2(ROOT/relative,cls.seed/relative)
 

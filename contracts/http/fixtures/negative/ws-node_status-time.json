@@ -1,0 +1,16 @@
+{
+  "v": 1,
+  "type": "node_status",
+  "box_id": "BOX-0001",
+  "message_id": "msg-1",
+  "ts": "bad",
+  "data": {
+    "node_id": "BOX-0001-ENV",
+    "role": "ENV",
+    "caps": 71,
+    "required": true,
+    "online": true,
+    "boot_id": 12,
+    "last_received_at": 1793923200050
+  }
+}

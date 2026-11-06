@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartbox.invalid/contracts/mqtt/schemas/command_ack.schema.json",
+  "title": "command_ack",
+  "$ref": "../../common/v1.schema.json#/$defs/CommandAck"
+}

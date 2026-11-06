@@ -1,0 +1,21 @@
+{
+  "data": {
+    "items": [
+      {
+        "id": "loc-1",
+        "box_id": "BOX-0001",
+        "observed_at": 1793923200000,
+        "received_at": 1793923200050,
+        "time_quality": "SNTP",
+        "lat": 31.2,
+        "lon": 121.5,
+        "valid": true,
+        "src": "MOCK"
+      }
+    ],
+    "page": 1,
+    "size": 20,
+    "total": 1
+  },
+  "request_id": 3
+}

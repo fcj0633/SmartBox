@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "node_id": "BOX-0001-ENV",
+      "role": "ENV",
+      "caps": 71,
+      "required": true,
+      "online": true,
+      "boot_id": 12,
+      "last_received_at": 1793923200050
+    }
+  ],
+  "request_id": 3
+}

@@ -1,0 +1,3220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartbox.invalid/contracts/common/v1.schema.json",
+  "title": "SmartBox v1 public data definitions",
+  "$defs": {
+    "Identity": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "box_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "node_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        }
+      },
+      "required": [
+        "v",
+        "box_id",
+        "node_id"
+      ]
+    },
+    "Time": {
+      "type": "object",
+      "properties": {
+        "ts": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ts_src": {
+          "enum": [
+            "SNTP",
+            "UNSYNCED"
+          ]
+        },
+        "uptime_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "time_uncertainty_ms": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "ts",
+        "ts_src",
+        "uptime_ms",
+        "time_uncertainty_ms"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "ts_src": {
+                "const": "UNSYNCED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "ts": {
+                "type": "null"
+              },
+              "time_uncertainty_ms": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "ts": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "time_uncertainty_ms": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Up": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Identity"
+        },
+        {
+          "$ref": "#/$defs/Time"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "boot_id": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          },
+          "required": [
+            "boot_id"
+          ]
+        }
+      ]
+    },
+    "RoleCaps": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "enum": [
+            "ENV",
+            "POSE"
+          ]
+        },
+        "caps": {
+          "enum": [
+            71,
+            120
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "caps"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "ENV"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "caps": {
+                "const": 71
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "caps": {
+                "const": 120
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Env": {
+      "type": "object",
+      "properties": {
+        "temp_c": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "humi_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lux": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "light_on": {
+          "type": "boolean"
+        },
+        "fan_on": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "temp_c",
+        "humi_pct",
+        "lux",
+        "valid",
+        "light_on",
+        "fan_on"
+      ]
+    },
+    "Pose": {
+      "type": "object",
+      "properties": {
+        "acc_g": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tilt_deg": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 180
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "enum": [
+            "UNKNOWN",
+            "NORMAL",
+            "TILTED",
+            "SIDEWAYS",
+            "INVERTED"
+          ]
+        },
+        "valid": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "acc_g",
+        "tilt_deg",
+        "state",
+        "valid"
+      ]
+    },
+    "Loc": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lon": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "src": {
+          "const": "MOCK"
+        }
+      },
+      "required": [
+        "lat",
+        "lon",
+        "valid",
+        "src"
+      ]
+    },
+    "Property": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Up"
+        },
+        {
+          "$ref": "#/$defs/RoleCaps"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "property_seq": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            },
+            "env": {
+              "$ref": "#/$defs/Env"
+            },
+            "pose": {
+              "$ref": "#/$defs/Pose"
+            },
+            "loc": {
+              "$ref": "#/$defs/Loc"
+            }
+          },
+          "required": [
+            "property_seq"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "ENV"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "env"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "pose"
+                  ]
+                },
+                {
+                  "required": [
+                    "loc"
+                  ]
+                }
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "pose",
+              "loc"
+            ],
+            "not": {
+              "required": [
+                "env"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "LostRange": {
+      "type": "object",
+      "properties": {
+        "boot_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "first_seq": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "last_seq": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "boot_id",
+        "first_seq",
+        "last_seq"
+      ]
+    },
+    "Heartbeat": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Up"
+        },
+        {
+          "$ref": "#/$defs/RoleCaps"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "sentry": {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "enum": [
+                    "UNKNOWN",
+                    "DISARMED",
+                    "ARMING",
+                    "ARMED",
+                    "PARTIAL",
+                    "DEGRADED"
+                  ]
+                },
+                "revision": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "state",
+                "revision"
+              ]
+            },
+            "sensor_quality": {
+              "enum": [
+                "VALID",
+                "INVALID",
+                "UNCALIBRATED",
+                "DEGRADED"
+              ]
+            },
+            "pending_events": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "overflow_total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "lost_ranges": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/LostRange"
+              }
+            },
+            "storage": {
+              "enum": [
+                "OK",
+                "ERROR",
+                "DEGRADED"
+              ]
+            }
+          },
+          "required": [
+            "sentry",
+            "sensor_quality",
+            "pending_events",
+            "overflow_total",
+            "lost_ranges",
+            "storage"
+          ]
+        }
+      ]
+    },
+    "Event": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Time"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_seq": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            },
+            "type": {
+              "enum": [
+                "ENV_HIGH",
+                "ENV_LOW",
+                "ENV_RECOVERED",
+                "POSE_CHANGED",
+                "IMPACT",
+                "DOOR_EVIDENCE",
+                "SENTRY_INTRUSION",
+                "GEOFENCE_EXIT",
+                "GEOFENCE_ENTER",
+                "STORAGE_OVERFLOW",
+                "DEVICE_FAULT"
+              ]
+            },
+            "src": {
+              "type": "string",
+              "minLength": 1
+            },
+            "level": {
+              "enum": [
+                "INFO",
+                "WARNING",
+                "CRITICAL"
+              ]
+            },
+            "data": {
+              "type": "object"
+            },
+            "replayed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "event_seq",
+            "type",
+            "src",
+            "level",
+            "data",
+            "replayed"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ENV_HIGH"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "metric": {
+                    "enum": [
+                      "temp_c",
+                      "humi_pct"
+                    ]
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "threshold": {
+                    "type": "number"
+                  },
+                  "profile_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "metric",
+                  "value",
+                  "threshold",
+                  "profile_id"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ENV_LOW"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "metric": {
+                    "enum": [
+                      "temp_c",
+                      "humi_pct"
+                    ]
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "threshold": {
+                    "type": "number"
+                  },
+                  "profile_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "metric",
+                  "value",
+                  "threshold",
+                  "profile_id"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ENV_RECOVERED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "metric": {
+                    "enum": [
+                      "temp_c",
+                      "humi_pct"
+                    ]
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "threshold": {
+                    "type": "number"
+                  },
+                  "profile_id": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "metric",
+                  "value",
+                  "threshold",
+                  "profile_id"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "POSE_CHANGED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "previous_state": {
+                    "enum": [
+                      "UNKNOWN",
+                      "NORMAL",
+                      "TILTED",
+                      "SIDEWAYS",
+                      "INVERTED"
+                    ]
+                  },
+                  "state": {
+                    "enum": [
+                      "UNKNOWN",
+                      "NORMAL",
+                      "TILTED",
+                      "SIDEWAYS",
+                      "INVERTED"
+                    ]
+                  },
+                  "tilt_deg": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "previous_state",
+                  "state",
+                  "tilt_deg"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "IMPACT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "peak_g": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "duration_ms": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "quality": {
+                    "enum": [
+                      "VALID",
+                      "DEGRADED"
+                    ]
+                  }
+                },
+                "required": [
+                  "peak_g",
+                  "duration_ms",
+                  "quality"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "DOOR_EVIDENCE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "OPEN",
+                      "CLOSE"
+                    ]
+                  },
+                  "lux": {
+                    "type": "number"
+                  },
+                  "tilt_deg": {
+                    "type": "number"
+                  },
+                  "actuator_excluded": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "action",
+                  "actuator_excluded"
+                ],
+                "anyOf": [
+                  {
+                    "required": [
+                      "lux"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "tilt_deg"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "SENTRY_INTRUSION"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "enum": [
+                      "LIGHT",
+                      "POSE",
+                      "IMPACT"
+                    ]
+                  },
+                  "sentry_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "reason",
+                  "sentry_revision"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "GEOFENCE_EXIT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number"
+                  },
+                  "lon": {
+                    "type": "number"
+                  },
+                  "distance_m": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "src": {
+                    "const": "MOCK"
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lon",
+                  "distance_m",
+                  "src"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "GEOFENCE_ENTER"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number"
+                  },
+                  "lon": {
+                    "type": "number"
+                  },
+                  "distance_m": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "src": {
+                    "const": "MOCK"
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lon",
+                  "distance_m",
+                  "src"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "STORAGE_OVERFLOW"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "overflow_total": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "lost_ranges": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/LostRange"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "overflow_total",
+                  "lost_ranges"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "DEVICE_FAULT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "component": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "component",
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EventBatch": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Up"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "events": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Event"
+              },
+              "minItems": 1,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "events"
+          ]
+        }
+      ]
+    },
+    "EventAck": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Identity"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "boot_id": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "event_seqs": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4294967295
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "result": {
+              "const": "stored"
+            },
+            "ts": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "boot_id",
+            "event_seqs",
+            "result",
+            "ts"
+          ]
+        }
+      ]
+    },
+    "SentryParams": {
+      "type": "object",
+      "properties": {
+        "on": {
+          "type": "boolean"
+        },
+        "duration_s": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 86400
+        },
+        "sentry_revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "on",
+        "duration_s",
+        "sentry_revision"
+      ]
+    },
+    "ProfileParams": {
+      "type": "object",
+      "properties": {
+        "profile_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "temp_min_c": {
+          "type": "number"
+        },
+        "temp_max_c": {
+          "type": "number"
+        },
+        "humi_min_pct": {
+          "type": "number"
+        },
+        "humi_max_pct": {
+          "type": "number"
+        },
+        "temp_hysteresis_c": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "humi_hysteresis_pct": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "profile_id",
+        "temp_min_c",
+        "temp_max_c",
+        "humi_min_pct",
+        "humi_max_pct",
+        "temp_hysteresis_c",
+        "humi_hysteresis_pct"
+      ]
+    },
+    "GpsParams": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "FIXED",
+            "ROUTE",
+            "WALK"
+          ]
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "mode",
+        "seed"
+      ]
+    },
+    "OutputParams": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "light",
+            "fan",
+            "indicator"
+          ]
+        },
+        "on": {
+          "type": "boolean"
+        },
+        "duration_s": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        }
+      },
+      "required": [
+        "kind",
+        "on",
+        "duration_s"
+      ]
+    },
+    "CalibrateParams": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "CommandInput": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "cmd": {
+              "enum": [
+                "sentry",
+                "profile",
+                "gps_mode",
+                "output",
+                "calibrate"
+              ]
+            },
+            "params": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "cmd",
+            "params"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "sentry"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/SentryParams"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "profile"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/ProfileParams"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "gps_mode"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/GpsParams"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "output"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/OutputParams"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "calibrate"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/CalibrateParams"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "target_node_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 48,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            }
+          },
+          "required": []
+        },
+        {
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "role"
+                ]
+              },
+              {
+                "required": [
+                  "caps"
+                ]
+              },
+              {
+                "required": [
+                  "target_caps"
+                ]
+              },
+              {
+                "required": [
+                  "box_id"
+                ]
+              },
+              {
+                "required": [
+                  "node_id"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "Command": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Identity"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "cmd": {
+              "enum": [
+                "sentry",
+                "profile",
+                "gps_mode",
+                "output",
+                "calibrate"
+              ]
+            },
+            "params": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "cmd",
+            "params"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "sentry"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/SentryParams"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "profile"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/ProfileParams"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "gps_mode"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/GpsParams"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "output"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/OutputParams"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "calibrate"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "$ref": "#/$defs/CalibrateParams"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "operation_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "target_caps": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 127
+            },
+            "issued_at": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "expires_at": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "request_id",
+            "operation_id",
+            "target_caps",
+            "issued_at",
+            "expires_at"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "sentry"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target_caps": {
+                "const": 64
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "profile"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target_caps": {
+                "const": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "gps_mode"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target_caps": {
+                "const": 32
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "cmd": {
+                "const": "calibrate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "target_caps": {
+                "const": 8
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CommandAck": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Up"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "operation_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "result": {
+              "enum": [
+                "ok",
+                "ignored",
+                "busy",
+                "error",
+                "expired"
+              ]
+            },
+            "code": {
+              "enum": [
+                "completed",
+                "unsupported_caps",
+                "invalid_params",
+                "time_unsynced",
+                "stale_revision",
+                "storage_error",
+                "conflicting_request",
+                "expired",
+                "retained_command",
+                "unsupported_command"
+              ]
+            },
+            "actual_state": {
+              "type": "object",
+              "properties": {
+                "sentry": {
+                  "enum": [
+                    "UNKNOWN",
+                    "DISARMED",
+                    "ARMING",
+                    "ARMED",
+                    "PARTIAL",
+                    "DEGRADED"
+                  ]
+                },
+                "sentry_revision": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "profile_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "mode": {
+                  "enum": [
+                    "FIXED",
+                    "ROUTE",
+                    "WALK"
+                  ]
+                },
+                "kind": {
+                  "enum": [
+                    "light",
+                    "fan",
+                    "indicator"
+                  ]
+                },
+                "on": {
+                  "type": "boolean"
+                },
+                "calibrated": {
+                  "type": "boolean"
+                }
+              },
+              "required": []
+            }
+          },
+          "required": [
+            "request_id",
+            "operation_id",
+            "result",
+            "code",
+            "actual_state"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "result": {
+                "const": "ok"
+              }
+            },
+            "required": [
+              "result"
+            ]
+          },
+          "then": {
+            "properties": {
+              "code": {
+                "const": "completed"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Availability": {
+      "type": "object",
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "boot_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "online": {
+          "type": "boolean"
+        },
+        "v": {
+          "const": 1
+        },
+        "box_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        }
+      },
+      "required": [
+        "node_id",
+        "boot_id",
+        "online"
+      ]
+    },
+    "BoxState": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Identity"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "door_state": {
+              "enum": [
+                "OPEN",
+                "CLOSED",
+                "UNKNOWN"
+              ]
+            },
+            "conclusion_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "historical": {
+              "const": false
+            },
+            "ts": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "door_state",
+            "conclusion_id",
+            "historical",
+            "ts"
+          ]
+        }
+      ]
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ]
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "error",
+        "request_id"
+      ]
+    },
+    "SampleEnv": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Env"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "received_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "src": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time_quality": {
+          "enum": [
+            "SNTP",
+            "UNSYNCED",
+            "ESTIMATED",
+            "UNKNOWN"
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "valid",
+        "observed_at",
+        "received_at",
+        "stale",
+        "src",
+        "time_quality"
+      ]
+    },
+    "SamplePose": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Pose"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "received_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "src": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time_quality": {
+          "enum": [
+            "SNTP",
+            "UNSYNCED",
+            "ESTIMATED",
+            "UNKNOWN"
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "valid",
+        "observed_at",
+        "received_at",
+        "stale",
+        "src",
+        "time_quality"
+      ]
+    },
+    "SampleLoc": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Loc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "received_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "src": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time_quality": {
+          "enum": [
+            "SNTP",
+            "UNSYNCED",
+            "ESTIMATED",
+            "UNKNOWN"
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "valid",
+        "observed_at",
+        "received_at",
+        "stale",
+        "src",
+        "time_quality"
+      ]
+    },
+    "Door": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "enum": [
+            "OPEN",
+            "CLOSED",
+            "UNKNOWN"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "HIGH",
+            "MEDIUM",
+            "LOW",
+            "INSUFFICIENT"
+          ]
+        },
+        "conclusion_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "historical": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "state",
+        "confidence",
+        "conclusion_id",
+        "observed_at",
+        "historical"
+      ]
+    },
+    "Alarm": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "enum": [
+                "INFO",
+                "WARNING",
+                "CRITICAL"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "active",
+        "level"
+      ]
+    },
+    "Node": {
+      "type": "object",
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "role": {
+          "enum": [
+            "ENV",
+            "POSE"
+          ]
+        },
+        "caps": {
+          "enum": [
+            71,
+            120
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "online": {
+          "type": "boolean"
+        },
+        "boot_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_received_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "node_id",
+        "role",
+        "caps",
+        "required",
+        "online",
+        "boot_id",
+        "last_received_at"
+      ]
+    },
+    "Snapshot": {
+      "type": "object",
+      "properties": {
+        "box_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "online_mask": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "connectivity": {
+          "enum": [
+            "ONLINE",
+            "PARTIAL",
+            "OFFLINE",
+            "UNKNOWN"
+          ]
+        },
+        "alarm": {
+          "$ref": "#/$defs/Alarm"
+        },
+        "door": {
+          "$ref": "#/$defs/Door"
+        },
+        "sentry": {
+          "type": "object",
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "DISARMED",
+                "ARMING",
+                "ARMED",
+                "PARTIAL",
+                "DEGRADED"
+              ]
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "state",
+            "revision"
+          ]
+        },
+        "env": {
+          "$ref": "#/$defs/SampleEnv"
+        },
+        "pose": {
+          "$ref": "#/$defs/SamplePose"
+        },
+        "loc": {
+          "$ref": "#/$defs/SampleLoc"
+        },
+        "node_diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Event"
+          }
+        }
+      },
+      "required": [
+        "box_id",
+        "online_mask",
+        "connectivity",
+        "alarm",
+        "door",
+        "env",
+        "pose",
+        "loc",
+        "sentry"
+      ]
+    },
+    "DeliverySnapshot": {
+      "type": "object",
+      "properties": {
+        "box_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "online_mask": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "connectivity": {
+          "enum": [
+            "ONLINE",
+            "PARTIAL",
+            "OFFLINE",
+            "UNKNOWN"
+          ]
+        },
+        "alarm": {
+          "$ref": "#/$defs/Alarm"
+        },
+        "door": {
+          "$ref": "#/$defs/Door"
+        },
+        "env": {
+          "$ref": "#/$defs/SampleEnv"
+        },
+        "loc": {
+          "$ref": "#/$defs/SampleLoc"
+        }
+      },
+      "required": [
+        "box_id",
+        "online_mask",
+        "connectivity",
+        "alarm",
+        "door",
+        "env",
+        "loc"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "pose"
+            ]
+          },
+          {
+            "required": [
+              "sentry"
+            ]
+          },
+          {
+            "required": [
+              "node_diagnostics"
+            ]
+          },
+          {
+            "required": [
+              "evidence"
+            ]
+          },
+          {
+            "required": [
+              "sentry_operation_details"
+            ]
+          }
+        ]
+      },
+      "additionalProperties": false
+    },
+    "SnapshotView": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Snapshot"
+        },
+        {
+          "$ref": "#/$defs/DeliverySnapshot"
+        }
+      ]
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "enum": [
+            "LOGISTICS_VIEWER",
+            "LOGISTICS_OPERATOR",
+            "DELIVERY_USER",
+            "COURIER"
+          ]
+        },
+        "box_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 48,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "username",
+        "role",
+        "box_ids"
+      ]
+    },
+    "LoginInput": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "password": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "username",
+        "password"
+      ]
+    },
+    "Login": {
+      "type": "object",
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expires_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "role": {
+          "enum": [
+            "LOGISTICS_VIEWER",
+            "LOGISTICS_OPERATOR",
+            "DELIVERY_USER",
+            "COURIER"
+          ]
+        }
+      },
+      "required": [
+        "access_token",
+        "expires_at",
+        "role"
+      ]
+    },
+    "Ticket": {
+      "type": "object",
+      "properties": {
+        "ticket": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expires_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "ticket",
+        "expires_at"
+      ]
+    },
+    "EventView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "box_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "enum": [
+            "INFO",
+            "WARNING",
+            "CRITICAL"
+          ]
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "received_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_quality": {
+          "enum": [
+            "SNTP",
+            "UNSYNCED",
+            "ESTIMATED",
+            "UNKNOWN"
+          ]
+        },
+        "historical": {
+          "type": "boolean"
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "box_id",
+        "type",
+        "level",
+        "observed_at",
+        "received_at",
+        "time_quality",
+        "historical",
+        "data"
+      ]
+    },
+    "DeliveryEventView": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/EventView"
+        },
+        {
+          "properties": {
+            "type": {
+              "enum": [
+                "DOOR_CONCLUSION",
+                "ALARM"
+              ]
+            }
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "evidence"
+                ]
+              },
+              {
+                "required": [
+                  "evidence_json"
+                ]
+              },
+              {
+                "required": [
+                  "raw_events"
+                ]
+              },
+              {
+                "required": [
+                  "pose"
+                ]
+              },
+              {
+                "required": [
+                  "node_diagnostics"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "const": "DOOR_CONCLUSION"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "OPEN",
+                          "CLOSED",
+                          "UNKNOWN"
+                        ]
+                      },
+                      "confidence": {
+                        "enum": [
+                          "HIGH",
+                          "MEDIUM",
+                          "LOW",
+                          "INSUFFICIENT"
+                        ]
+                      },
+                      "reason": {
+                        "type": "string"
+                      },
+                      "conclusion_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "confidence"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "const": "ALARM"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "data": {
+                    "$ref": "#/$defs/Alarm"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "TrackPoint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "box_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "received_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_quality": {
+          "enum": [
+            "SNTP",
+            "UNSYNCED",
+            "ESTIMATED",
+            "UNKNOWN"
+          ]
+        },
+        "lat": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lon": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "src": {
+          "const": "MOCK"
+        }
+      },
+      "required": [
+        "id",
+        "box_id",
+        "observed_at",
+        "received_at",
+        "time_quality",
+        "lat",
+        "lon",
+        "valid",
+        "src"
+      ]
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "box_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "status": {
+          "enum": [
+            "PENDING",
+            "RUNNING",
+            "SUCCEEDED",
+            "PARTIAL",
+            "FAILED",
+            "EXPIRED"
+          ]
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "node_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 48,
+                "pattern": "^[A-Za-z0-9_-]+$"
+              },
+              "request_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "status": {
+                "enum": [
+                  "PENDING",
+                  "RUNNING",
+                  "SUCCEEDED",
+                  "FAILED",
+                  "EXPIRED"
+                ]
+              },
+              "code": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "actual_state": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "node_id",
+              "request_id",
+              "status",
+              "code",
+              "actual_state"
+            ]
+          }
+        }
+      },
+      "required": [
+        "operation_id",
+        "box_id",
+        "status",
+        "nodes"
+      ]
+    },
+    "Accepted": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "operation_id"
+      ]
+    },
+    "EventViewPage": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventView"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "size",
+        "total"
+      ]
+    },
+    "DeliveryEventViewPage": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DeliveryEventView"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "size",
+        "total"
+      ]
+    },
+    "TrackPointPage": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TrackPoint"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "size",
+        "total"
+      ]
+    },
+    "LoginResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/Login"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "MeResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/User"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "BoxesResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SnapshotView"
+          }
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "LatestResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/SnapshotView"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "EventsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/EventViewPage"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "DeliveryEventsResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/DeliveryEventViewPage"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "TrackResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/TrackPointPage"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "NodesResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "CommandResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/Accepted"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "OperationResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/Operation"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "TicketResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/Ticket"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ]
+    },
+    "Query": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "to": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "enum": [
+            "INFO",
+            "WARNING",
+            "CRITICAL"
+          ]
+        }
+      },
+      "required": []
+    },
+    "WsSubscribe": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "type": {
+          "enum": [
+            "subscribe",
+            "unsubscribe"
+          ]
+        },
+        "box_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 48,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "v",
+        "type",
+        "box_ids"
+      ]
+    },
+    "WsPush": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "type": {
+          "enum": [
+            "snapshot",
+            "box_event",
+            "alarm",
+            "command_status",
+            "node_status"
+          ]
+        },
+        "box_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "message_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "ts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "v",
+        "type",
+        "box_id",
+        "message_id",
+        "ts",
+        "data"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "snapshot"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/SnapshotView"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "box_event"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/EventView"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "alarm"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/Alarm"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "command_status"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/Operation"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "node_status"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/Node"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "WsError": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "const": 1
+        },
+        "type": {
+          "const": "error"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ]
+        }
+      },
+      "required": [
+        "v",
+        "type",
+        "request_id",
+        "error"
+      ]
+    }
+  }
+}

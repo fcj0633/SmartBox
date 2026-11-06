@@ -1,0 +1,10 @@
+{
+  "data": {
+    "username": "demo",
+    "role": "LOGISTICS_OPERATOR",
+    "box_ids": [
+      "BOX-0001"
+    ]
+  },
+  "request_id": "http-1"
+}

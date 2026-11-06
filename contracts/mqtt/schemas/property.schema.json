@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartbox.invalid/contracts/mqtt/schemas/property.schema.json",
+  "title": "property",
+  "$ref": "../../common/v1.schema.json#/$defs/Property"
+}

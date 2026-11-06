@@ -1,0 +1,1 @@
+{"v":1,"request_id":"req-env-001","operation_id":"op-001","box_id":"BOX-0001","node_id":"BOX-0001-POSE","cmd":"output","target_caps":16,"issued_at":1793923200000,"expires_at":1793923215000,"params":{"kind":"indicator","on":true,"duration_s":3}}

@@ -1,0 +1,21 @@
+{
+  "v": 1,
+  "type": "box_event",
+  "box_id": "BOX-0001",
+  "message_id": "msg-1",
+  "ts": 1793923200000,
+  "data": {
+    "id": "evt-1",
+    "box_id": "BOX-0001",
+    "type": "DOOR_CONCLUSION",
+    "level": "INFO",
+    "observed_at": 1793923200000,
+    "received_at": 1793923200050,
+    "time_quality": "SNTP",
+    "historical": false,
+    "data": {
+      "state": "UNKNOWN",
+      "confidence": "INSUFFICIENT"
+    }
+  }
+}

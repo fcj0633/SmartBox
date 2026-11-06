@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "type": "alarm",
+  "box_id": "BOX-0001",
+  "message_id": "msg-1",
+  "ts": "bad",
+  "data": {
+    "active": false,
+    "level": null
+  }
+}

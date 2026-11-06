@@ -1,0 +1,21 @@
+{
+  "v": 1,
+  "type": "command_status",
+  "box_id": "BOX-0001",
+  "message_id": "msg-1",
+  "ts": 1793923200000,
+  "data": {
+    "operation_id": "op-1",
+    "box_id": "BOX-0001",
+    "status": "PENDING",
+    "nodes": [
+      {
+        "node_id": "BOX-0001-ENV",
+        "request_id": "req-1",
+        "status": "PENDING",
+        "code": null,
+        "actual_state": {}
+      }
+    ]
+  }
+}

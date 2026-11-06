@@ -1,0 +1,8 @@
+{
+  "cmd": "output",
+  "params": {
+    "kind": "light",
+    "on": true,
+    "duration_s": 3
+  }
+}

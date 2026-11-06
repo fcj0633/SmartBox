@@ -1,0 +1,704 @@
+{
+  "protocol_version": 1,
+  "scope": "structure-and-explicit-static-rules-only",
+  "date": "2026-11-06",
+  "base_commit": "2215749",
+  "files": [
+    {
+      "path": "contracts/common/v1.schema.json",
+      "sha256": "88db645d7fd55445a490a1f107c1352d0440a5b545217de67bfe2547199b4da9"
+    },
+    {
+      "path": "contracts/coverage.json",
+      "sha256": "cb35a224fe58053164221ca3d792c8ef7189c830cbe4992321953cb1d7a7e4f8"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/bad-query-range.json",
+      "sha256": "924b716e6218feb1b915f4861adf822c25bed63dc7f323b9bf8619aec6531af5"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/bad-query-size.json",
+      "sha256": "d968ae8add1cac4afd5eafa807acef6fd231b6bb2176f4c604131530ab0a7cae"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/courier-profile.json",
+      "sha256": "3dbb30f74af57bcf9a4d2cbf4b5d094342be94c5a04498825443db138d9db767"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/credential-in-response.json",
+      "sha256": "eb404a44cf1ff5cd5e000aa5623638f087b3e41aba372fe20d21cff166046ae9"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/cross-box-view.json",
+      "sha256": "b5035351beb2d40638ba3eb9b5bde55d7756783f22aa78e2cff39af2903960e2"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/delivery-nested-evidence.json",
+      "sha256": "c1c177b464664f5caba476aec7ddbd8db487a6b789992eb9cf6f98d2f2a5ae1a"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/delivery-pose.json",
+      "sha256": "6a47434484a7ccb8e76742cc519406b0cec371a602b72c8d10db9fc31bb0f955"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/forged-command-role.json",
+      "sha256": "48ef15a71aefa7a9cfbb9f49ba151b46cd8463e2327cede07531c6b5f44f3724"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-boxes-bad-request-id.json",
+      "sha256": "3fbcde91fc0baf3743406d9167599eef30c7332704ae0be9f9f1cc24b9e486a7"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-command-bad-request-id.json",
+      "sha256": "3166f1e4e5cfc79be6eea652a69b659473eeaa3ab47435f93291b1e31696c506"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-events-bad-request-id.json",
+      "sha256": "4c9ee0bd1e13a1f0c2c3cf05b2344b5ac5ffad24128794e8adaac0cafa7a21a7"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-latest-bad-request-id.json",
+      "sha256": "1ccb99dd4fcd4c4275ca2f385f67c085d674bd45ba535258a775c88c0974272b"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-login-bad-request-id.json",
+      "sha256": "78fb50049ca8d8bed41b1eda08b6a5af413abc14dea2ba4a4b545363dd1af699"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-me-bad-request-id.json",
+      "sha256": "41b55c39b8354c4b7433533e4a52e18bd8913cef42429bf583b7a9112906a6ea"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-nodes-bad-request-id.json",
+      "sha256": "1efc54cad4693415acefe1df4ddfb1e85ac3255039759f9764247462ac154c72"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-operation-bad-request-id.json",
+      "sha256": "091095e364ebfb0479f5365728cb93a12a05125d6df7554de8716310fb4d81d6"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-ticket-bad-request-id.json",
+      "sha256": "b0d832e4d7f43bd80c898facb921e0ec6b8cae29740b8aecebd9529129beaebe"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/http-track-bad-request-id.json",
+      "sha256": "7ebc1dd08b081c37049e3a7d37716022637fd404b0e3944fb3b965f999b94afc"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/login-empty-user.json",
+      "sha256": "58c44e985bbed31a1fc4d31e63befb5eb630da82641c72c52d79b0549accaefa"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/long-idempotency-key.json",
+      "sha256": "e19c8a72053ade04b4e675b498b113a01ba965df3c4314bd69238749bd0f9ce6"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/unauthorized-command.json",
+      "sha256": "ad03276dcaf4d8ec310d7b89b40c211a33af41fd2f85f116d7c5213b3a1e0806"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/ws-alarm-time.json",
+      "sha256": "4f717dce391bf071981c1bcf4f85f1da3d7fd363636eb7f96477baf6263e5334"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/ws-box_event-time.json",
+      "sha256": "e76d191a118423e7686e1e0843a739345be42cce2a9f90256629d365468fbeab"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/ws-client-version.json",
+      "sha256": "f8c00c36b1fdd3fd6936b9c9cb499b113e0345355388f8cd56d348f3a04b2bf3"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/ws-command_status-time.json",
+      "sha256": "8a0d3b9655dbd23fd8d3e7c54137ce98f342078650256f0f99163941478ca629"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/ws-delivery-node-status.json",
+      "sha256": "cf648ac1d5531cb8f7559883997e801c3a56bb40d1f132bd19176d7b4f48d597"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/ws-mixed-scope.json",
+      "sha256": "11a49e6b379bef045519f1120c30aff0b3c7a12c194d9cd5a155d2d0cc773150"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/ws-node_status-time.json",
+      "sha256": "8930fae3142709f848097a713020d7943e71e988db7e7003b58c203d6341a338"
+    },
+    {
+      "path": "contracts/http/fixtures/negative/ws-snapshot-time.json",
+      "sha256": "34de4fc7ae3325ad19e1c71615b29eef151890cc59a1bde1dea5f8aa5d6477c3"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/command-calibrate-http.json",
+      "sha256": "2e84a9764fc4f924ee392cea65d336ea33c7331a12b16e60ccfeeb589f337ab1"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/command-gps_mode-http.json",
+      "sha256": "a879368c61867b634bd328ba9b539c27d47cbee89b1a7047afd1b66f5919812f"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/command-output-http.json",
+      "sha256": "18d80bd99e7c9579ec63b1e10330887d7b182e02ee9eaafd611de0758aaa0e82"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/command-profile-http.json",
+      "sha256": "3dbb30f74af57bcf9a4d2cbf4b5d094342be94c5a04498825443db138d9db767"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/command-sentry-http.json",
+      "sha256": "ad03276dcaf4d8ec310d7b89b40c211a33af41fd2f85f116d7c5213b3a1e0806"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/courier-sentry.json",
+      "sha256": "ad03276dcaf4d8ec310d7b89b40c211a33af41fd2f85f116d7c5213b3a1e0806"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/delivery-events.json",
+      "sha256": "018836e1db7b67472b238cb2fcfa05f8c0ea0a2b9a016cf3cdb6df36fd896b74"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/delivery-latest.json",
+      "sha256": "9c006baad47ed0831ca67665ae0739177f67b5464daf42d854a8b3b00bd59615"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-boxes-response.json",
+      "sha256": "8d9f051a3f7822e5e26ef3f46d557b0b59797918960d481943eb11d3ad2dbcd6"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-command-response.json",
+      "sha256": "9a0d50daf2ae929c89701f7c720df2a849247e9e0ed58512bcc6c52838536203"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-error.json",
+      "sha256": "8dff88fe6c022f07653fdec541c03139dedcc00b7064bbe76877c7080be47f01"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-events-response.json",
+      "sha256": "3a80eec1c03c63547598de47a308616f02f473c2d7700a6a1eea8e6914bfb9e1"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-export.csv",
+      "sha256": "c73a0e4dfcaa7221a91cce1e8faa7322728b07a9005f55c31f1789ff96b8ef86"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-latest-response.json",
+      "sha256": "433ab00cf047f483f8ab84bdced1b593007c61184e437e97506a052fe5888ad8"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-login-request.json",
+      "sha256": "0ed162ad1c2549a90f367f74fec724203881971fc967eed8205ad870e976030e"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-login-response.json",
+      "sha256": "8840d1532f80d525a9f3df5a64f838c699076e0a9815f69400244cd009738788"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-me-response.json",
+      "sha256": "7b04455be9a638a47ea5ef018952e6e32f3a5b3499c2ff3c1d198de3a33aac54"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-nodes-response.json",
+      "sha256": "e3d77605d468e64bf8ecbff22a88d2310eea3692cf2a82057dcfbaa156709e7d"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-operation-response.json",
+      "sha256": "a124d92b516b6a8f3d3917fc161dbdcbecb09bcd8d16615bcd8487d0ff96fcdd"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-ticket-response.json",
+      "sha256": "64fcf62a71fa8e6edeb21a01bc2fe9632571d29164158f21fe7404267596e850"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/http-track-response.json",
+      "sha256": "29a8533a55f6843b1870d49f5f5f038b18bc5aaa8cbfa15e89934f2ee0d085ad"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/query-valid.json",
+      "sha256": "c58eb23ca6fc8326494f849625eeb760d72866ae74386f8ca6607ee355dedfb5"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-alarm.json",
+      "sha256": "1c67445b331ea2766ff44f72950c14e0c005b6b0d8396bb841d3cd71268dc1bb"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-box_event.json",
+      "sha256": "0073c8062067d3cf029e821c8ead08a09efb5c75d9620ef730bfd5df52fa0027"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-command_status.json",
+      "sha256": "4eaf18308c5532dd04348408bdf8021c084bed6cb46506506903f59d606f6362"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-delivery-snapshot.json",
+      "sha256": "8ca807c2a69304f7faf3a08114f052f3c2bed9df7b70cd9c1c3e55f581ed01fd"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-error.json",
+      "sha256": "26d33691e08fd2bfe19d3f1e228acb13b6a3ea7aaf86e41563499c0dd957247d"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-node_status.json",
+      "sha256": "fa0f839dce896f78fe587a993080255136024be7de8af599191eaba56eef3276"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-snapshot.json",
+      "sha256": "f2e1385fdba26d0c44a2155bbbd30f19670243425298e977b236d107559356bb"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-subscribe.json",
+      "sha256": "b876dca14f1f61e7b1da7e61a2cca8d7fda631013565bd481e41442224df9848"
+    },
+    {
+      "path": "contracts/http/fixtures/positive/ws-unsubscribe.json",
+      "sha256": "ca2a6d2bd03052540899110c09bcc25dbc78255b9a6313345099ece68b611837"
+    },
+    {
+      "path": "contracts/http/openapi.yaml",
+      "sha256": "83f78b017df69f297d83e207e9bd86426f7aa8c8b65fafbbd56c3743f9170a90"
+    },
+    {
+      "path": "contracts/http/v1.md",
+      "sha256": "839cf7f90dd24e7181aeb5f0c8072edcb9fe0426e2c2f916f4769e2ed26bc4aa"
+    },
+    {
+      "path": "contracts/http/ws/client.schema.json",
+      "sha256": "f18ef3e6e4ed917eb8e309a072408bad61d768ea9355d159c00c21e5743335ee"
+    },
+    {
+      "path": "contracts/http/ws/error.schema.json",
+      "sha256": "d370c9363ef8c415b650944ea130bc87350c46462a375bdfdfaf4826265be4aa"
+    },
+    {
+      "path": "contracts/http/ws/README.md",
+      "sha256": "0823d73fdf4f75ea8db59b0c4a6b4eabab043b20b9d951bf88b0dda77b55d44b"
+    },
+    {
+      "path": "contracts/http/ws/server.schema.json",
+      "sha256": "da863a8c276dc3c6a4fdacf0535e9873722fa50225d3cc2702b838acbeaff936"
+    },
+    {
+      "path": "contracts/http/权限投影与行为检查.md",
+      "sha256": "d1100d417a9a2418e32d4848801d9ae651e14581246950c666788c6e95d634d8"
+    },
+    {
+      "path": "contracts/mqtt/examples.json",
+      "sha256": "efe79edf3d5648a83311da8bc3bd7daa091b53561bee38f2b3d4ed287c2300f0"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/ack-false-completion.json",
+      "sha256": "896912942e38505a0d3fec330639adb77879c6184bba13690ba258715937f989"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/ack-request-mismatch.json",
+      "sha256": "bccbc30c22497aca1a24c5035988a8777f13aea8a14a9ba8e45afa4188ea181f"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/ack-unsaved.json",
+      "sha256": "c7a285c3ed32c182c445ea157fbc9dea199b55ff87a140dffc482184d5e670e2"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/batch-five.json",
+      "sha256": "ab9819eefd2229b2768afc6625f50772c1344885af887c687259215f516e9bc6"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/caps-command.json",
+      "sha256": "d801e3b83156cc4ce80a48ddb75a6790618903ff6c90e442e7bdfea8e89e19e8"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/command-calibrate-bad-params.json",
+      "sha256": "bb5c899f3730922f915b39cae541c001da8bfb1a607a82e762942d841cf434cb"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/command-gps_mode-bad-params.json",
+      "sha256": "70680c61bed6c1e03817b0352821c0c6b1777a2c95d1a27d36826a77ae3e32e3"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/command-id-bytes.json",
+      "sha256": "17a9436c7dca1ea5bc1f18815a69f6161978cab811ad8ca77eb67364543a05ac"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/command-output-bad-params.json",
+      "sha256": "fda6140c8913976e63a2739da5df7499badd98b79ecf1c3182f8d81c7fac5156"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/command-profile-bad-params.json",
+      "sha256": "8c84e669f8d2392decf2abbdef708b67b99b80d33c3708ef403e83ad6b4cb8ff"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/command-sentry-bad-params.json",
+      "sha256": "c5abd6547330dfd723cce9e0f65fdc12800fdda5b64a2c001336144ff33c422d"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/command-time-order.json",
+      "sha256": "9c71997d73bbdac21e76b5f8ce61e5522e136e09d03d863d1c71c2b7b2eadba1"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/duplicate-key.txt",
+      "sha256": "43ed7672803f5fac136f672609b8250b0d5f7a0df90686e70c9430d7309ea3d7"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-device_fault-missing-data.json",
+      "sha256": "75a8a09dc08d6528c477ad86879164c68b794bae5dc81f7802ea01d4da544d26"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-door_evidence-missing-data.json",
+      "sha256": "784df8a75e307056a9086b9aba1500b8df43bcf4f208ee2ac9b448b033f3c078"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-env_high-missing-data.json",
+      "sha256": "4e3e9d69c5299df0af9ad9440f6561bd0f58e204755d6023236323c66099d4f6"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-env_low-missing-data.json",
+      "sha256": "a84786c065870c0d49af086c15952ad4d8625cb7630cd39304eb8af64d9e8425"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-env_recovered-missing-data.json",
+      "sha256": "1bc445d7792ed4f7d6c24105812e7fa58f1fd7e1556d789adb31703a7ccf14ea"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-geofence_enter-missing-data.json",
+      "sha256": "3b2bbf89dc072ef98911ecb117da44ecce2418d838dce79bf46843b6330c8c1c"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-geofence_exit-missing-data.json",
+      "sha256": "b2c902224f31642a5857316cea62ca8c61054b6f9992764491f7605fb9a7bb4d"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-impact-missing-data.json",
+      "sha256": "8032f23cde47b2b61ce069c87c06c4e604d9a397596dce89c985b55cfc176389"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-pose_changed-missing-data.json",
+      "sha256": "e85f1731391b831a9e936d8e0ece11148ed4703a597fea4dcaf6129e5b37c879"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-role-caps.json",
+      "sha256": "e9442b1581b0848ac062e77b6e4400af1aff4c70418f44a419f279ed72125ebf"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-sentry_intrusion-missing-data.json",
+      "sha256": "f50a477375b23f6cf7ecb14e8293b43cf27118b6f117db9705779f613e171e3b"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/event-storage_overflow-missing-data.json",
+      "sha256": "2cfe10dac9032695666444cc3a029012903e0e838878765743aeaf764742eba3"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/expired-command.json",
+      "sha256": "d801e3b83156cc4ce80a48ddb75a6790618903ff6c90e442e7bdfea8e89e19e8"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/frame-2049.json",
+      "sha256": "8c1faef2509bc2ab6c4f6ad9afcd347a6cccfc316885db93884bc2d606dfc0bf"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/invalid-node.json",
+      "sha256": "307ca5c722c3efae57e7fc4141ffd42da1598ac18e756e430963b4acbe66abca"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/long-node.json",
+      "sha256": "f70a3e9c79603c56ac58a8574aa9b4534f0f0507c2e6eb8da5a3905d7a05d4c5"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/lost-range-order.json",
+      "sha256": "de00c2f84b98f7b037f79321d3630b3d5afd4e4667e040f337436ea00f8cd343"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/missing-version.json",
+      "sha256": "d903a544dd34ce13d85ae57c2c0dfed325308138c6da750c141db5e7562c4a1b"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/mqtt-cmd-version.json",
+      "sha256": "e96f55713d4281d416ec76746ebae2e8ae5aac7b4f41905b39fc1bfc2cbd61ed"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/mqtt-command_ack-version.json",
+      "sha256": "8c35cabc7cff073c1c18b9c8f7820fe6701c287f2c3d41ede845d2d3e1a7fd51"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/mqtt-event-version.json",
+      "sha256": "426447e73725667a6206e46cdd56333b36894d83d860f9a5191882f7c149bf89"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/mqtt-event_ack-version.json",
+      "sha256": "83036ab1c7989952ac961f3d39e18f9e49e7ce8b62f226d8460173a3fb98aaf3"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/mqtt-heartbeat-version.json",
+      "sha256": "6141ff9bd7cddb86a728faf9ecddcdab158c46ada2f2268b002598186103b322"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/mqtt-property-version.json",
+      "sha256": "38e33bf9cbe1c11a1093ba6bb3cb94328ed1d57a83824c16d52b3035191948fa"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/mqtt-unsynced_property-version.json",
+      "sha256": "d0f2d609a224ff7747964f2c02812ac4f739d8dfa00247b0dcd8424e0e4b4f02"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/nan-json.txt",
+      "sha256": "989e8c67a4887de1595358e366f7bffe9f08ad50ea4e587e8b6a7417de14f88b"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/output-kind-bit.json",
+      "sha256": "77b02a246237e91cb91d27e481b01ecb7a073d50a3e94aa54aea2de68360adab"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/oversize-payload.json",
+      "sha256": "6312736eca3b22a4a6720e1d3b5ee7b4d0c7dc94630e53e16bc1df7fcfcb5faa"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/payload-1537.json",
+      "sha256": "3551b3afca93972d2d84ae1a82df05b5af960acc181fec109c7c09c9ca1d06b1"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/profile-recovery-range.json",
+      "sha256": "d7f57f29132d56f4c7123c559afc8c05a2a9013ad68d5636d7f605a010d49859"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/qos-mismatch.json",
+      "sha256": "8c1faef2509bc2ab6c4f6ad9afcd347a6cccfc316885db93884bc2d606dfc0bf"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/retained-command.json",
+      "sha256": "d801e3b83156cc4ce80a48ddb75a6790618903ff6c90e442e7bdfea8e89e19e8"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/role-caps.json",
+      "sha256": "6491ebde52f3750dfd42c4fb94bf6a445dd94b5833ff067f0361d5bdddc30e13"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/sequence-overflow.json",
+      "sha256": "827c1dbc652353b5f611fc9e371ccf90ecef1e2db76f1be94bbf80ff1c00db82"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/synced-null-time.json",
+      "sha256": "d23d7d1baa16907e4b51b799567af688415812cbe1b99c8d93ceadd2cd75df85"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/topic-identity.json",
+      "sha256": "8c1faef2509bc2ab6c4f6ad9afcd347a6cccfc316885db93884bc2d606dfc0bf"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/topic-size.json",
+      "sha256": "8c1faef2509bc2ab6c4f6ad9afcd347a6cccfc316885db93884bc2d606dfc0bf"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/truncated-json.txt",
+      "sha256": "6f8c7dd52f59d88706375cda63bb725f722689cc227ce0b55abf69366b5f40ed"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/unsynced-command.json",
+      "sha256": "d801e3b83156cc4ce80a48ddb75a6790618903ff6c90e442e7bdfea8e89e19e8"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/unsynced-fake-utc.json",
+      "sha256": "1b8ee4b8f7c95bb5ff52729d61090e9d754dea2f776a050c7f9912a1e72c47f1"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/negative/valid-null-sensor.json",
+      "sha256": "38089707d1abd0f110e33eb15275b26864d738fffac43df7025973d04371e23d"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/ack-calibrate.json",
+      "sha256": "f924b5413b17ca10091532b68b850f91fb14c5b1aceb83d9d9336f77d5f4c737"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/ack-gps_mode.json",
+      "sha256": "384c5b30ad4dd8b625db7a0b3d15adef6f5def2eb0cd00ecae7e6b1795a895de"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/ack-output.json",
+      "sha256": "5dd95d73be299f2fd4e60e2aa28abffc62a3d9293869536b1a651f84666463bf"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/ack-profile.json",
+      "sha256": "14e13582d13255c4a9e1c8907f647f151d3eb7bb83691da0b83eb806ab90ff18"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/ack-sentry.json",
+      "sha256": "bccbc30c22497aca1a24c5035988a8777f13aea8a14a9ba8e45afa4188ea181f"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/command-calibrate.json",
+      "sha256": "fe71866f299107bc28e191a71c794466d96eceb23fed86a43d812ec3b820a443"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/command-gps_mode.json",
+      "sha256": "61551fe8b6a2ef1e432c59ed9af1acd48cd2f82743f6bed48ee5f146cbe06a9f"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/command-output-fan.json",
+      "sha256": "c90b6761712aa395daf00d24a40180368bdc7999f1fc3e6097e057e1c559fa40"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/command-output-indicator.json",
+      "sha256": "966daee3132bd54157c7ddff2df6b14f96b5e372e967d958ad6e9d8561907a28"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/command-output.json",
+      "sha256": "e53cace9314a871c4a224f0121ca86bad1bf326ab8ea5ea6c39e24b6c40bcc89"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/command-profile.json",
+      "sha256": "5433537e06796c5f85edc43e75408c5e4a520e740d75e386b10f06626613d069"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/command-sentry.json",
+      "sha256": "d801e3b83156cc4ce80a48ddb75a6790618903ff6c90e442e7bdfea8e89e19e8"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-device_fault.json",
+      "sha256": "399ec9f278b83146127dce9ba67a42ee1046b23c715cd78b34d99723b959b1ca"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-door_evidence.json",
+      "sha256": "7acfe65d3c8c8e1fc18edb21034b935e630e38e6232c62755921feea26062d34"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-env_high.json",
+      "sha256": "eb33f7471fd8c53f4430c3e15a619b8e4bb54e7422d9f8051ed872a2bce3b8bb"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-env_low.json",
+      "sha256": "f255266e6a4317359f3ae0d1be3ecaec2df1750605ec6e544abd75b02e141c6b"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-env_recovered.json",
+      "sha256": "4735a6be8e35b27debb61f87e88110bc213fb04c6acb09132c8954122955da0a"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-geofence_enter.json",
+      "sha256": "0e936632d05852ba696199ee33e0005c4f4c7cd34e45d3e0371f4c76248a97b5"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-geofence_exit.json",
+      "sha256": "b185f170c8c1538ecbc9f20ca5e78ffa0d9c901ae2ad49df44a4c2afe03e3661"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-impact.json",
+      "sha256": "bb346b45aee2ef275510fc63719810aae7da38e42bb7bdda5c96f81296fe2d8d"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-pose_changed.json",
+      "sha256": "10cff83857370d10a5836cc48d7886cbe5da90426476a6fa9d89b15caa8c2bcf"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-sentry_intrusion.json",
+      "sha256": "663d5e72d6e20b244af7fe8945ad332821f55fee40263eb90d24e36a4cbd99eb"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/event-storage_overflow.json",
+      "sha256": "72ec8226883995cbe3e76b2bfc0c61a7a354bd7829b6c8fb3815ffa552483e2b"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-availability-false.json",
+      "sha256": "d53018e9265b85be794ad30a497acd5c1a82e285f8543715297d4f68de03e505"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-availability-true.json",
+      "sha256": "0e25ab60bca53a3124e268fc35f1d1a6e308ae2a33b15ea070391359830760c4"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-box-state.json",
+      "sha256": "db2590490a86cdde8130148069bfb9578e65372c597bf7f040de7ae24524dc70"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-cmd.json",
+      "sha256": "d801e3b83156cc4ce80a48ddb75a6790618903ff6c90e442e7bdfea8e89e19e8"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-command_ack.json",
+      "sha256": "bccbc30c22497aca1a24c5035988a8777f13aea8a14a9ba8e45afa4188ea181f"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-event.json",
+      "sha256": "7acfe65d3c8c8e1fc18edb21034b935e630e38e6232c62755921feea26062d34"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-event_ack.json",
+      "sha256": "5c38fa6da1e6a3bd71252f885cac2e305659165542ef71f29d2b51026c5e2be0"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-heartbeat.json",
+      "sha256": "a1228809d06c191603f32d71229324a09e4bb694e422a222ad5d03e66502319e"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-pose-heartbeat.json",
+      "sha256": "0a33cb3fe402fc6bc2959d1bd9ad835ffff0feacd23f249a86801c7de6cc798a"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-pose.json",
+      "sha256": "1face43309ee1057f4492f4b49404821266450add4b568b2dfc0390e4a6f4217"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-property.json",
+      "sha256": "8c1faef2509bc2ab6c4f6ad9afcd347a6cccfc316885db93884bc2d606dfc0bf"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/mqtt-unsynced_property.json",
+      "sha256": "bdc1a26df5618310e8483d35ab96b21656d41fb54ba1d7c72251ef97caa38897"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/partial-invalid-env.json",
+      "sha256": "3416c5ef61f38ed79eb8cbbb52d5fe0f71034bf2109cf08c549a71b24d32f6f9"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/payload-1536.json",
+      "sha256": "0df39e96d512d1717d4f9eb16b4fa420776df31c8b56257f5ff17e2aebbbe713"
+    },
+    {
+      "path": "contracts/mqtt/fixtures/positive/unknown-field-ignored.json",
+      "sha256": "dd4f4cf6765cf3df1e4505d7f1bebdf2509684f7b9b769bf79025cbe714a98dc"
+    },
+    {
+      "path": "contracts/mqtt/schemas/availability.schema.json",
+      "sha256": "fcfeb221f1a3162e303bbf83aed130fec973ba382be65d484fe28cd4234c0224"
+    },
+    {
+      "path": "contracts/mqtt/schemas/box_state.schema.json",
+      "sha256": "7e8e8f1088e787f6ef49ad3a814cbc1d3629554e49c4c99327f6a6b1f70562a0"
+    },
+    {
+      "path": "contracts/mqtt/schemas/cmd.schema.json",
+      "sha256": "317d45138413b05d7a138d37961356e8734ebae9094b09e89435b7b286666762"
+    },
+    {
+      "path": "contracts/mqtt/schemas/command_ack.schema.json",
+      "sha256": "678f753867681d0d26beb2f495c1b84aacf76e99c51b7fedf86c8b368e196c0f"
+    },
+    {
+      "path": "contracts/mqtt/schemas/event.schema.json",
+      "sha256": "5942667938a2adc99b755c10d7f6eaa2fe07d126e0cb32b7ad245299a5e3fc61"
+    },
+    {
+      "path": "contracts/mqtt/schemas/event_ack.schema.json",
+      "sha256": "0d8a3f58d14373fb55c73a3568ae43e91298cb45538275fc27c8825016eb05e9"
+    },
+    {
+      "path": "contracts/mqtt/schemas/heartbeat.schema.json",
+      "sha256": "4cf113769592db33219831bea9d229a8788a65c00fa6f7e41806d2c7bdbb4f25"
+    },
+    {
+      "path": "contracts/mqtt/schemas/property.schema.json",
+      "sha256": "1068273b9c7d34cd178e63e2ce96742c75e69abec2f62fae8fbeef6ff9a5f87d"
+    },
+    {
+      "path": "contracts/mqtt/schemas/README.md",
+      "sha256": "223716138b0851138b09863788aad978dcfdd5a21ec9a154071092f75637dda7"
+    },
+    {
+      "path": "contracts/mqtt/v1.md",
+      "sha256": "a54d5b38b34a45bc1354b21be96446365dcad3b8746979b4cb61aa86c30d6e8c"
+    },
+    {
+      "path": "contracts/README.md",
+      "sha256": "3cfafcd15b5d1280928ea226a2861ed9771e6f8314670a24031040ce0fe61dc3"
+    },
+    {
+      "path": "contracts/接口覆盖与待决清单.md",
+      "sha256": "ae72d440ba25c0c24bd1f01de3170febbc6463a7c466da21a7fa745ed6f716d9"
+    }
+  ]
+}

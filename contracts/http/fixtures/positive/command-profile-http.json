@@ -1,0 +1,12 @@
+{
+  "cmd": "profile",
+  "params": {
+    "profile_id": "demo",
+    "temp_min_c": 2,
+    "temp_max_c": 8,
+    "humi_min_pct": 30,
+    "humi_max_pct": 85,
+    "temp_hysteresis_c": 1,
+    "humi_hysteresis_pct": 3
+  }
+}

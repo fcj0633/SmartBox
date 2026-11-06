@@ -1,0 +1,73 @@
+{
+  "data": [
+    {
+      "box_id": "BOX-0001",
+      "online_mask": 3,
+      "connectivity": "ONLINE",
+      "alarm": {
+        "active": false,
+        "level": null
+      },
+      "sentry": {
+        "state": "DISARMED",
+        "revision": 0
+      },
+      "door": {
+        "state": "UNKNOWN",
+        "confidence": "INSUFFICIENT",
+        "conclusion_id": null,
+        "observed_at": null,
+        "historical": false
+      },
+      "env": {
+        "value": {
+          "temp_c": 5.2,
+          "humi_pct": 78.4,
+          "lux": 12,
+          "valid": true,
+          "light_on": false,
+          "fan_on": false
+        },
+        "valid": true,
+        "observed_at": 1793923200000,
+        "received_at": 1793923200050,
+        "stale": false,
+        "src": "BOX-0001-ENV",
+        "time_quality": "SNTP"
+      },
+      "pose": {
+        "value": {
+          "acc_g": [
+            0,
+            0,
+            1
+          ],
+          "tilt_deg": 0,
+          "state": "NORMAL",
+          "valid": true
+        },
+        "valid": true,
+        "observed_at": 1793923200000,
+        "received_at": 1793923200050,
+        "stale": false,
+        "src": "BOX-0001-POSE",
+        "time_quality": "SNTP"
+      },
+      "loc": {
+        "value": {
+          "lat": 31.2,
+          "lon": 121.5,
+          "valid": true,
+          "src": "MOCK"
+        },
+        "valid": true,
+        "observed_at": 1793923200000,
+        "received_at": 1793923200050,
+        "stale": false,
+        "src": "BOX-0001-POSE",
+        "time_quality": "SNTP"
+      }
+    }
+  ],
+  "request_id": 3
+}

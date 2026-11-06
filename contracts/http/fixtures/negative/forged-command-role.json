@@ -1,0 +1,9 @@
+{
+  "cmd": "sentry",
+  "params": {
+    "on": true,
+    "duration_s": 7200,
+    "sentry_revision": 1
+  },
+  "role": "LOGISTICS_OPERATOR"
+}

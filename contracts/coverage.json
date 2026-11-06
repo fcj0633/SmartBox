@@ -1,0 +1,2699 @@
+{
+  "version": 1,
+  "mqtt": {
+    "property": "Property",
+    "heartbeat": "Heartbeat",
+    "event": "EventBatch",
+    "command_ack": "CommandAck",
+    "availability": "Availability",
+    "cmd": "Command",
+    "event_ack": "EventAck",
+    "box_state": "BoxState"
+  },
+  "commands": [
+    "sentry",
+    "profile",
+    "gps_mode",
+    "output",
+    "calibrate"
+  ],
+  "http_operations": [
+    {
+      "method": "post",
+      "path": "/auth/login",
+      "operation_id": "login",
+      "request": "LoginInput",
+      "response": "LoginResponse"
+    },
+    {
+      "method": "get",
+      "path": "/me",
+      "operation_id": "me",
+      "request": null,
+      "response": "MeResponse"
+    },
+    {
+      "method": "get",
+      "path": "/boxes",
+      "operation_id": "boxes",
+      "request": null,
+      "response": "BoxesResponse"
+    },
+    {
+      "method": "get",
+      "path": "/boxes/{id}/latest",
+      "operation_id": "latest",
+      "request": null,
+      "response": "LatestResponse"
+    },
+    {
+      "method": "get",
+      "path": "/boxes/{id}/events",
+      "operation_id": "events",
+      "request": null,
+      "response": "EventsResponse"
+    },
+    {
+      "method": "get",
+      "path": "/boxes/{id}/track",
+      "operation_id": "track",
+      "request": null,
+      "response": "TrackResponse"
+    },
+    {
+      "method": "get",
+      "path": "/boxes/{id}/nodes",
+      "operation_id": "nodes",
+      "request": null,
+      "response": "NodesResponse"
+    },
+    {
+      "method": "post",
+      "path": "/boxes/{id}/commands",
+      "operation_id": "command",
+      "request": "CommandInput",
+      "response": "CommandResponse"
+    },
+    {
+      "method": "get",
+      "path": "/boxes/{id}/commands/{operation_id}",
+      "operation_id": "operation",
+      "request": null,
+      "response": "OperationResponse"
+    },
+    {
+      "method": "get",
+      "path": "/boxes/{id}/events/export",
+      "operation_id": "export",
+      "request": null,
+      "response": null
+    },
+    {
+      "method": "post",
+      "path": "/ws-ticket",
+      "operation_id": "ticket",
+      "request": null,
+      "response": "TicketResponse"
+    }
+  ],
+  "ws_types": [
+    "snapshot",
+    "box_event",
+    "alarm",
+    "command_status",
+    "node_status"
+  ],
+  "fixtures": [
+    {
+      "id": "mqtt-property",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-property.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/property",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 0,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-property-version",
+      "file": "contracts/mqtt/fixtures/negative/mqtt-property-version.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/property",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 0,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/v"
+      }
+    },
+    {
+      "id": "mqtt-heartbeat",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-heartbeat.json",
+      "definition": "Heartbeat",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/heartbeat",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-heartbeat-version",
+      "file": "contracts/mqtt/fixtures/negative/mqtt-heartbeat-version.json",
+      "definition": "Heartbeat",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/heartbeat",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/v"
+      }
+    },
+    {
+      "id": "mqtt-event",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-event.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-event-version",
+      "file": "contracts/mqtt/fixtures/negative/mqtt-event-version.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/v"
+      }
+    },
+    {
+      "id": "mqtt-event_ack",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-event_ack.json",
+      "definition": "EventAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event_ack",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "stored_event_seqs": [
+          1
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-event_ack-version",
+      "file": "contracts/mqtt/fixtures/negative/mqtt-event_ack-version.json",
+      "definition": "EventAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event_ack",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "stored_event_seqs": [
+          1
+        ]
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/v"
+      }
+    },
+    {
+      "id": "mqtt-cmd",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-cmd.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-cmd-version",
+      "file": "contracts/mqtt/fixtures/negative/mqtt-cmd-version.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/v"
+      }
+    },
+    {
+      "id": "mqtt-command_ack",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-command_ack.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/command_ack",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-command_ack-version",
+      "file": "contracts/mqtt/fixtures/negative/mqtt-command_ack-version.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/command_ack",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/v"
+      }
+    },
+    {
+      "id": "mqtt-unsynced_property",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-unsynced_property.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/property",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 0,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-unsynced_property-version",
+      "file": "contracts/mqtt/fixtures/negative/mqtt-unsynced_property-version.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/property",
+        "node_id": "BOX-0001-ENV",
+        "box_id": "BOX-0001",
+        "caps": 71,
+        "qos": 0,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/v"
+      }
+    },
+    {
+      "id": "mqtt-pose",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-pose.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/property",
+        "caps": 120,
+        "qos": 0,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-pose-heartbeat",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-pose-heartbeat.json",
+      "definition": "Heartbeat",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/heartbeat",
+        "caps": 120,
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-availability-true",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-availability-true.json",
+      "definition": "Availability",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/availability",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-availability-false",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-availability-false.json",
+      "definition": "Availability",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/availability",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "mqtt-box-state",
+      "file": "contracts/mqtt/fixtures/positive/mqtt-box-state.json",
+      "definition": "BoxState",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/box_state",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "command-sentry",
+      "file": "contracts/mqtt/fixtures/positive/command-sentry.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": null
+    },
+    {
+      "id": "command-sentry-bad-params",
+      "file": "contracts/mqtt/fixtures/negative/command-sentry-bad-params.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/params/on"
+      }
+    },
+    {
+      "id": "command-sentry-http",
+      "file": "contracts/http/fixtures/positive/command-sentry-http.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "operation": "command",
+        "side": "request"
+      },
+      "expected": null
+    },
+    {
+      "id": "ack-sentry",
+      "file": "contracts/mqtt/fixtures/positive/ack-sentry.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/command_ack",
+        "qos": 1,
+        "retain": false,
+        "request_id": "req-env-001",
+        "operation_id": "op-001"
+      },
+      "expected": null
+    },
+    {
+      "id": "command-profile",
+      "file": "contracts/mqtt/fixtures/positive/command-profile.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": null
+    },
+    {
+      "id": "command-profile-bad-params",
+      "file": "contracts/mqtt/fixtures/negative/command-profile-bad-params.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/params/profile_id"
+      }
+    },
+    {
+      "id": "command-profile-http",
+      "file": "contracts/http/fixtures/positive/command-profile-http.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "operation": "command",
+        "side": "request"
+      },
+      "expected": null
+    },
+    {
+      "id": "ack-profile",
+      "file": "contracts/mqtt/fixtures/positive/ack-profile.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/command_ack",
+        "qos": 1,
+        "retain": false,
+        "request_id": "req-env-001",
+        "operation_id": "op-001"
+      },
+      "expected": null
+    },
+    {
+      "id": "command-gps_mode",
+      "file": "contracts/mqtt/fixtures/positive/command-gps_mode.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/cmd",
+        "caps": 120,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": null
+    },
+    {
+      "id": "command-gps_mode-bad-params",
+      "file": "contracts/mqtt/fixtures/negative/command-gps_mode-bad-params.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/cmd",
+        "caps": 120,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/params/mode"
+      }
+    },
+    {
+      "id": "command-gps_mode-http",
+      "file": "contracts/http/fixtures/positive/command-gps_mode-http.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "operation": "command",
+        "side": "request"
+      },
+      "expected": null
+    },
+    {
+      "id": "ack-gps_mode",
+      "file": "contracts/mqtt/fixtures/positive/ack-gps_mode.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/command_ack",
+        "qos": 1,
+        "retain": false,
+        "request_id": "req-env-001",
+        "operation_id": "op-001",
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": null
+    },
+    {
+      "id": "command-output",
+      "file": "contracts/mqtt/fixtures/positive/command-output.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": null
+    },
+    {
+      "id": "command-output-bad-params",
+      "file": "contracts/mqtt/fixtures/negative/command-output-bad-params.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/params/kind"
+      }
+    },
+    {
+      "id": "command-output-http",
+      "file": "contracts/http/fixtures/positive/command-output-http.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "operation": "command",
+        "side": "request"
+      },
+      "expected": null
+    },
+    {
+      "id": "ack-output",
+      "file": "contracts/mqtt/fixtures/positive/ack-output.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/command_ack",
+        "qos": 1,
+        "retain": false,
+        "request_id": "req-env-001",
+        "operation_id": "op-001"
+      },
+      "expected": null
+    },
+    {
+      "id": "command-output-fan",
+      "file": "contracts/mqtt/fixtures/positive/command-output-fan.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/cmd",
+        "caps": 71,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": null
+    },
+    {
+      "id": "command-output-indicator",
+      "file": "contracts/mqtt/fixtures/positive/command-output-indicator.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/cmd",
+        "caps": 120,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": null
+    },
+    {
+      "id": "command-calibrate",
+      "file": "contracts/mqtt/fixtures/positive/command-calibrate.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/cmd",
+        "caps": 120,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": null
+    },
+    {
+      "id": "command-calibrate-bad-params",
+      "file": "contracts/mqtt/fixtures/negative/command-calibrate-bad-params.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/cmd",
+        "caps": 120,
+        "qos": 1,
+        "retain": false,
+        "now": 1793923200000,
+        "time_synced": true
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/params"
+      }
+    },
+    {
+      "id": "command-calibrate-http",
+      "file": "contracts/http/fixtures/positive/command-calibrate-http.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "operation": "command",
+        "side": "request"
+      },
+      "expected": null
+    },
+    {
+      "id": "ack-calibrate",
+      "file": "contracts/mqtt/fixtures/positive/ack-calibrate.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/command_ack",
+        "qos": 1,
+        "retain": false,
+        "request_id": "req-env-001",
+        "operation_id": "op-001",
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": null
+    },
+    {
+      "id": "event-env_high",
+      "file": "contracts/mqtt/fixtures/positive/event-env_high.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "event-env_high-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-env_high-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-env_low",
+      "file": "contracts/mqtt/fixtures/positive/event-env_low.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "event-env_low-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-env_low-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-env_recovered",
+      "file": "contracts/mqtt/fixtures/positive/event-env_recovered.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "event-env_recovered-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-env_recovered-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-pose_changed",
+      "file": "contracts/mqtt/fixtures/positive/event-pose_changed.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": null
+    },
+    {
+      "id": "event-pose_changed-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-pose_changed-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-impact",
+      "file": "contracts/mqtt/fixtures/positive/event-impact.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": null
+    },
+    {
+      "id": "event-impact-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-impact-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-door_evidence",
+      "file": "contracts/mqtt/fixtures/positive/event-door_evidence.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "event-door_evidence-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-door_evidence-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-sentry_intrusion",
+      "file": "contracts/mqtt/fixtures/positive/event-sentry_intrusion.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": null
+    },
+    {
+      "id": "event-sentry_intrusion-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-sentry_intrusion-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-geofence_exit",
+      "file": "contracts/mqtt/fixtures/positive/event-geofence_exit.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": null
+    },
+    {
+      "id": "event-geofence_exit-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-geofence_exit-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-geofence_enter",
+      "file": "contracts/mqtt/fixtures/positive/event-geofence_enter.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": null
+    },
+    {
+      "id": "event-geofence_enter-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-geofence_enter-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-POSE/event",
+        "qos": 1,
+        "retain": false,
+        "caps": 120,
+        "node_id": "BOX-0001-POSE"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-storage_overflow",
+      "file": "contracts/mqtt/fixtures/positive/event-storage_overflow.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "event-storage_overflow-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-storage_overflow-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "event-device_fault",
+      "file": "contracts/mqtt/fixtures/positive/event-device_fault.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": null
+    },
+    {
+      "id": "event-device_fault-missing-data",
+      "file": "contracts/mqtt/fixtures/negative/event-device_fault-missing-data.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/BOX-0001-ENV/event",
+        "qos": 1,
+        "retain": false
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/events/0/data"
+      }
+    },
+    {
+      "id": "synced-null-time",
+      "file": "contracts/mqtt/fixtures/negative/synced-null-time.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/ts"
+      }
+    },
+    {
+      "id": "unsynced-fake-utc",
+      "file": "contracts/mqtt/fixtures/negative/unsynced-fake-utc.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/ts"
+      }
+    },
+    {
+      "id": "invalid-node",
+      "file": "contracts/mqtt/fixtures/negative/invalid-node.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/node_id"
+      }
+    },
+    {
+      "id": "long-node",
+      "file": "contracts/mqtt/fixtures/negative/long-node.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/node_id"
+      }
+    },
+    {
+      "id": "role-caps",
+      "file": "contracts/mqtt/fixtures/negative/role-caps.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/caps"
+      }
+    },
+    {
+      "id": "batch-five",
+      "file": "contracts/mqtt/fixtures/negative/batch-five.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/events"
+      }
+    },
+    {
+      "id": "ack-unsaved",
+      "file": "contracts/mqtt/fixtures/negative/ack-unsaved.json",
+      "definition": "EventAck",
+      "channel": "mqtt",
+      "context": {
+        "stored_event_seqs": [
+          1
+        ]
+      },
+      "expected": {
+        "code": "ack_set",
+        "path": "/event_seqs"
+      }
+    },
+    {
+      "id": "topic-identity",
+      "file": "contracts/mqtt/fixtures/negative/topic-identity.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "topic": "box/BOX-0001/OTHER/property"
+      },
+      "expected": {
+        "code": "identity",
+        "path": "/node_id"
+      }
+    },
+    {
+      "id": "topic-size",
+      "file": "contracts/mqtt/fixtures/negative/topic-size.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "topic": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": {
+        "code": "topic_bytes",
+        "path": "/topic"
+      }
+    },
+    {
+      "id": "retained-command",
+      "file": "contracts/mqtt/fixtures/negative/retained-command.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "caps": 71,
+        "now": 1793923200000,
+        "time_synced": true,
+        "retain": true
+      },
+      "expected": {
+        "code": "retained",
+        "path": "/retain"
+      }
+    },
+    {
+      "id": "expired-command",
+      "file": "contracts/mqtt/fixtures/negative/expired-command.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "caps": 71,
+        "now": 1793923216000,
+        "time_synced": true,
+        "retain": false
+      },
+      "expected": {
+        "code": "expired",
+        "path": "/expires_at"
+      }
+    },
+    {
+      "id": "unsynced-command",
+      "file": "contracts/mqtt/fixtures/negative/unsynced-command.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "caps": 71,
+        "now": 1793923200000,
+        "time_synced": false,
+        "retain": false
+      },
+      "expected": {
+        "code": "time_unsynced",
+        "path": "/ts_src"
+      }
+    },
+    {
+      "id": "caps-command",
+      "file": "contracts/mqtt/fixtures/negative/caps-command.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {
+        "caps": 1,
+        "now": 1793923200000,
+        "time_synced": true,
+        "retain": false
+      },
+      "expected": {
+        "code": "caps",
+        "path": "/target_caps"
+      }
+    },
+    {
+      "id": "command-time-order",
+      "file": "contracts/mqtt/fixtures/negative/command-time-order.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "time_order",
+        "path": "/expires_at"
+      }
+    },
+    {
+      "id": "command-id-bytes",
+      "file": "contracts/mqtt/fixtures/negative/command-id-bytes.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "id_bytes",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "ack-request-mismatch",
+      "file": "contracts/mqtt/fixtures/negative/ack-request-mismatch.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {
+        "request_id": "other"
+      },
+      "expected": {
+        "code": "request_match",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "oversize-payload",
+      "file": "contracts/mqtt/fixtures/negative/oversize-payload.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "payload_bytes",
+        "path": "/payload"
+      }
+    },
+    {
+      "id": "payload-1536",
+      "file": "contracts/mqtt/fixtures/positive/payload-1536.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": null
+    },
+    {
+      "id": "payload-1537",
+      "file": "contracts/mqtt/fixtures/negative/payload-1537.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "payload_bytes",
+        "path": "/payload"
+      }
+    },
+    {
+      "id": "unknown-field-ignored",
+      "file": "contracts/mqtt/fixtures/positive/unknown-field-ignored.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": null
+    },
+    {
+      "id": "frame-2049",
+      "file": "contracts/mqtt/fixtures/negative/frame-2049.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "frame_bytes": 2049
+      },
+      "expected": {
+        "code": "frame_bytes",
+        "path": "/frame"
+      }
+    },
+    {
+      "id": "qos-mismatch",
+      "file": "contracts/mqtt/fixtures/negative/qos-mismatch.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {
+        "qos": 1
+      },
+      "expected": {
+        "code": "qos",
+        "path": "/qos"
+      }
+    },
+    {
+      "id": "lost-range-order",
+      "file": "contracts/mqtt/fixtures/negative/lost-range-order.json",
+      "definition": "Heartbeat",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "range_order",
+        "path": "/lost_ranges/0"
+      }
+    },
+    {
+      "id": "profile-recovery-range",
+      "file": "contracts/mqtt/fixtures/negative/profile-recovery-range.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "profile_range",
+        "path": "/params"
+      }
+    },
+    {
+      "id": "output-kind-bit",
+      "file": "contracts/mqtt/fixtures/negative/output-kind-bit.json",
+      "definition": "Command",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "caps_kind",
+        "path": "/target_caps"
+      }
+    },
+    {
+      "id": "missing-version",
+      "file": "contracts/mqtt/fixtures/negative/missing-version.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": ""
+      }
+    },
+    {
+      "id": "sequence-overflow",
+      "file": "contracts/mqtt/fixtures/negative/sequence-overflow.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/property_seq"
+      }
+    },
+    {
+      "id": "valid-null-sensor",
+      "file": "contracts/mqtt/fixtures/negative/valid-null-sensor.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "validity",
+        "path": "/env"
+      }
+    },
+    {
+      "id": "partial-invalid-env",
+      "file": "contracts/mqtt/fixtures/positive/partial-invalid-env.json",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": null
+    },
+    {
+      "id": "http-login-request",
+      "file": "contracts/http/fixtures/positive/http-login-request.json",
+      "definition": "LoginInput",
+      "channel": "common",
+      "context": {
+        "operation": "login",
+        "side": "request"
+      },
+      "expected": null
+    },
+    {
+      "id": "http-login-response",
+      "file": "contracts/http/fixtures/positive/http-login-response.json",
+      "definition": "LoginResponse",
+      "channel": "common",
+      "context": {
+        "operation": "login",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-login-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-login-bad-request-id.json",
+      "definition": "LoginResponse",
+      "channel": "common",
+      "context": {
+        "operation": "login",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-me-response",
+      "file": "contracts/http/fixtures/positive/http-me-response.json",
+      "definition": "MeResponse",
+      "channel": "common",
+      "context": {
+        "operation": "me",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-me-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-me-bad-request-id.json",
+      "definition": "MeResponse",
+      "channel": "common",
+      "context": {
+        "operation": "me",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-boxes-response",
+      "file": "contracts/http/fixtures/positive/http-boxes-response.json",
+      "definition": "BoxesResponse",
+      "channel": "common",
+      "context": {
+        "operation": "boxes",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-boxes-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-boxes-bad-request-id.json",
+      "definition": "BoxesResponse",
+      "channel": "common",
+      "context": {
+        "operation": "boxes",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-latest-response",
+      "file": "contracts/http/fixtures/positive/http-latest-response.json",
+      "definition": "LatestResponse",
+      "channel": "common",
+      "context": {
+        "operation": "latest",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-latest-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-latest-bad-request-id.json",
+      "definition": "LatestResponse",
+      "channel": "common",
+      "context": {
+        "operation": "latest",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-events-response",
+      "file": "contracts/http/fixtures/positive/http-events-response.json",
+      "definition": "EventsResponse",
+      "channel": "common",
+      "context": {
+        "operation": "events",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-events-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-events-bad-request-id.json",
+      "definition": "EventsResponse",
+      "channel": "common",
+      "context": {
+        "operation": "events",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-track-response",
+      "file": "contracts/http/fixtures/positive/http-track-response.json",
+      "definition": "TrackResponse",
+      "channel": "common",
+      "context": {
+        "operation": "track",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-track-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-track-bad-request-id.json",
+      "definition": "TrackResponse",
+      "channel": "common",
+      "context": {
+        "operation": "track",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-nodes-response",
+      "file": "contracts/http/fixtures/positive/http-nodes-response.json",
+      "definition": "NodesResponse",
+      "channel": "common",
+      "context": {
+        "operation": "nodes",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-nodes-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-nodes-bad-request-id.json",
+      "definition": "NodesResponse",
+      "channel": "common",
+      "context": {
+        "operation": "nodes",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-command-response",
+      "file": "contracts/http/fixtures/positive/http-command-response.json",
+      "definition": "CommandResponse",
+      "channel": "common",
+      "context": {
+        "operation": "command",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-command-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-command-bad-request-id.json",
+      "definition": "CommandResponse",
+      "channel": "common",
+      "context": {
+        "operation": "command",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-operation-response",
+      "file": "contracts/http/fixtures/positive/http-operation-response.json",
+      "definition": "OperationResponse",
+      "channel": "common",
+      "context": {
+        "operation": "operation",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-operation-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-operation-bad-request-id.json",
+      "definition": "OperationResponse",
+      "channel": "common",
+      "context": {
+        "operation": "operation",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "http-export",
+      "file": "contracts/http/fixtures/positive/http-export.csv",
+      "definition": "CSV",
+      "channel": "csv",
+      "context": {
+        "operation": "export",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-ticket-response",
+      "file": "contracts/http/fixtures/positive/http-ticket-response.json",
+      "definition": "TicketResponse",
+      "channel": "common",
+      "context": {
+        "operation": "ticket",
+        "side": "response",
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "http-ticket-bad-request-id",
+      "file": "contracts/http/fixtures/negative/http-ticket-bad-request-id.json",
+      "definition": "TicketResponse",
+      "channel": "common",
+      "context": {
+        "operation": "ticket",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/request_id"
+      }
+    },
+    {
+      "id": "delivery-latest",
+      "file": "contracts/http/fixtures/positive/delivery-latest.json",
+      "definition": "LatestResponse",
+      "channel": "common",
+      "context": {
+        "operation": "latest",
+        "side": "response",
+        "role": "DELIVERY_USER",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "delivery-events",
+      "file": "contracts/http/fixtures/positive/delivery-events.json",
+      "definition": "DeliveryEventsResponse",
+      "channel": "common",
+      "context": {
+        "operation": "events",
+        "side": "response",
+        "role": "DELIVERY_USER",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "delivery-nested-evidence",
+      "file": "contracts/http/fixtures/negative/delivery-nested-evidence.json",
+      "definition": "LatestResponse",
+      "channel": "common",
+      "context": {
+        "role": "DELIVERY_USER",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/data"
+      }
+    },
+    {
+      "id": "delivery-pose",
+      "file": "contracts/http/fixtures/negative/delivery-pose.json",
+      "definition": "LatestResponse",
+      "channel": "common",
+      "context": {
+        "role": "DELIVERY_USER",
+        "side": "response"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/data"
+      }
+    },
+    {
+      "id": "cross-box-view",
+      "file": "contracts/http/fixtures/negative/cross-box-view.json",
+      "definition": "LatestResponse",
+      "channel": "common",
+      "context": {
+        "box_ids": [
+          "OTHER"
+        ],
+        "side": "response"
+      },
+      "expected": {
+        "code": "box_scope",
+        "path": "/data/box_id"
+      }
+    },
+    {
+      "id": "bad-query-size",
+      "file": "contracts/http/fixtures/negative/bad-query-size.json",
+      "definition": "Query",
+      "channel": "common",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/size"
+      }
+    },
+    {
+      "id": "bad-query-range",
+      "file": "contracts/http/fixtures/negative/bad-query-range.json",
+      "definition": "Query",
+      "channel": "common",
+      "context": {},
+      "expected": {
+        "code": "query_range",
+        "path": "/to"
+      }
+    },
+    {
+      "id": "query-valid",
+      "file": "contracts/http/fixtures/positive/query-valid.json",
+      "definition": "Query",
+      "channel": "common",
+      "context": {},
+      "expected": null
+    },
+    {
+      "id": "forged-command-role",
+      "file": "contracts/http/fixtures/negative/forged-command-role.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": ""
+      }
+    },
+    {
+      "id": "unauthorized-command",
+      "file": "contracts/http/fixtures/negative/unauthorized-command.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "role": "DELIVERY_USER",
+        "side": "request",
+        "operation": "command"
+      },
+      "expected": {
+        "code": "control_permission",
+        "path": "/cmd"
+      }
+    },
+    {
+      "id": "courier-profile",
+      "file": "contracts/http/fixtures/negative/courier-profile.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "role": "COURIER",
+        "side": "request",
+        "operation": "command"
+      },
+      "expected": {
+        "code": "control_permission",
+        "path": "/cmd"
+      }
+    },
+    {
+      "id": "courier-sentry",
+      "file": "contracts/http/fixtures/positive/courier-sentry.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "role": "COURIER",
+        "side": "request",
+        "operation": "command"
+      },
+      "expected": null
+    },
+    {
+      "id": "http-error",
+      "file": "contracts/http/fixtures/positive/http-error.json",
+      "definition": "Error",
+      "channel": "common",
+      "context": {},
+      "expected": null
+    },
+    {
+      "id": "ws-subscribe",
+      "file": "contracts/http/fixtures/positive/ws-subscribe.json",
+      "definition": "WsSubscribe",
+      "channel": "ws",
+      "context": {
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "ws-unsubscribe",
+      "file": "contracts/http/fixtures/positive/ws-unsubscribe.json",
+      "definition": "WsSubscribe",
+      "channel": "ws",
+      "context": {
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "ws-mixed-scope",
+      "file": "contracts/http/fixtures/negative/ws-mixed-scope.json",
+      "definition": "WsSubscribe",
+      "channel": "ws",
+      "context": {
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": {
+        "code": "box_scope",
+        "path": "/box_ids/1"
+      }
+    },
+    {
+      "id": "ws-client-version",
+      "file": "contracts/http/fixtures/negative/ws-client-version.json",
+      "definition": "WsSubscribe",
+      "channel": "ws",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/v"
+      }
+    },
+    {
+      "id": "ws-snapshot",
+      "file": "contracts/http/fixtures/positive/ws-snapshot.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "ws-snapshot-time",
+      "file": "contracts/http/fixtures/negative/ws-snapshot-time.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/ts"
+      }
+    },
+    {
+      "id": "ws-box_event",
+      "file": "contracts/http/fixtures/positive/ws-box_event.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "ws-box_event-time",
+      "file": "contracts/http/fixtures/negative/ws-box_event-time.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/ts"
+      }
+    },
+    {
+      "id": "ws-alarm",
+      "file": "contracts/http/fixtures/positive/ws-alarm.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "ws-alarm-time",
+      "file": "contracts/http/fixtures/negative/ws-alarm-time.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/ts"
+      }
+    },
+    {
+      "id": "ws-command_status",
+      "file": "contracts/http/fixtures/positive/ws-command_status.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "ws-command_status-time",
+      "file": "contracts/http/fixtures/negative/ws-command_status-time.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/ts"
+      }
+    },
+    {
+      "id": "ws-node_status",
+      "file": "contracts/http/fixtures/positive/ws-node_status.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {
+        "role": "LOGISTICS_OPERATOR",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "ws-node_status-time",
+      "file": "contracts/http/fixtures/negative/ws-node_status-time.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/ts"
+      }
+    },
+    {
+      "id": "ws-delivery-snapshot",
+      "file": "contracts/http/fixtures/positive/ws-delivery-snapshot.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {
+        "role": "DELIVERY_USER",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": null
+    },
+    {
+      "id": "ws-error",
+      "file": "contracts/http/fixtures/positive/ws-error.json",
+      "definition": "WsError",
+      "channel": "ws",
+      "context": {},
+      "expected": null
+    },
+    {
+      "id": "ws-delivery-node-status",
+      "file": "contracts/http/fixtures/negative/ws-delivery-node-status.json",
+      "definition": "WsPush",
+      "channel": "ws",
+      "context": {
+        "role": "DELIVERY_USER",
+        "box_ids": [
+          "BOX-0001"
+        ]
+      },
+      "expected": {
+        "code": "projection",
+        "path": "/type"
+      }
+    },
+    {
+      "id": "truncated-json",
+      "file": "contracts/mqtt/fixtures/negative/truncated-json.txt",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "parse",
+        "path": ""
+      }
+    },
+    {
+      "id": "nan-json",
+      "file": "contracts/mqtt/fixtures/negative/nan-json.txt",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "parse",
+        "path": ""
+      }
+    },
+    {
+      "id": "duplicate-key",
+      "file": "contracts/mqtt/fixtures/negative/duplicate-key.txt",
+      "definition": "Property",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "parse",
+        "path": ""
+      }
+    },
+    {
+      "id": "login-empty-user",
+      "file": "contracts/http/fixtures/negative/login-empty-user.json",
+      "definition": "LoginInput",
+      "channel": "common",
+      "context": {
+        "operation": "login",
+        "side": "request"
+      },
+      "expected": {
+        "code": "schema",
+        "path": "/username"
+      }
+    },
+    {
+      "id": "long-idempotency-key",
+      "file": "contracts/http/fixtures/negative/long-idempotency-key.json",
+      "definition": "CommandInput",
+      "channel": "common",
+      "context": {
+        "idempotency_key": "中中中中中中中中中中中中中中中中中中中中中中"
+      },
+      "expected": {
+        "code": "id_bytes",
+        "path": "/headers/Idempotency-Key"
+      }
+    },
+    {
+      "id": "credential-in-response",
+      "file": "contracts/http/fixtures/negative/credential-in-response.json",
+      "definition": "Error",
+      "channel": "common",
+      "context": {
+        "side": "response"
+      },
+      "expected": {
+        "code": "secret",
+        "path": "/error/device_password"
+      }
+    },
+    {
+      "id": "ack-false-completion",
+      "file": "contracts/mqtt/fixtures/negative/ack-false-completion.json",
+      "definition": "CommandAck",
+      "channel": "mqtt",
+      "context": {},
+      "expected": {
+        "code": "schema",
+        "path": "/code"
+      }
+    },
+    {
+      "id": "event-role-caps",
+      "file": "contracts/mqtt/fixtures/negative/event-role-caps.json",
+      "definition": "EventBatch",
+      "channel": "mqtt",
+      "context": {
+        "caps": 71
+      },
+      "expected": {
+        "code": "event_caps",
+        "path": "/events/0/type"
+      }
+    }
+  ],
+  "sources": {
+    "mqtt:property": {
+      "source": "contracts/mqtt/v1.md",
+      "definition": "Property",
+      "requirements": [
+        "REQ-M03-003",
+        "REQ-M03-005",
+        "REQ-M03-008",
+        "REQ-M05-002",
+        "REQ-M05-003"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "mqtt:heartbeat": {
+      "source": "contracts/mqtt/v1.md",
+      "definition": "Heartbeat",
+      "requirements": [
+        "REQ-M03-003",
+        "REQ-M03-004",
+        "REQ-M03-005",
+        "REQ-M04-006"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "mqtt:event": {
+      "source": "contracts/mqtt/v1.md",
+      "definition": "EventBatch",
+      "requirements": [
+        "REQ-M04-001",
+        "REQ-M04-003",
+        "REQ-M04-004",
+        "REQ-M04-005",
+        "REQ-M04-006",
+        "REQ-M03-008"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "mqtt:command_ack": {
+      "source": "contracts/mqtt/v1.md",
+      "definition": "CommandAck",
+      "requirements": [
+        "REQ-M03-005",
+        "REQ-M03-006",
+        "REQ-M03-007"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "mqtt:availability": {
+      "source": "contracts/mqtt/v1.md",
+      "definition": "Availability",
+      "requirements": [
+        "REQ-M03-004"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "mqtt:cmd": {
+      "source": "contracts/mqtt/v1.md",
+      "definition": "Command",
+      "requirements": [
+        "REQ-M03-005",
+        "REQ-M03-006",
+        "REQ-M03-007",
+        "REQ-M03-008"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "mqtt:event_ack": {
+      "source": "contracts/mqtt/v1.md",
+      "definition": "EventAck",
+      "requirements": [
+        "REQ-M04-003",
+        "REQ-M04-004"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "mqtt:box_state": {
+      "source": "contracts/mqtt/v1.md",
+      "definition": "BoxState",
+      "requirements": [
+        "REQ-M05-002",
+        "REQ-M05-004",
+        "REQ-M03-005"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": [
+        "Q-08"
+      ]
+    },
+    "command:sentry": {
+      "source": "contracts/mqtt/v1.md#命令与回执",
+      "definition": "Command / CommandInput",
+      "requirements": [
+        "REQ-M03-006",
+        "REQ-M03-007",
+        "REQ-M06-004"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": [
+        "Q-02",
+        "Q-10"
+      ]
+    },
+    "command:profile": {
+      "source": "contracts/mqtt/v1.md#命令与回执",
+      "definition": "Command / CommandInput",
+      "requirements": [
+        "REQ-M03-006",
+        "REQ-M03-007",
+        "REQ-M06-004"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": [
+        "Q-09"
+      ]
+    },
+    "command:gps_mode": {
+      "source": "contracts/mqtt/v1.md#命令与回执",
+      "definition": "Command / CommandInput",
+      "requirements": [
+        "REQ-M03-006",
+        "REQ-M03-007",
+        "REQ-M06-004"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": [
+        "Q-04"
+      ]
+    },
+    "command:output": {
+      "source": "contracts/mqtt/v1.md#命令与回执",
+      "definition": "Command / CommandInput",
+      "requirements": [
+        "REQ-M03-006",
+        "REQ-M03-007",
+        "REQ-M06-004"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "command:calibrate": {
+      "source": "contracts/mqtt/v1.md#命令与回执",
+      "definition": "Command / CommandInput",
+      "requirements": [
+        "REQ-M03-006",
+        "REQ-M03-007",
+        "REQ-M06-004"
+      ],
+      "consumers": [
+        "TASK-002",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "pending": []
+    },
+    "http:login": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "LoginResponse",
+      "requirements": [
+        "REQ-M06-001"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "http:me": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "MeResponse",
+      "requirements": [
+        "REQ-M06-001",
+        "REQ-M06-002"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "http:boxes": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "BoxesResponse",
+      "requirements": [
+        "REQ-M05-001",
+        "REQ-M05-002",
+        "REQ-M05-004",
+        "REQ-M06-002",
+        "REQ-M06-003"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "http:latest": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "LatestResponse",
+      "requirements": [
+        "REQ-M05-002",
+        "REQ-M05-003",
+        "REQ-M05-004",
+        "REQ-M06-002",
+        "REQ-M06-003",
+        "REQ-M06-005"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": [
+        "Q-01"
+      ]
+    },
+    "http:events": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "EventsResponse",
+      "requirements": [
+        "REQ-M05-005",
+        "REQ-M06-002",
+        "REQ-M06-003",
+        "REQ-M06-005"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": [
+        "Q-06",
+        "Q-11"
+      ]
+    },
+    "http:track": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "TrackResponse",
+      "requirements": [
+        "REQ-M05-005",
+        "REQ-M06-002"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": [
+        "Q-06",
+        "Q-11"
+      ]
+    },
+    "http:nodes": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "NodesResponse",
+      "requirements": [
+        "REQ-M05-001",
+        "REQ-M06-003"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "http:command": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "CommandResponse",
+      "requirements": [
+        "REQ-M03-006",
+        "REQ-M03-007",
+        "REQ-M06-004"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": [
+        "Q-02"
+      ]
+    },
+    "http:operation": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "OperationResponse",
+      "requirements": [
+        "REQ-M03-006",
+        "REQ-M06-004"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": [
+        "Q-02"
+      ]
+    },
+    "http:export": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "CSV",
+      "requirements": [
+        "REQ-M05-005",
+        "REQ-M06-006"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": [
+        "Q-06",
+        "Q-11"
+      ]
+    },
+    "http:ticket": {
+      "source": "contracts/http/v1.md#路由",
+      "definition": "TicketResponse",
+      "requirements": [
+        "REQ-M06-001",
+        "REQ-M06-005"
+      ],
+      "consumers": [
+        "TASK-003",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:subscribe": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WsSubscribe",
+      "requirements": [
+        "REQ-M06-005"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:unsubscribe": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WsSubscribe",
+      "requirements": [
+        "REQ-M06-005"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:snapshot": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WsPush",
+      "requirements": [
+        "REQ-M06-005",
+        "REQ-M05-002",
+        "REQ-M05-004"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:box_event": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WsPush",
+      "requirements": [
+        "REQ-M06-005",
+        "REQ-M05-002",
+        "REQ-M05-004"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:alarm": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WsPush",
+      "requirements": [
+        "REQ-M06-005",
+        "REQ-M05-002",
+        "REQ-M05-004"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:command_status": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WsPush",
+      "requirements": [
+        "REQ-M06-005",
+        "REQ-M05-002",
+        "REQ-M05-004"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": [
+        "Q-02"
+      ]
+    },
+    "ws:node_status": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WsPush",
+      "requirements": [
+        "REQ-M06-005",
+        "REQ-M05-002",
+        "REQ-M05-004"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:error": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WsError",
+      "requirements": [
+        "REQ-M06-005"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:handshake": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "ticket route + behavior",
+      "requirements": [
+        "REQ-M06-005"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    },
+    "ws:ping_pong": {
+      "source": "contracts/http/v1.md#快照、权限和实时推送",
+      "definition": "WebSocket control frames",
+      "requirements": [
+        "REQ-M06-005"
+      ],
+      "consumers": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "pending": []
+    }
+  }
+}

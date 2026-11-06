@@ -1,0 +1,24 @@
+{
+  "data": {
+    "items": [
+      {
+        "id": "evt-1",
+        "box_id": "BOX-0001",
+        "type": "DOOR_CONCLUSION",
+        "level": "INFO",
+        "observed_at": 1793923200000,
+        "received_at": 1793923200050,
+        "time_quality": "SNTP",
+        "historical": false,
+        "data": {
+          "state": "UNKNOWN",
+          "confidence": "INSUFFICIENT"
+        }
+      }
+    ],
+    "page": 1,
+    "size": 20,
+    "total": 1
+  },
+  "request_id": "r-1"
+}

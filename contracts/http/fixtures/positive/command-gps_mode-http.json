@@ -1,0 +1,7 @@
+{
+  "cmd": "gps_mode",
+  "params": {
+    "mode": "FIXED",
+    "seed": 7
+  }
+}

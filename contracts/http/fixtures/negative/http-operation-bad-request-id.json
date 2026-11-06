@@ -1,0 +1,17 @@
+{
+  "data": {
+    "operation_id": "op-1",
+    "box_id": "BOX-0001",
+    "status": "PENDING",
+    "nodes": [
+      {
+        "node_id": "BOX-0001-ENV",
+        "request_id": "req-1",
+        "status": "PENDING",
+        "code": null,
+        "actual_state": {}
+      }
+    ]
+  },
+  "request_id": 3
+}

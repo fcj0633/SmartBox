@@ -1,0 +1,9 @@
+{
+  "v": 1,
+  "type": "error",
+  "request_id": "r-1",
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "无权订阅"
+  }
+}

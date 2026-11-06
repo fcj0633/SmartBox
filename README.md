@@ -4,7 +4,7 @@
 
 项目英文名：**SmartBox**。代码仓库：[fcj0633/SmartBox](https://github.com/fcj0633/SmartBox)。
 
-**当前交付：P0 工程与文档基线；尚无可运行的业务应用。** 官方IA1/SC2例程据用户反馈通过；SmartBox软件准备继续推进，P1 不等待接板；真实采集和硬件结果在 P2 验证。
+**当前进度：P0基线已建立，P1接口准备已完成；尚无可运行的业务应用。** 官方IA1/SC2例程据用户反馈通过；SmartBox软件准备继续推进，P1 不等待接板；真实采集和硬件结果在 P2 验证。
 
 ## 从这里开始
 
@@ -37,3 +37,7 @@
 [需求索引](docs/requirements/README.md)、[系统总纲](docs/requirements/00-系统需求规格说明书.md)、[CR-002迁移与生效](docs/management/changes/CR-002-需求体系与编号重构.md)。模块文档是业务需求权威来源，根contracts是协议细节权威来源。
 
 新增功能优先归已有模块；只有新业务领域才增加MOD。编号稳定不复用，修改同步设计、契约关联、任务、测试和追踪，不能改变未确认规则或按MOD顺序重排迭代。
+
+## 接口准备与检查
+
+TASK-001交付入口：[版本矩阵](docs/development/environment/工具与依赖版本矩阵.md)、[机器契约与样例](contracts/README.md)、[实际检查报告](docs/testing/reports/TASK-001-契约验证报告.md)。契约工具使用独立Python环境运行，依赖安装见版本矩阵；没有应用启动、数据库或板端验收通过声明。

@@ -1,0 +1,1 @@
+{"v":2,"box_id":"BOX-0001","node_id":"BOX-0001-ENV","boot_id":12,"ts":null,"ts_src":"UNSYNCED","uptime_ms":30000,"time_uncertainty_ms":null,"property_seq":1,"role":"ENV","caps":71,"env":{"temp_c":null,"humi_pct":null,"lux":null,"valid":false,"light_on":false,"fan_on":false}}

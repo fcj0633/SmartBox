@@ -1,0 +1,8 @@
+{
+  "cmd": "sentry",
+  "params": {
+    "on": true,
+    "duration_s": 60,
+    "sentry_revision": 1
+  }
+}
