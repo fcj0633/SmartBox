@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.smartbox.node.NodeMapper">
+  <resultMap id="node" type="cn.smartbox.node.NodeRow"><constructor>
+    <arg column="node_id" javaType="java.lang.String"/><arg column="role" javaType="java.lang.String"/><arg column="caps" javaType="java.lang.Integer"/><arg column="required" javaType="java.lang.Boolean"/><arg column="current_boot_id" javaType="java.lang.Long"/><arg column="last_received_at" javaType="java.lang.Long"/>
+  </constructor></resultMap>
+  <select id="byBox" resultMap="node">SELECT node_id,role,caps,required,current_boot_id,last_received_at FROM nodes WHERE box_id=#{boxId} ORDER BY role</select>
+</mapper>

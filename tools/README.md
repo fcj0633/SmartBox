@@ -53,3 +53,9 @@ python -m unittest discover -s tests -p test_build_firmware.py -v
 ```
 
 上述两组也已在Ubuntu Python 3.8执行。组件测试替身只进入宿主测试，生产GN只链接真实SDK CMSIS。当前8帧采样/16项候选均为易失工作缓冲，网络固定返回未实现，不满足MOD-04或真实通信验收。[实际报告](../docs/testing/reports/TASK-002-固件骨架验证报告.md)记录交付结果和限制。
+
+## 后端基础工具
+
+[backend.py](backend.py)统一执行unit/build/bootstrap/run/test/smoke；[backend_smoke.py](backend_smoke.py)启动真实JAR并离线解析冻结Schema校验响应。详细配置、命令、测试清理保护与Windows进程兼容处理见[后端初始化与启动指南](../docs/development/guides/后端数据库初始化与启动.md)。工具不保存/打印密码或JWT，不停止已有端口程序；smoke结束检查自身实际进程与端口已释放。
+
+真实集成必须使用test配置和显式--allow-test-reset，检查实际数据库与账号后只清理项目测试业务数据。运行命令使用dev配置，不自动初始化或重置账号。依赖复用既有.venv契约工具，不安装系统工具。实际结果见[TASK-003报告](../docs/testing/reports/TASK-003-后端与数据库验证报告.md)。

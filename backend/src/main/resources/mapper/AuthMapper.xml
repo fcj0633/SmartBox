@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.smartbox.auth.AuthMapper">
+  <resultMap id="account" type="cn.smartbox.auth.UserAccount"><constructor>
+    <arg column="id" javaType="java.lang.Long"/><arg column="username" javaType="java.lang.String"/><arg column="password_hash" javaType="java.lang.String"/><arg column="role_code" javaType="java.lang.String"/><arg column="enabled" javaType="java.lang.Boolean"/>
+  </constructor></resultMap>
+  <select id="byUsername" resultMap="account">SELECT id,username,password_hash,role_code,enabled FROM users WHERE username=#{username}</select>
+  <select id="byId" resultMap="account">SELECT id,username,password_hash,role_code,enabled FROM users WHERE id=#{id}</select>
+  <select id="boxes" resultType="string">SELECT box_id FROM user_box_access WHERE user_id=#{id} ORDER BY box_id</select>
+  <select id="hasBox" resultType="int">SELECT COUNT(*) FROM user_box_access WHERE user_id=#{id} AND box_id=#{boxId}</select>
+  <select id="boxExists" resultType="int">SELECT COUNT(*) FROM boxes WHERE box_id=#{boxId}</select>
+</mapper>

@@ -26,6 +26,8 @@ class DocumentationChecks(unittest.TestCase):
         for p in ROOT.rglob("*.md"):
             if any(x in p.relative_to(ROOT).parts for x in (".git","artifacts","node_modules","target",".venv")):continue
             q=cls.seed/p.relative_to(ROOT);q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
+        shutil.copytree(ROOT/"backend/src",cls.seed/"backend/src",dirs_exist_ok=True)
+        shutil.copy2(ROOT/"backend/pom.xml",cls.seed/"backend/pom.xml")
         shutil.copytree(ROOT/"contracts",cls.seed/"contracts",dirs_exist_ok=True)
         shutil.copytree(ROOT/"firmware",cls.seed/"firmware",dirs_exist_ok=True)
         shutil.copytree(ROOT/"tests/firmware",cls.seed/"tests/firmware",dirs_exist_ok=True)

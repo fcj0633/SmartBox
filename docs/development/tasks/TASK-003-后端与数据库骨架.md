@@ -4,7 +4,7 @@
 |---|---|
 | 阶段 | P1 |
 | 负责人 | 用户（独立开发与验收） |
-| 状态 | 待开始 |
+| 状态 | 已完成（后端与数据库基础，完整集成待后续任务） |
 | 依赖 | TASK-001 |
 | MOD | [MOD-03](../../requirements/modules/MOD-03-设备接入与控制.md)、[MOD-05](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md)、[MOD-06](../../requirements/modules/MOD-06-用户与权限管理.md) |
 | 需求 | [REQ-M03-001](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-001)、[REQ-M03-006](../../requirements/modules/MOD-03-设备接入与控制.md#req-m03-006)、[REQ-M05-001](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-001)、[REQ-M06-001](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-001)、[REQ-M06-002](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-002)、[REQ-M06-003](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-003)、[REQ-M06-004](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-004)、[REQ-M06-005](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-005)、[NFR-003](../../requirements/quality/安全与可维护性.md) |
@@ -13,7 +13,7 @@
 
 本任务建立能在Windows本机运行的后端与真实MySQL基础：可编译的单Maven应用、配置隔离、迁移、受控初始化、登录、当前身份、节点基础查询，以及可复用的授权和字段投影策略。详细设计集中维护于本文；[后端总体设计](../../design/backend/后端模块与数据模型.md)和[后端入口](../../../backend/README.md)只维护总体职责及导航。
 
-**本轮仅完善设计文档。** 未创建pom、Java源码、SQL或占位文件，未登录数据库、建库、创建账号或启动服务。TASK-003仍为待开始，后面的文件、接口、表结构、命令和测试均为后续开发设计，不是实际执行结果。用户独立开发及验收，Codex本轮只执行已授权文档整理，不代填签字。
+**实际执行已完成。** 按用户授权由Codex执行S1～S7，用户独立负责最终验收；已交付源码、13张基础表、4次迁移、真实MySQL与HTTP检查。详见[实际报告](../../testing/reports/TASK-003-后端与数据库验证报告.md)。任务完成只表示本页基础范围完成，不表示事件、命令、WS、网页或整份需求/TC通过。
 
 前置输入：
 
@@ -25,7 +25,7 @@
 | [角色权限](../../requirements/product/角色与权限.md)、本任务属性中的需求 | 授权与字段裁剪，不新增管理功能 |
 | [当前进度](../../management/当前进度.md)、[追踪矩阵](../../management/需求追踪矩阵.md)、[ITER-001](../iterations/ITER-001-三端骨架与通信闭环.md) | 保持现有范围、依赖、阶段与未决问题 |
 
-后续采用完整P1基础表方案：本任务建立13张表，TASK-005再实现遥测写入、事件与outbox事务、提交后确认、聚合查询、命令和WS。表存在不表示业务已实现；本任务不依赖Broker、真实节点或开发板。不开发自助注册、用户管理后台、重新绑定、告警人工工单或运输生命周期。
+采用完整P1基础表方案：本任务建立13张表，TASK-005再实现遥测写入、事件与outbox事务、提交后确认、聚合查询、命令和WS。表存在不表示业务已实现；本任务不依赖Broker、真实节点或开发板。不开发自助注册、用户管理后台、重新绑定、告警人工工单或运输生命周期。
 
 ## 2. 需求贡献与后续边界
 
@@ -64,7 +64,7 @@
 
 沿用版本矩阵：Java21、Spring Boot 3.5.16、Spring Security 6.5.11（Boot管理）、MyBatis Starter 3.0.5、MyBatis 3.5.19、MyBatis-Spring 3.0.5、Flyway core/mysql 11.7.2、Connector/J 9.7.0。实际开发时输出dependency:tree确认解析结果；解析不一致先报告，不能静默使用其他版本。新增测试/构建依赖也须按既有BOM或明确版本固定。
 
-计划结构如下，本轮不创建这些目录或文件：
+工程结构如下；只创建实际使用的模块，后续业务目录不作空占位：
 
 ```text
 backend/
@@ -99,10 +99,10 @@ flowchart LR
 
 公开路由仅登录和不含详细信息的最小健康检查；其余路由要求认证，未实现路由在认证后按框架404处理，未认证先401。Security负责身份与粗粒度路由，应用服务负责对象范围和动作授权。Controller不调Mapper；Mapper不自行推断当前角色；实体、密码散列和原始payload不能直接序列化。模块间通过服务接口，不跨模块直接拼接其他模块Mapper。
 
-| 内部接口/类型（计划） | 责任及返回 | 约束 |
+| 内部接口/类型 | 责任及返回 | 约束 |
 |---|---|---|
-| CurrentUserProvider / CurrentUser | user_id、username、当前role；认证无效返回401 | 服务端加载身份，不信任客户端role/box_ids |
-| BoxAccessService.requireAccess(user, boxId) | 校验箱体授权，拒绝403 | 先校验作用域再解释资源404 |
+| Security认证转换 / CurrentUser / CurrentIdentityService | user_id、username、当前role；认证无效返回401 | 服务端加载身份，不信任客户端role/box_ids |
+| BoxAccessService.require(user, boxId, action) | 校验箱体授权，拒绝403 | 先校验作用域再解释资源404 |
 | PermissionPolicy.require(user, action) | READ_BUSINESS、READ_DIAGNOSTICS、SENTRY_CONTROL、CONFIGURE、EXPORT的允许/拒绝 | 动作枚举为内部策略，不增HTTP字段 |
 | RoleProjectionService | 由显式业务输入构造允许角色DTO | 白名单；不在Map中删除几个字段后整体透传 |
 | LoginService / TokenService | 验证受控账号，签发/校验既有Login对象 | 不注册、刷新或管理账号 |
@@ -157,7 +157,7 @@ CORS默认只允许http://localhost:5173、http://127.0.0.1:5173，允许实际�
 
 ## 5. 数据库统一约定与ER关系
 
-目标smartbox_dev与smartbox_test，MySQL 8.0/InnoDB/utf8mb4。业务表共13张，flyway_schema_history由Flyway管理，另计不冒充业务表。以下是拟实现字段字典，本轮不创建SQL。
+目标smartbox_dev与smartbox_test，MySQL 8.0/InnoDB/utf8mb4。业务表共13张，flyway_schema_history由Flyway管理，另计不冒充业务表。以下为基础字段字典；实际结构以backend中的版本化迁移为准，已在真实MySQL验证。
 
 **字典缩写：** NN=NOT NULL；NULL=可空，未写默认时默认为“无DDL默认，写入者显式赋值”；PK=主键；UK=唯一键。所有FK采用ON DELETE/UPDATE RESTRICT，不级联清除历史。自增PK采用BIGINT正数且不使用UNSIGNED，映射Java Long；有限uint32采用BIGINT并CHECK范围，映射Long。
 
@@ -273,11 +273,11 @@ box_id只引用真实已识别箱体；未授权/未知目标不为记录审计�
 
 ### 7.1 库与账号
 
-开发库smartbox_dev；集成库smartbox_test。运行账号分别smartbox_app与smartbox_test_app，迁移账号smartbox_migrator与smartbox_test_migrator；限定localhost和对应项目库，不使用root作为应用数据源。迁移所需DDL/DML仅授权项目库，运行账号仅SELECT/INSERT/UPDATE/DELETE，无CREATE/DROP/ALTER/GRANT。管理员凭据与授权可用性在S1实际核对，本轮不读取或要求用户提供。
+开发库smartbox_dev；集成库smartbox_test。运行账号分别smartbox_app与smartbox_test_app，迁移账号smartbox_migrator与smartbox_test_migrator；限定localhost和对应项目库，不使用root作为应用数据源。迁移所需DDL/DML仅授权项目库，运行账号仅SELECT/INSERT/UPDATE/DELETE，无CREATE/DROP/ALTER/GRANT。管理员权限已在S1核对，实际仅初始化本项目库和账号；管理员密码未保存到应用或文件。
 
 Flyway使用独立migration URL/user/password，业务DataSource使用运行账号；集成库使用独立两套配置。连接库名、实际CURRENT_USER和权限在执行时核对，不仅凭配置文件名判定。连接失败不自动尝试其他项目账号或库。字符集/时区配置统一，URL不内嵌密码。
 
-计划迁移划分：V1身份/箱体/节点与四角色；V2遥测/最新/事件/outbox；V3命令/幂等/审计。迁移必须按FK依赖创建，结构迁移没有开发密码/演示账号。已应用脚本不可修改，后续变化新增版本；启动启用validate，cleanDisabled=true，不自动baseline或repair，不以create-drop替代Flyway。
+实际迁移划分：V1身份/箱体/节点与四角色；V2遥测/最新/事件/outbox；V3命令/幂等/审计；V4补全逐节点回执时间CHECK的非空条件。真实负例发现MySQL CHECK对UNKNOWN可放行，故新增V4而不改已应用V1～V3；业务规则不变。迁移必须按FK依赖创建，结构迁移没有开发密码/演示账号。已应用脚本不可修改，后续变化新增版本；启动启用validate，cleanDisabled=true，不自动baseline或repair，不以create-drop替代Flyway。
 
 MySQL DDL可能部分提交；失败保留history和实际结构，先定位，不盲目重跑、repair或删表。已有项目库先核对迁移历史，禁止拿空库脚本覆盖。缺迁移账号时不能假装首次迁移成功。
 
@@ -304,27 +304,28 @@ MySQL DDL可能部分提交；失败保留history和实际结构，先定位，�
 | SMARTBOX_JWT_SECRET_BASE64 | ≥32随机字节Base64 | 不合格时启动失败，不生成临时密钥掩盖配置缺失 |
 | SMARTBOX_ALLOWED_ORIGINS | localhost/127.0.0.1的5173默认白名单 | 通配或非法来源配置拒绝 |
 | SMARTBOX_BOOTSTRAP_FILE | 显式非Web初始化输入，本地忽略路径 | 缺失/不一致拒绝，不采用弱口令种子 |
-| SMARTBOX_TEST_DB_URL/USER/PASSWORD | smartbox_test运行连接 | 不允许回退到dev配置 |
-| SMARTBOX_TEST_MIGRATION_URL/USER/PASSWORD | smartbox_test迁移连接 | 必须同测试库且账号分离 |
+| test配置中的SMARTBOX_DB_URL/USER/PASSWORD | smartbox_test运行连接，工具选择test配置后注入同名变量 | 不允许回退到dev配置 |
+| test配置中的SMARTBOX_MIGRATION_URL/USER/PASSWORD | smartbox_test迁移连接，同样使用公共变量名 | 必须同测试库且账号分离 |
+| SMARTBOX_WINDOWS_TCP_SELECTOR | 本机true，工具仅为子进程启用JDK内置TCP回退 | 主机AF_UNIX兼容处理，不修改系统配置 |
 | SMARTBOX_TEST_ALLOW_RESET | 临时显式true，默认false | 其他库/profile/账号不符仍拒绝 |
 
 环境变量映射由config中的配置绑定实现，不能以为任意自定义变量会被Spring自动识别。示例只写REPLACE_WITH_LOCAL_VALUE等明显占位，不提供可通用登录的开发密码。TLS、生产密钥托管及外网部署不在本任务宣称通过。
 
 ## 8. S1～S7具体执行计划
 
-所有步骤负责人为用户；未来Codex实际执行时另记录执行者。每一步满足完成条件才登记完成日期，不预填。
+所有步骤负责人为用户；本次实际执行者为Codex。下面保留执行次序和失败边界，实际结果见第10节。
 
 | 步骤 | 输入 | 动作 | 产出与完成条件 | 失败处理 |
 |---|---|---|---|---|
 | S1 环境与权限核对 | TASK-001版本/契约、环境清单、本地连接配置 | 只读核对Java/Maven、8080/DB端口、MySQL版本与管理员/项目权限、现有同名库 | 路径/工具/权限与初始化范围明确，凭据只在本地 | 缺凭据或权限登记阻塞，不猜密码、不试其他项目账号、不覆盖同名库 |
 | S2 Maven与应用骨架 | S1、工程/配置设计 | 建pom及当前模块，统一响应/异常/request_id、配置绑定、最小健康检查 | 编译通过；无秘密默认；非法配置明确失败；健康不泄详情 | 依赖解析与既定版本不符时先定位，不静默升降级 |
-| S3 表结构与迁移 | 第5/6节字典与ER图 | 编写V1～V3，配置双数据源角色、CHECK/FK/UK/索引与TypeHandler | 真MySQL空库迁移成功、重复启动不改数据；列范围/时间/唯一性可验证 | DDL失败检查部分提交与history；不自动clean/repair或改已应用脚本 |
+| S3 表结构与迁移 | 第5/6节字典与ER图 | 编写V1～V3及新增V4约束修正，配置双数据源角色、CHECK/FK/UK/索引与TypeHandler | 真MySQL空库迁移成功、重复启动不改数据；列范围/时间/唯一性可验证 | DDL失败检查部分提交与history；不自动clean/repair或改已应用脚本 |
 | S4 初始化与访问 | 已迁移库、MyBatis、本地初始化输入 | Mapper、受控账号、箱体节点、授权；显式非Web初始化 | 相同输入可重跑不覆盖，冲突整事务回滚，密码仅散列，节点/能力正确 | 保留脱敏冲突，不借此完成换绑/移交 |
 | S5 认证与授权 | S4账号及合同结构 | 登录/JWT/me/nodes，角色与箱体策略、投影、脱敏审计 | 成功/失败、到期/篡改、跨箱体/角色拒绝；节点DTO契约一致 | DB故障503、凭据错误401，不返回假数据或泄露SQL |
 | S6 自动及真实集成 | 测试库、四角色双箱体、现有Schema | 单元+HTTP+MySQL集成；迁移重跑、边界、错误与日志检查 | mvn verify及实际运行证据可复现；真实响应符合冻结Schema | 缺MySQL可继续纯单元，任务保持待验证/阻塞，不能用H2冒充完成 |
 | S7 记录与收尾 | 源码、构建/数据库/HTTP实际结果 | 记录版本、证据、迁移与限制，更新TASK/ITER/进度/追踪 | 依赖、数据结构与状态一致，可供TASK-004/005继续使用 | 未执行/失败逐项列出，不将整TC/REQ改通过，不创建虚假报告 |
 
-未来构建命令形状为在backend执行mvn verify，运行JAR、bootstrap及验证所需的精确命令需随实际pom/main模式生成后补齐。当前没有pom，不能现在执行这些计划命令或声称命令已验证。操作次序与失败边界见[初始化与启动指南](../guides/后端数据库初始化与启动.md)。
+已验证入口为仓库根目录执行python tools/backend.py build --profile dev、bootstrap --profile dev及run --profile dev；单元为unit，真实集成为test --profile test --allow-test-reset（Maven verify -Pit）。独立HTTP契约检查使用.venv/Scripts/python tools/backend.py smoke --profile dev。完整命令及本地配置说明见指南。操作次序与失败边界见[初始化与启动指南](../guides/后端数据库初始化与启动.md)。
 
 ## 9. 验收矩阵与完成口径
 
@@ -354,14 +355,26 @@ Q-01～Q-14保持未决：新鲜度/历史解释、控制迟到、初始化归�
 
 后续开发风险与应对：项目库/迁移账号权限缺失先登记；版本解析失败先核对源与锁定版本；MySQL DDL部分提交先定位；不把真实DB不可用伪装为账号错误；审计泄漏通过白名单和日志检查验证；静态投影不代替各出口集成；JWT/数据库本地配置与初始化输入一律不入Git。
 
-| 计划交付位置 | 内容 | 本轮状态 |
+| 实际交付位置 | 内容 | 本轮状态 |
 |---|---|---|
-| backend/ | pom、当前模块、DTO/策略、迁移、Mapper及测试 | 未创建，仍只有README |
-| secrets/或忽略local配置 | 本地DB/JWT/初始化输入 | 未创建或读取，不提交 |
-| artifacts/backend/TASK-003/运行编号/ | 解析树、构建日志、迁移/HTTP脱敏证据 | 未执行，无产物 |
-| docs/testing/reports/ | 未来实际报告，标题避免重复定义全局TASK编号 | 本轮不创建虚假执行报告 |
-| 本任务及相关入口/指南 | 可直接实施的设计和验收 | 本轮已完善，仅文档 |
+| backend/ | Maven、Java、DTO/策略、4次迁移、Mapper及测试 | 已实现、编译和验证 |
+| secrets/（忽略） | dev/test配置和两个初始化输入 | 已生成，本地保留，不提交 |
+| artifacts/（忽略） | 构建、依赖、迁移和HTTP脱敏证据 | 已保存，索引见报告 |
+| docs/testing/reports/ | TASK-003实际验收报告 | 已形成 |
+| 本任务及入口/指南 | 设计、运行方式、实际结果和限制 | 已同步 |
 
-任务未来完成条件：编译、真实MySQL迁移/重复启动、受控初始化、三个业务接口、授权/投影、错误/审计及实际报告全部满足。无数据库条件或无真实结果时不得完成；不能依赖真实板卡作为本任务软件验收前提。
+### S1～S7实际记录
 
-**本轮实际记录：设计与执行计划已完善，S1～S7均尚未执行；TASK-003保持待开始。** 未创建源码/SQL，未登录数据库、建库、创建账号、启动服务或修改SDK。后续开工第一步为S1环境与数据库权限核对；本轮文档检查与中文提交只证明设计整理完成，不表示后端或数据库开发完成。
+记录日期2026-11-07（客户端日期）；底层主机原始日志标记2026-11-06晚间至2026-11-07凌晨，保留原始时间，不改写日志。实际执行者Codex，无代填人工签字。
+
+| 步骤 | 实际结果 | 证据 |
+|---|---|---|
+| S1 | Java21.0.10、Maven3.9.14、MySQL8.0.44及范围权限核对通过；新建两个独立项目库、四个本地账号 | 报告环境/隔离记录 |
+| S2 | 单Maven应用、配置校验、响应/错误/request_id和健康检查完成 | backend源码、Maven结果 |
+| S3 | 13业务表、V1～V4迁移、FK/UK/CHECK、uint64映射通过 | 真实MySQL集成及数据库摘要 |
+| S4 | dev四账号单箱体双节点；test八账号双箱体四节点；重跑及冲突回滚通过 | BootstrapService和集成结果 |
+| S5 | JWT/PBKDF2、三个业务接口、角色/箱体策略、投影及独立审计完成 | 纯单元/真实HTTP检查 |
+| S6 | 17项单元、26项集成及独立23项HTTP检查通过 | 实际报告和本地日志 |
+| S7 | 本轮后端进程停止，原MySQL保持运行，库/账号/配置保留；文档与状态同步 | HTTP清理记录和收尾检查 |
+
+**TASK-003已完成后端与数据库基础。** 完整MQTT接入、事件保存后确认、outbox工作器、命令执行、聚合/WS/CSV/网页尚未实现；投影和事务测试不表示这些出口已上线。未涉及SDK、烧录或板端运行，整份TC-009/012与关联需求不自动验收。下一项从TASK-004的Broker与模拟节点开始。

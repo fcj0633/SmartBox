@@ -1,9 +1,20 @@
 # 后端工程入口
 
-技术方向：Java21、Spring Boot、Spring Security、MyBatis、Flyway、MySQL8，精确版本沿用TASK-001。[TASK-003详细设计](../docs/development/tasks/TASK-003-后端与数据库骨架.md)已完善，任务状态仍为待开始；本目录只有说明，尚无pom、Java源码、SQL、可运行服务或项目数据库。
+TASK-003已完成后端与数据库基础：Java21 / Spring Boot3.5.16、Spring Security6.5.11、MyBatis、Flyway、真实MySQL。交付[pom.xml](pom.xml)、[应用源码](src/main/java/cn/smartbox/SmartBoxApplication.java)、13张业务表与4次迁移、认证授权基础及测试。
 
-详细设计集中在TASK-003，涵盖目录和调用关系、13张P1基础表字段字典与ER图、JWT/密码/箱体授权、配置、受控初始化、S1～S7及验收。总体模块职责见[后端设计](../docs/design/backend/后端模块与数据模型.md)，操作次序见[数据库初始化与启动指南](../docs/development/guides/后端数据库初始化与启动.md)。
+可运行接口：GET /actuator/health、POST /api/v1/auth/login、GET /api/v1/me、GET /api/v1/boxes/{id}/nodes。JWT有效期30分钟，角色和箱体范围以数据库为准；节点尚未接入，online=false且启动标识/接收时间为空，不伪造实时数据。
 
-未来TASK-003建立完整P1基础表，交付健康检查、登录、当前身份及授权节点基础查询；事件处理、遥测聚合、命令和WS闭环仍由TASK-005实现。建表、投影单元测试不等于完整业务出口上线。
+在仓库根目录执行：
 
-默认Windows回环运行，项目开发库smartbox_dev、集成库smartbox_test，迁移与运行账号分离。真实配置只留本地，不提供默认密码；不能使用其他项目表或以H2/SQLite替代MySQL集成验收。当前不执行任何构建、建库或启动命令，正式开发从TASK-003的S1环境与数据库权限核对开始。
+```powershell
+python tools/backend.py unit
+python tools/backend.py build --profile dev
+python tools/backend.py bootstrap --profile dev
+python tools/backend.py run --profile dev
+```
+
+默认127.0.0.1:8080；本轮验收结束已停止后端，MySQL仍运行。配置从本地忽略的secrets/backend.local.json读取，演示登录信息在secrets/backend-dev.bootstrap.local.json；不要提交、打印到报告或复制真实秘密进命令行。配置格式、真实集成及复验见[初始化与启动指南](../docs/development/guides/后端数据库初始化与启动.md)。
+
+详细字段与实现边界集中在[TASK-003](../docs/development/tasks/TASK-003-后端与数据库骨架.md)；[实际报告](../docs/testing/reports/TASK-003-后端与数据库验证报告.md)记录17项单元、26项集成和23项独立HTTP检查。总体职责见[后端设计](../docs/design/backend/后端模块与数据模型.md)。
+
+TASK-005继续实现MQTT接入、遥测聚合、事件/outbox保存后确认、命令、WS及业务查询。表和公共投影存在不表示业务闭环完成；不包含前端、真实节点或板端验收。运行账号无DDL权限，数据库迁移与运行账号分离，禁止用其他项目库或H2/SQLite替代集成验证。
