@@ -1,0 +1,816 @@
+openapi: 3.1.1
+info:
+  title: SmartBox REST v1
+  version: 1.0.0
+  description: 接口准备基线；不代表服务已实现。业务待决项见接口覆盖与待决清单。
+servers:
+- url: /api/v1
+security:
+- bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      operationId: login
+      summary: login
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-06
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+  /me:
+    get:
+      operationId: me
+      summary: me
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-06
+  /boxes:
+    get:
+      operationId: boxes
+      summary: boxes
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoxesResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-05
+      description: 必须验证角色及box_id授权；字段投影和拒绝语义见权限投影与行为检查.md。
+  /boxes/{id}/latest:
+    get:
+      operationId: latest
+      summary: latest
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-05
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: &id001
+          type: string
+          minLength: 1
+          maxLength: 48
+          pattern: ^[A-Za-z0-9_-]+$
+      description: 必须验证角色及box_id授权；字段投影和拒绝语义见权限投影与行为检查.md。
+  /boxes/{id}/events:
+    get:
+      operationId: events
+      summary: events
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-05
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: from
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      - name: to
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: type
+        in: query
+        schema:
+          type: string
+          minLength: 1
+      - name: level
+        in: query
+        schema:
+          enum:
+          - INFO
+          - WARNING
+          - CRITICAL
+      description: 必须验证角色及box_id授权；字段投影和拒绝语义见权限投影与行为检查.md。 from含/to不含；默认24小时，最大31天，非保留期限；稳定按时间和唯一id排序。
+  /boxes/{id}/track:
+    get:
+      operationId: track
+      summary: track
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-05
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: from
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      - name: to
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      description: 必须验证角色及box_id授权；字段投影和拒绝语义见权限投影与行为检查.md。 from含/to不含；默认24小时，最大31天，非保留期限；稳定按时间和唯一id排序。
+  /boxes/{id}/nodes:
+    get:
+      operationId: nodes
+      summary: nodes
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodesResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-05
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      description: 必须验证角色及box_id授权；字段投影和拒绝语义见权限投影与行为检查.md。
+  /boxes/{id}/commands:
+    post:
+      operationId: command
+      summary: command
+      responses:
+        '202':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-05
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema: &id002
+          type: string
+          minLength: 1
+          maxLength: 64
+        description: UTF-8 1～64字节；同用户/箱体/key至少保存24小时，异请求409。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandInput'
+      description: 必须验证角色及box_id授权；字段投影和拒绝语义见权限投影与行为检查.md。
+  /boxes/{id}/commands/{operation_id}:
+    get:
+      operationId: operation
+      summary: operation
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-05
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: operation_id
+        in: path
+        required: true
+        schema: *id002
+      description: 必须验证角色及box_id授权；字段投影和拒绝语义见权限投影与行为检查.md。
+  /boxes/{id}/events/export:
+    get:
+      operationId: export
+      summary: export
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            text/csv:
+              schema:
+                type: string
+              example: 'id,box_id,type
+
+                evt-1,BOX-0001,DOOR_CONCLUSION
+
+                '
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-05
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: *id001
+      - name: from
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      - name: to
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+      - name: type
+        in: query
+        schema:
+          type: string
+          minLength: 1
+      - name: level
+        in: query
+        schema:
+          enum:
+          - INFO
+          - WARNING
+          - CRITICAL
+      description: 必须验证角色及box_id授权；字段投影和拒绝语义见权限投影与行为检查.md。 from含/to不含；默认24小时，最大31天，非保留期限；稳定按时间和唯一id排序。
+  /ws-ticket:
+    post:
+      operationId: ticket
+      summary: ticket
+      responses:
+        '200':
+          description: 成功；按角色和箱体授权投影
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketResponse'
+        '400':
+          description: 参数非法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 未登录或凭据无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 无权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 已先授权但资源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 冲突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-requirement-module: MOD-06
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Identity:
+      $ref: common.schema.json#/$defs/Identity
+    Time:
+      $ref: common.schema.json#/$defs/Time
+    Up:
+      $ref: common.schema.json#/$defs/Up
+    RoleCaps:
+      $ref: common.schema.json#/$defs/RoleCaps
+    Env:
+      $ref: common.schema.json#/$defs/Env
+    Pose:
+      $ref: common.schema.json#/$defs/Pose
+    Loc:
+      $ref: common.schema.json#/$defs/Loc
+    Property:
+      $ref: common.schema.json#/$defs/Property
+    LostRange:
+      $ref: common.schema.json#/$defs/LostRange
+    Heartbeat:
+      $ref: common.schema.json#/$defs/Heartbeat
+    Event:
+      $ref: common.schema.json#/$defs/Event
+    EventBatch:
+      $ref: common.schema.json#/$defs/EventBatch
+    EventAck:
+      $ref: common.schema.json#/$defs/EventAck
+    SentryParams:
+      $ref: common.schema.json#/$defs/SentryParams
+    ProfileParams:
+      $ref: common.schema.json#/$defs/ProfileParams
+    GpsParams:
+      $ref: common.schema.json#/$defs/GpsParams
+    OutputParams:
+      $ref: common.schema.json#/$defs/OutputParams
+    CalibrateParams:
+      $ref: common.schema.json#/$defs/CalibrateParams
+    CommandInput:
+      $ref: common.schema.json#/$defs/CommandInput
+    Command:
+      $ref: common.schema.json#/$defs/Command
+    CommandAck:
+      $ref: common.schema.json#/$defs/CommandAck
+    Availability:
+      $ref: common.schema.json#/$defs/Availability
+    BoxState:
+      $ref: common.schema.json#/$defs/BoxState
+    Error:
+      $ref: common.schema.json#/$defs/Error
+    SampleEnv:
+      $ref: common.schema.json#/$defs/SampleEnv
+    SamplePose:
+      $ref: common.schema.json#/$defs/SamplePose
+    SampleLoc:
+      $ref: common.schema.json#/$defs/SampleLoc
+    Door:
+      $ref: common.schema.json#/$defs/Door
+    Alarm:
+      $ref: common.schema.json#/$defs/Alarm
+    Node:
+      $ref: common.schema.json#/$defs/Node
+    Snapshot:
+      $ref: common.schema.json#/$defs/Snapshot
+    DeliverySnapshot:
+      $ref: common.schema.json#/$defs/DeliverySnapshot
+    SnapshotView:
+      $ref: common.schema.json#/$defs/SnapshotView
+    User:
+      $ref: common.schema.json#/$defs/User
+    LoginInput:
+      $ref: common.schema.json#/$defs/LoginInput
+    Login:
+      $ref: common.schema.json#/$defs/Login
+    Ticket:
+      $ref: common.schema.json#/$defs/Ticket
+    EventView:
+      $ref: common.schema.json#/$defs/EventView
+    DeliveryEventView:
+      $ref: common.schema.json#/$defs/DeliveryEventView
+    TrackPoint:
+      $ref: common.schema.json#/$defs/TrackPoint
+    Operation:
+      $ref: common.schema.json#/$defs/Operation
+    Accepted:
+      $ref: common.schema.json#/$defs/Accepted
+    EventViewPage:
+      $ref: common.schema.json#/$defs/EventViewPage
+    DeliveryEventViewPage:
+      $ref: common.schema.json#/$defs/DeliveryEventViewPage
+    TrackPointPage:
+      $ref: common.schema.json#/$defs/TrackPointPage
+    LoginResponse:
+      $ref: common.schema.json#/$defs/LoginResponse
+    MeResponse:
+      $ref: common.schema.json#/$defs/MeResponse
+    BoxesResponse:
+      $ref: common.schema.json#/$defs/BoxesResponse
+    LatestResponse:
+      $ref: common.schema.json#/$defs/LatestResponse
+    EventsResponse:
+      $ref: common.schema.json#/$defs/EventsResponse
+    DeliveryEventsResponse:
+      $ref: common.schema.json#/$defs/DeliveryEventsResponse
+    TrackResponse:
+      $ref: common.schema.json#/$defs/TrackResponse
+    NodesResponse:
+      $ref: common.schema.json#/$defs/NodesResponse
+    CommandResponse:
+      $ref: common.schema.json#/$defs/CommandResponse
+    OperationResponse:
+      $ref: common.schema.json#/$defs/OperationResponse
+    TicketResponse:
+      $ref: common.schema.json#/$defs/TicketResponse
+    Query:
+      $ref: common.schema.json#/$defs/Query

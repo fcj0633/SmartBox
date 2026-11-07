@@ -40,8 +40,12 @@
 
 ## 当前单人开发与固件骨架设计
 
-当前全部开发与验收由用户独立完成，历史分工只保留当时事实。TASK-002详细设计集中在[任务文档](development/tasks/TASK-002-双角色固件骨架.md)，已完成软件骨架、实际SDK编译链接与恢复，见[报告](testing/reports/TASK-002-固件骨架验证报告.md)；未执行板端验收，TASK-003后端基础现已完成，见[报告](testing/reports/TASK-003-后端与数据库验证报告.md)及[启动指南](development/guides/后端数据库初始化与启动.md)，按任务索引从TASK-005继续。
+当前全部开发与验收由用户独立完成，历史分工只保留当时事实。TASK-002详细设计集中在[任务文档](development/tasks/TASK-002-双角色固件骨架.md)，已完成软件骨架、实际SDK编译链接与恢复，见[报告](testing/reports/TASK-002-固件骨架验证报告.md)；未执行板端验收，TASK-003后端基础现已完成，见[报告](testing/reports/TASK-003-后端与数据库验证报告.md)及[启动指南](development/guides/后端数据库初始化与启动.md)，按任务索引从TASK-006继续。
 
 ## TASK-004交付入口
 
-[详细任务](development/tasks/TASK-004-MQTT与模拟节点.md)、[真实验证报告](testing/reports/TASK-004-MQTT与模拟节点验证报告.md)、[模拟器使用](../tools/simulator/README.md)。37项单元/临时配置与55项真实MQTT检查通过；[CR-003](management/changes/CR-003-布防有效期限计时起点.md)只明确实际ARMED后计时，不解决其他待决事项。当前下一项TASK-005，完整系统闭环尚未验收。
+[详细任务](development/tasks/TASK-004-MQTT与模拟节点.md)、[真实验证报告](testing/reports/TASK-004-MQTT与模拟节点验证报告.md)、[模拟器使用](../tools/simulator/README.md)。37项单元/临时配置与55项真实MQTT检查通过；[CR-003](management/changes/CR-003-布防有效期限计时起点.md)只明确实际ARMED后计时，不解决其他待决事项。当前TASK-005服务端闭环已完成，下一项TASK-006；完整系统验收仍待后续。
+
+## 服务端闭环交付
+
+[TASK-005报告](testing/reports/TASK-005-服务端闭环验证报告.md)、[启动复验](development/guides/服务端闭环启动与验收.md)、[有效契约](../contracts/effective/README.md)。真实上报保存、精确确认、查询/控制/WS通过；网页、完整算法和板端仍待后续。

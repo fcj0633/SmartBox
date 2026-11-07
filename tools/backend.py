@@ -42,11 +42,17 @@ def main():
     p.add_argument('--config',type=Path,default=ROOT/'secrets/backend.local.json')
     p.add_argument('--allow-test-reset',action='store_true')
     p.add_argument('--report-dir',type=Path,default=ROOT/'artifacts/backend/TASK-003')
+    p.add_argument('--mqtt-config',type=Path,help='Ignored project MQTT config; only for run')
     args=p.parse_args()
     try:
         if args.action=='unit':command=['mvn.cmd' if os.name=='nt' else 'mvn','-B','-ntp','test'];env=os.environ.copy()
         else:
             env=local_environment(args.config,args.profile)
+            if args.mqtt_config:
+                if args.action!='run':raise ValueError('MQTT configuration is only for run')
+                from simulator.config import load
+                mqtt=load(args.mqtt_config);account=mqtt['accounts']['backend']
+                env.update({'SMARTBOX_MQTT_ENABLED':'true','SMARTBOX_MQTT_URL':'tcp://127.0.0.1:1883','SMARTBOX_MQTT_USER':account['username'],'SMARTBOX_MQTT_PASSWORD':account['password']})
             if args.action in ['build','test']:
                 if args.action=='test':
                     if args.profile!='test' or not args.allow_test_reset:raise ValueError('Integration requires test profile and --allow-test-reset')

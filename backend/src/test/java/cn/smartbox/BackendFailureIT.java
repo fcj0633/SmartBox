@@ -12,8 +12,9 @@ import java.net.URI;
 import java.net.http.*;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties="smartbox.workers.enabled=false")
 @ActiveProfiles("test")
+@org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class BackendFailureIT {
     @MockitoBean AuthMapper users;
     @Autowired TokenService tokens;

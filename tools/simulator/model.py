@@ -17,6 +17,7 @@ class Model:
         self.mono=monotonic; self.utc=utc; self.started=self.mono()
         self.boot=identity.reserve(); self.synced=synced; self.invalid=invalid
         self.seed=seed; self.location_step=0; self.mode='FIXED'; self.profile_id='SIM-DEFAULT'; self.profile=None
+        self.location=None; self.location_due=0
         self.rng=random.Random(seed)
         self.outputs={'light':False,'fan':False,'indicator':False}; self.output_due={}
         self.revision=identity.value['sentry_revision']
@@ -44,12 +45,17 @@ class Model:
         else:
             out['pose']={'acc_g':[0,0,1] if valid else None,'tilt_deg':0 if valid else None,
                          'state':'NORMAL' if valid else 'UNKNOWN','valid':valid}
-            self.location_step+=1
-            step=(0 if self.mode=='FIXED' else
-                  ((self.location_step+self.seed)%20)*0.00001 if self.mode=='ROUTE' else
-                  self.rng.uniform(-0.0001,0.0001))
-            out['loc']={'lat':round(30+step,7) if valid else None,
-                        'lon':round(120+step,7) if valid else None,'valid':valid,'src':'MOCK'}
+            if self.location is None or self.mono()>=self.location_due:
+                if self.location_step==U32:raise Exhausted('location sequence exhausted')
+                self.location_step+=1
+                step=(0 if self.mode=='FIXED' else
+                      ((self.location_step+self.seed)%20)*0.00001 if self.mode=='ROUTE' else
+                      self.rng.uniform(-0.0001,0.0001))
+                self.location={'lat':round(30+step,7) if valid else None,
+                               'lon':round(120+step,7) if valid else None,'valid':valid,'src':'MOCK',
+                               'observation':{'sample_seq':self.location_step,**self.stamp()}}
+                self.location_due=self.mono()+(10 if self.mode=='FIXED' else 1)
+            out['loc']=copy.deepcopy(self.location)
         return out
     def heartbeat(self):
         return {**self.up(),'role':self.role,'caps':self.caps,
@@ -120,7 +126,7 @@ class Model:
         elif kind=='profile':
             self.profile=copy.deepcopy(params);self.profile_id=params['profile_id'];actual={'profile_id':self.profile_id}
         elif kind=='gps_mode':
-            self.mode=params['mode'];self.rng=random.Random(params['seed']);actual={'mode':self.mode}
+            self.mode=params['mode'];self.location_due=0;self.rng=random.Random(params['seed']);actual={'mode':self.mode}
         elif kind=='calibrate':
             self.calibrated=not self.invalid
             if not self.calibrated:return self.ack(command,'busy','invalid_params')

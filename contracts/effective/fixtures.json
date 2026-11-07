@@ -1,0 +1,136 @@
+[
+  {
+    "id": "alarm-unknown",
+    "definition": "Alarm",
+    "valid": true,
+    "value": {
+      "assessment": "UNKNOWN",
+      "active": null,
+      "level": null
+    }
+  },
+  {
+    "id": "alarm-unknown-false",
+    "definition": "Alarm",
+    "valid": false,
+    "value": {
+      "assessment": "UNKNOWN",
+      "active": false,
+      "level": null
+    }
+  },
+  {
+    "id": "alarm-evaluated-clear",
+    "definition": "Alarm",
+    "valid": true,
+    "value": {
+      "assessment": "EVALUATED",
+      "active": false,
+      "level": null
+    }
+  },
+  {
+    "id": "alarm-evaluated-null",
+    "definition": "Alarm",
+    "valid": false,
+    "value": {
+      "assessment": "EVALUATED",
+      "active": null,
+      "level": null
+    }
+  },
+  {
+    "id": "legacy-location",
+    "definition": "Loc",
+    "valid": true,
+    "value": {
+      "lat": 30,
+      "lon": 120,
+      "valid": true,
+      "src": "MOCK"
+    }
+  },
+  {
+    "id": "location-observation",
+    "definition": "Loc",
+    "valid": true,
+    "value": {
+      "lat": 30,
+      "lon": 120,
+      "valid": true,
+      "src": "MOCK",
+      "observation": {
+        "sample_seq": 1,
+        "ts": null,
+        "ts_src": "UNSYNCED",
+        "uptime_ms": 100,
+        "time_uncertainty_ms": null
+      }
+    }
+  },
+  {
+    "id": "location-unsynced-utc",
+    "definition": "Loc",
+    "valid": false,
+    "value": {
+      "lat": 30,
+      "lon": 120,
+      "valid": true,
+      "src": "MOCK",
+      "observation": {
+        "sample_seq": 1,
+        "ts": 10,
+        "ts_src": "UNSYNCED",
+        "uptime_ms": 100,
+        "time_uncertainty_ms": null
+      }
+    }
+  },
+  {
+    "id": "location-sequence-zero",
+    "definition": "Loc",
+    "valid": false,
+    "value": {
+      "lat": 30,
+      "lon": 120,
+      "valid": true,
+      "src": "MOCK",
+      "observation": {
+        "sample_seq": 0,
+        "ts": null,
+        "ts_src": "UNSYNCED",
+        "uptime_ms": 100,
+        "time_uncertainty_ms": null
+      }
+    }
+  },
+  {
+    "id": "unknown-sample",
+    "definition": "SampleLoc",
+    "valid": true,
+    "value": {
+      "value": null,
+      "valid": false,
+      "observed_at": null,
+      "received_at": null,
+      "stale": true,
+      "src": null,
+      "time_quality": "UNKNOWN",
+      "freshness": "UNKNOWN"
+    }
+  },
+  {
+    "id": "missing-freshness",
+    "definition": "SampleLoc",
+    "valid": false,
+    "value": {
+      "value": null,
+      "valid": false,
+      "observed_at": null,
+      "received_at": null,
+      "stale": true,
+      "src": null,
+      "time_quality": "UNKNOWN"
+    }
+  }
+]

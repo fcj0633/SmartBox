@@ -63,3 +63,7 @@ python -m unittest discover -s tests -p test_build_firmware.py -v
 ## TASK-004模拟工具入口
 
 [mqtt.py](mqtt.py)提供prepare、broker、node、unit、integration；实现分层和命令见[模拟器说明](simulator/README.md)，[Broker模板](../deploy/mosquitto/README.md)保持与旧服务隔离。项目.venv新增paho-mqtt2.1.0并单独锁定，不改系统Python。默认本地配置在忽略的secrets/mqtt.local.json，不打印密码或以命令行传密码。真实集成自建配置和子进程，确认1883空闲后执行，结束检查进程和端口释放。测试event_ack不能证明数据库保存，storage=DEGRADED不能证明Flash可靠性。实际结果见[TASK-004报告](../docs/testing/reports/TASK-004-MQTT与模拟节点验证报告.md)。
+
+## TASK-005当前实现入口
+
+[启动指南](../docs/development/guides/服务端闭环启动与验收.md)、[有效契约生成/检查](effective_contracts.py)、[真实联调](live_integration.py)。接入/查询/命令/WS职责在live包分离，LiveStore/LiveMapper隔离MyBatis持久访问；Controller不查数据库。V5～V9新增运行态、位置、事件视图、命令恢复/回执、操作顺序及质量约束，V1～V4保持。告警判断与门融合仍未知；网页及板端待后续，实际验收结果以任务报告为准。

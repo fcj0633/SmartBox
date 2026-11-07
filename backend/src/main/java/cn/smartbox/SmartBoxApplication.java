@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SmartBoxApplication {
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(SmartBoxApplication.class);
-        boolean bootstrap = java.util.Arrays.asList(args).contains("--smartbox.bootstrap=true");
+        boolean bootstrap = java.util.Arrays.asList(args).contains("--smartbox.bootstrap=true")||java.util.Arrays.asList(args).contains("--smartbox.integration.reset=true");
         if (bootstrap) app.setWebApplicationType(WebApplicationType.NONE);
         try {
             var context = app.run(args);

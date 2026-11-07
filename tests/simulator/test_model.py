@@ -44,6 +44,18 @@ class ModelTests(unittest.TestCase):
         self.clock.value=3.1;self.assertEqual('ok',self.model.tick()[0]['result'])
         self.clock.value=5.09;self.model.tick();self.assertEqual('ARMED',self.model.sentry)
         self.clock.value=5.1;self.model.tick();self.assertEqual('DISARMED',self.model.sentry)
+    def test_fixed_location_retains_observation_until_ten_seconds(self):
+        node='BOX-0001-POSE';atomic_json(self.dir/(node+'.json'),{'node_id':node,'boot_id':0,'sentry_revision':0})
+        model=Model('POSE',IdentityState(self.dir,node),monotonic=self.clock.mono,utc=self.clock.utc)
+        first=model.property()['loc'];self.clock.value=9.999
+        self.assertEqual(first,model.property()['loc']);self.clock.value=10
+        second=model.property()['loc'];self.assertEqual(first['lat'],second['lat'])
+        self.assertEqual(2,second['observation']['sample_seq']);self.assertNotEqual(first['observation']['ts'],second['observation']['ts'])
+    def test_route_location_new_observation_each_second(self):
+        node='BOX-0001-POSE';atomic_json(self.dir/(node+'.json'),{'node_id':node,'boot_id':0,'sentry_revision':0})
+        model=Model('POSE',IdentityState(self.dir,node),monotonic=self.clock.mono,utc=self.clock.utc,synced=False)
+        model.mode='ROUTE';first=model.property()['loc'];self.clock.value=1
+        second=model.property()['loc'];self.assertEqual(2,second['observation']['sample_seq']);self.assertIsNone(second['observation']['ts'])
     def test_sentry_zero_has_no_expiry(self):
         self.model.request(self.command('sentry',{'on':True,'duration_s':0,'sentry_revision':1},64))
         self.clock.value=3;self.model.tick();self.clock.value=999999;self.model.tick()
