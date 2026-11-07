@@ -67,3 +67,7 @@ python -m unittest discover -s tests -p test_build_firmware.py -v
 ## TASK-005当前实现入口
 
 [启动指南](../docs/development/guides/服务端闭环启动与验收.md)、[有效契约生成/检查](effective_contracts.py)、[真实联调](live_integration.py)。接入/查询/命令/WS职责在live包分离，LiveStore/LiveMapper隔离MyBatis持久访问；Controller不查数据库。V5～V9新增运行态、位置、事件视图、命令恢复/回执、操作顺序及质量约束，V1～V4保持。告警判断与门融合仍未知；网页及板端待后续，实际验收结果以任务报告为准。
+
+## TASK-006前端统一入口
+
+[frontend.py](frontend.py)提供install/dev/check/build/browser/integration；[frontend_integration.py](frontend_integration.py)复用现有真实Broker/后端/双模拟进程管理。命令和安全边界见[网页指南](../docs/development/guides/网页启动与首轮验收.md)，实际结果见[报告](../docs/testing/reports/TASK-006-网页与首轮闭环验证报告.md)。集成要求--profile test、--allow-test-reset和新的artifacts目录；--scenario authorization仅定向补查，不替代完整验收。测试库授权撤销在收尾恢复，缺少配置不跳过，只清理自身进程。

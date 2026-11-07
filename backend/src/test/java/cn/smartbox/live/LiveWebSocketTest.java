@@ -2,6 +2,7 @@ package cn.smartbox.live;
 import cn.smartbox.auth.*;
 import java.time.Clock;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,27 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LiveWebSocketTest {
+    @Test void readOnlySubscriberSurvivesAnOperatorsCommandUpdate()throws Exception{
+        AuthMapper users=mock(AuthMapper.class);when(users.byId(1L)).thenReturn(new UserAccount(1L,"viewer",null,"LOGISTICS_VIEWER",true));
+        QueryService query=mock(QueryService.class);CommandService commands=mock(CommandService.class);LiveStore db=mock(LiveStore.class);
+        ContractValidator validator=mock(ContractValidator.class);var mapper=new com.fasterxml.jackson.databind.ObjectMapper();
+        when(validator.parse(any())).thenReturn(mapper.readTree("{\"v\":1,\"type\":\"subscribe\",\"box_ids\":[\"BOX-0001\"]}"));
+        when(validator.hash(any())).thenReturn(new byte[]{1});when(validator.text(any())).thenReturn("{}");
+        when(query.snapshot(any(),any())).thenReturn(mapper.createObjectNode());when(query.nodes(any(),any())).thenReturn(List.of());
+        when(db.rows(startsWith("SELECT operation_id"),any(),any())).thenReturn(List.of(Map.of("operation_id","other-operation","updated_at",1L,"cmd","output")));
+        when(commands.operation(any(),any(),any())).thenThrow(cn.smartbox.common.ApiException.denied());
+        Clock clock=Clock.systemUTC();LiveWebSocket handler=new LiveWebSocket(users,null,null,query,commands,validator,clock,mock(cn.smartbox.authorization.BoxAccessService.class),db);
+        WebSocketSession socket=mock(WebSocketSession.class);AtomicBoolean open=new AtomicBoolean(true);CountDownLatch sent=new CountDownLatch(1),closed=new CountDownLatch(1);
+        when(socket.getId()).thenReturn("viewer");when(socket.isOpen()).thenAnswer(i->open.get());
+        when(socket.getAttributes()).thenReturn(Map.of("ticket",new LiveWebSocket.Ticket(1L,clock.millis()+30000,clock.millis()+1800000)));
+        doAnswer(i->{sent.countDown();return null;}).when(socket).sendMessage(any());
+        doAnswer(i->{open.set(false);closed.countDown();return null;}).when(socket).close(any());
+        try{
+            handler.afterConnectionEstablished(socket);handler.handleTextMessage(socket,new TextMessage("subscription"));handler.push();
+            assertTrue(sent.await(2,TimeUnit.SECONDS));assertFalse(closed.await(200,TimeUnit.MILLISECONDS));assertTrue(open.get());
+            verify(commands,never()).operation(any(),any(),any());
+        }finally{handler.shutdown();}
+    }
     @Test void mqttQueueIsBoundedNonblockingAndOwnsItsBytes(){
         MqttGateway gateway=new MqttGateway(new org.springframework.mock.env.MockEnvironment(),mock(LiveStore.class));
         byte[] bytes={1};assertTrue(gateway.enqueue("test",bytes,1,false));bytes[0]=9;

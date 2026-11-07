@@ -1,0 +1,36 @@
+{
+  "name": "smartbox-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:browser": "playwright test --config tests/playwright.config.ts",
+    "test:live": "playwright test --config tests/live.config.ts"
+  },
+  "dependencies": {
+    "vue": "3.5.45",
+    "vue-router": "4.6.4",
+    "pinia": "3.0.4",
+    "element-plus": "2.14.8",
+    "lossless-json": "4.3.3"
+  },
+  "overrides": {
+    "@vue/test-utils": { "js-beautify": "1.15.4" }
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "8.3.6",
+    "@vitejs/plugin-vue": "6.0.10",
+    "vue-tsc": "3.3.14",
+    "vitest": "5.1.0",
+    "@vue/test-utils": "2.5.1",
+    "jsdom": "26.1.0",
+    "@playwright/test": "1.65.0",
+    "@vue/compiler-dom": "3.5.45",
+    "@vue/server-renderer": "3.5.45"
+  }
+}

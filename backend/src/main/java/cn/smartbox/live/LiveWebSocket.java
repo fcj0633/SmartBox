@@ -121,7 +121,8 @@ public class LiveWebSocket extends TextWebSocketHandler implements HandshakeInte
                 if(!fingerprint.equals(client.snapshots.put(box,fingerprint)))offer(client,new Notice("snapshot",box,null,snapshot));
                 if(!user.role().equals("DELIVERY_USER")){
                     for(JsonNode node:query.nodes(user,box))offer(client,new Notice("node_status",box,node.path("node_id").asText(),null));
-                    for(var operation:db.rows("SELECT operation_id,updated_at,cmd FROM command_operations WHERE box_id=? AND updated_at>=?",box,client.since)){
+                    // A read-only subscriber must not be disconnected by a command result it cannot read.
+                    if(Set.of("LOGISTICS_OPERATOR","COURIER").contains(user.role()))for(var operation:db.rows("SELECT operation_id,updated_at,cmd FROM command_operations WHERE box_id=? AND updated_at>=?",box,client.since)){
                         if(user.role().equals("COURIER")&&!operation.get("cmd").equals("sentry"))continue;
                         String key="op:"+operation.get("operation_id")+":"+operation.get("updated_at");
                         if(client.sent.add(key))offer(client,new Notice("command_status",box,operation.get("operation_id").toString(),null));

@@ -4,7 +4,7 @@
 
 项目英文名：**SmartBox**。代码仓库：[fcj0633/SmartBox](https://github.com/fcj0633/SmartBox)。
 
-**当前进度：P0基线、P1接口准备、双角色固件骨架、TASK-003后端数据库基础及TASK-004双节点MQTT已完成；TASK-005服务端与双模拟节点闭环已完成，网页、完整业务算法和板端仍待后续。** 官方IA1/SC2例程据用户反馈通过；SmartBox软件准备继续推进，P1 不等待接板；真实采集和硬件结果在 P2 验证。
+**当前进度：P0基线、P1接口准备、双角色固件骨架、TASK-003后端数据库基础及TASK-004双节点MQTT已完成；TASK-005服务端与双模拟节点闭环已完成，TASK-006电脑端网页与P1软件/模拟闭环已完成；完整业务算法和板端仍待后续。** 官方IA1/SC2例程据用户反馈通过；SmartBox软件准备继续推进，P1 不等待接板；真实采集和硬件结果在 P2 验证。
 
 ## 从这里开始
 
@@ -44,7 +44,7 @@ TASK-001交付入口：[版本矩阵](docs/development/environment/工具与依�
 
 ## 固件骨架交付
 
-[TASK-002](docs/development/tasks/TASK-002-双角色固件骨架.md)、[源码与端口](firmware/README.md)、[构建与检查工具](tools/README.md)、[实际报告](docs/testing/reports/TASK-002-固件骨架验证报告.md)。两角色已实际编译链接并恢复原学习环境；尚未烧录、采集真实数据或联网，TASK-003后端与数据库基础也已完成，见[后端入口](backend/README.md)及[实际报告](docs/testing/reports/TASK-003-后端与数据库验证报告.md)。后续按依赖推进TASK-006，完整业务算法与板端仍待验证。
+[TASK-002](docs/development/tasks/TASK-002-双角色固件骨架.md)、[源码与端口](firmware/README.md)、[构建与检查工具](tools/README.md)、[实际报告](docs/testing/reports/TASK-002-固件骨架验证报告.md)。两角色已实际编译链接并恢复原学习环境；尚未烧录、采集真实数据或联网，TASK-003后端与数据库基础也已完成，见[后端入口](backend/README.md)及[实际报告](docs/testing/reports/TASK-003-后端与数据库验证报告.md)。后续按依赖推进TASK-007，完整业务算法与板端仍待验证。
 
 ## 双节点MQTT交付
 
@@ -52,4 +52,8 @@ TASK-001交付入口：[版本矩阵](docs/development/environment/工具与依�
 
 ## TASK-005服务端闭环入口
 
-当前HTTP/WS使用[有效契约](contracts/effective/README.md)，冻结v1保持原样。运行与复验见[闭环指南](docs/development/guides/服务端闭环启动与验收.md)，实际结果见[任务报告](docs/testing/reports/TASK-005-服务端闭环验证报告.md)。网页、完整规则算法和板端仍在后续任务；未知告警和门结论不代表正常。
+当前HTTP/WS使用[有效契约](contracts/effective/README.md)，冻结v1保持原样。运行与复验见[闭环指南](docs/development/guides/服务端闭环启动与验收.md)，实际结果见[任务报告](docs/testing/reports/TASK-005-服务端闭环验证报告.md)。该任务交付时网页待后续；当前网页见下方TASK-006入口，完整规则算法和板端仍待后续；未知告警和门结论不代表正常。
+
+## TASK-006网页与P1交付
+
+[前端入口](frontend/README.md)、[网页启动指南](docs/development/guides/网页启动与首轮验收.md)、[实际报告](docs/testing/reports/TASK-006-网页与首轮闭环验证报告.md)和[REL-001](docs/delivery/releases/REL-001-P1软件与模拟闭环.md)。电脑端已完成授权监测、实时恢复与五类模拟控制；真实浏览器和MySQL/MQTT闭环通过，未知结论不表示安全。原服务保持，验证进程已清理。下一项TASK-007，完整历史/轨迹/CSV页面仍由TASK-010完善。
