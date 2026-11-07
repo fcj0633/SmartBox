@@ -6,6 +6,7 @@ application-local.yml
 application-local.yaml
 *.local.json
 secrets/
+firmware/include/sb_local_config.h
 # Build and dependency outputs
 **/node_modules/
 **/target/

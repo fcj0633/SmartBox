@@ -71,3 +71,11 @@ python -m unittest discover -s tests -p test_build_firmware.py -v
 ## TASK-006前端统一入口
 
 [frontend.py](frontend.py)提供install/dev/check/build/browser/integration；[frontend_integration.py](frontend_integration.py)复用现有真实Broker/后端/双模拟进程管理。命令和安全边界见[网页指南](../docs/development/guides/网页启动与首轮验收.md)，实际结果见[报告](../docs/testing/reports/TASK-006-网页与首轮闭环验证报告.md)。集成要求--profile test、--allow-test-reset和新的artifacts目录；--scenario authorization仅定向补查，不替代完整验收。测试库授权撤销在收尾恢复，缺少配置不跳过，只清理自身进程。
+
+## TASK-007硬件工具
+
+[hardware.py](hardware.py)提供check、prepare、broker：check只核对私有Wi-Fi字段；prepare从现有项目运行账号只读核对代次并预留新范围，生成私有头文件与独立硬件Broker配置；broker需新的--run-dir，仅运行/停止自己的进程。命令不接收明文密码参数，不覆盖原本机Broker账号与配置。
+
+[check_hardware.py](check_hardware.py)通过既有Ubuntu GCC测试真实固件核心，检查实际生成报文的冻结/有效Schema；[capture_serial.ps1](capture_serial.ps1)仅以115200读取指定COM，输出限制到新的artifacts文件，不发送数据或在控制台打印原始串口文本。构建仍使用[build_firmware.py](build_firmware.py)，Mock回归使用[check_firmware.py](check_firmware.py)。
+
+后端仅在run加显式--mqtt-config及--hardware-mqtt时接受硬件模式配置，服务仍回环监听。硬件配置和操作步骤见[指南](../docs/development/guides/编译烧录与联调流程.md)，当前阶段结果见[报告](../docs/testing/reports/TASK-007-双板接入验证报告.md)。prepare会分配新代次区间，需要构建对应新固件；不要为了启动Broker重复prepare，不要删除或回滚本地代次账本。

@@ -57,3 +57,8 @@ TASK-001交付入口：[版本矩阵](docs/development/environment/工具与依�
 ## TASK-006网页与P1交付
 
 [前端入口](frontend/README.md)、[网页启动指南](docs/development/guides/网页启动与首轮验收.md)、[实际报告](docs/testing/reports/TASK-006-网页与首轮闭环验证报告.md)和[REL-001](docs/delivery/releases/REL-001-P1软件与模拟闭环.md)。电脑端已完成授权监测、实时恢复与五类模拟控制；真实浏览器和MySQL/MQTT闭环通过，未知结论不表示安全。原服务保持，验证进程已清理。下一项TASK-007，完整历史/轨迹/CSV页面仍由TASK-010完善。
+
+
+## 真实双板基础验证
+
+TASK-007已完成基础接入：IA1/SC2真实采集，经Wi-Fi/MQTT、后端、MySQL到网页，补光/风扇/指示灯10秒真实控制及自动关闭，双板超过5分钟与离线恢复通过。详细实现、证据和限制见[任务7](docs/development/tasks/TASK-007-双板实际采集与输出接入.md)及[报告](docs/testing/reports/TASK-007-双板接入验证报告.md)。GPS仍MOCK，完整算法和Flash可靠性待后续；不是整套系统验收通过。测试服务已停止，复用时按[指南](docs/development/guides/编译烧录与联调流程.md)启动。

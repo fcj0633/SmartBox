@@ -5,6 +5,8 @@
 static SbAppStatus status;
 static osMessageQueueId_t samples;
 static bool started;
+static uint64_t last_sample;
+static bool sampled_before;
 static bool state_is(SbStartupState value) {
     bool result; int32_t lock=sb_platform_lock();
     if (lock<0) return false;
@@ -14,7 +16,7 @@ static void fail(const char *why) {
     int32_t lock=sb_platform_lock();
     if (lock<0) return;
     status.failure=why; status.state=SB_FAILED; sb_platform_unlock(lock);
-    (void)sb_output_init(); /* Mock fail-safe: no output remains latched on. */
+    (void)sb_output_init(); /* Best-effort safe outputs after a fatal startup/platform fault. */
 }
 static bool pause_ms(uint32_t ms) {
     uint32_t ticks;
@@ -34,7 +36,20 @@ static void add(uint64_t *counter,uint64_t value) {
 }
 static void sample_one(SbInputKind kind) {
     SbSensorFrame frame; SbResult result=sb_sensor_read(kind,&frame);
-    if (result!=SB_OK) { fail("sample port"); return; }
+    if (result!=SB_OK) { add(&status.sensor_errors,1); return; }
+    if (!frame.valid) add(&status.sensor_errors,1);
+    if (kind!=SB_INPUT_LOCATION) {
+        int32_t guard=sb_platform_lock();
+        if (guard>=0) {
+            if (sampled_before) {
+                uint64_t interval=frame.clock.uptime_ms-last_sample;
+                if (status.sampled==1 || interval<status.interval_min_ms) status.interval_min_ms=interval;
+                if (interval>status.interval_max_ms) status.interval_max_ms=interval;
+            }
+            ++status.sampled;last_sample=frame.clock.uptime_ms;sampled_before=true;
+            sb_platform_unlock(guard);
+        }
+    }
     if (osMessageQueuePut(samples,&frame,0,0)!=osOK) add(&status.sample_queue_full,1);
 }
 static void sampling(void *arg) {
@@ -110,12 +125,19 @@ SbResult sb_app_start(void) {
     started=true; memset(&status,0,sizeof(status)); status.state=SB_BOOTSTRAP;
     if (sb_config_validate()!=SB_OK) { fail("config"); return cleanup(); }
     if (sb_clock_init()!=SB_OK) { fail("clock init"); return cleanup(); }
-    if (sb_sensor_init()!=SB_OK || sb_output_init()!=SB_OK || sb_event_buffer_init()!=SB_OK) { fail("port init"); return cleanup(); }
+    if (sb_sensor_init()!=SB_OK) { fail("sensor init"); return cleanup(); }
+    if (sb_output_init()!=SB_OK) { fail("output init"); return cleanup(); }
+    if (sb_event_buffer_init()!=SB_OK) { fail("buffer init"); return cleanup(); }
     sb_pipeline_init();
     samples=osMessageQueueNew(8,sizeof(SbSensorFrame),NULL);
     if (!samples) { fail("sample queue"); return cleanup(); }
     for (i=0;i<3;++i) {
-        osThreadAttr_t attr={0}; attr.name=names[i]; attr.stack_size=4096; attr.priority=priorities[i];
+        osThreadAttr_t attr={0}; attr.name=names[i]; attr.stack_size=4096;
+#ifdef SB_HARDWARE
+        /* RV32 JSON/TCP path needs extra stack; verify watermark on board. */
+        if(i==2)attr.stack_size=8192;
+#endif
+        attr.priority=priorities[i];
         if (!osThreadNew(functions[i],NULL,&attr)) { fail(names[i]); return cleanup(); }
         ++status.created;
     }

@@ -54,3 +54,8 @@ TASK-001按用户明确授权取消人工评审，采用自动检查和冻结/�
 当前有效契约由冻结v1与[CR-004补充](contracts/effective/README.md)组成，生成/检查见tools/effective_contracts.py；禁止回写174份历史冻结文件。定位15秒及独立采样标记、固定操作终态与迟到事实、画像采用及接收时间历史语义按CR-004执行；无判断器时告警UNKNOWN/active=null。TASK-005详细结果见报告，不升级完整算法、网页或板端验收。
 
 TASK-006已建立Vue电脑端工程，详细结果见[报告](docs/testing/reports/TASK-006-网页与首轮闭环验证报告.md)，启动和真实验收见[指南](docs/development/guides/网页启动与首轮验收.md)。Token仅内存，WS通知后REST重读，秘密不进入前端环境；前端统一工具仅在显式test及清理同意后操作smartbox_test。前述TASK-005交付时“网页未验”是历史边界，当前首轮网页切片已验证；完整业务和板端仍未验收。
+
+
+## TASK-007当前事实
+
+2026-11-07基础双板链路验证已完成：IA1/SC2真实采集、Wi-Fi/MQTT/SNTP、入库与网页、三项真实output、双板310秒及断电/90秒静默/Broker恢复均有实际证据，见[报告](docs/testing/reports/TASK-007-双板接入验证报告.md)。上文TASK-002 Mock及P1未验板是当时交付边界；当前不再将真实适配说成未开发。GPS仍Mock，真实固件本期只执行output，完整业务/Flash可靠性/资源峰值/长期稳定性未验收。用户已结束本轮，不自动启动TASK-008，不推送。

@@ -7,6 +7,8 @@ import secrets
 import shutil
 import subprocess
 import tempfile
+import ipaddress
+import socket
 from .storage import atomic_json, FileLock, IdentityState
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,18 +31,26 @@ def confined(path, root):
     except ValueError: raise ValueError('Path outside project') from None
     return path
 
-def load(path=DEFAULT, root=ROOT):
+def load(path=DEFAULT, root=ROOT, allow_hardware=False):
     path = confined(path, root)
     value = json.loads(path.read_text(encoding='utf-8'))
     if value.get('format') != 1 or value.get('box_id') != 'BOX-0001': raise ValueError('Invalid config')
     b = value['broker']
     if b['host'] != '127.0.0.1' or b['port'] != 1883: raise ValueError('Local endpoint required')
+    hardware=b.get('mode')=='hardware'
+    if b.get('mode') not in (None,'local','hardware'):raise ValueError('Unknown broker mode')
+    if hardware:
+        if not allow_hardware:raise ValueError('Hardware broker requires explicit hardware entry')
+        address=ipaddress.IPv4Address(b['bind_ipv4']);subnet=ipaddress.IPv4Network(b['allowed_subnet'],strict=True)
+        if not address.is_private or address.is_loopback or address.is_link_local or address.is_multicast or address.is_unspecified or address not in subnet or subnet.prefixlen<16:raise ValueError('Unsafe hardware network')
+        with socket.socket() as probe:probe.bind((str(address),0))
     for key in ('config','password_file','acl_file'):
         confined(b[key], root)
         if not Path(b[key]).is_file(): raise ValueError('Missing broker file')
     if not Path(b['exe']).is_file() or not Path(b['passwd_exe']).is_file(): raise ValueError('Missing broker tools')
-    template=(Path(root)/'deploy/mosquitto/mosquitto.conf.template').read_text(encoding='utf-8')
+    template=(Path(root)/('deploy/mosquitto/mosquitto.hardware.conf.template' if hardware else 'deploy/mosquitto/mosquitto.conf.template')).read_text(encoding='utf-8')
     expected=template.replace('PASSWORD_FILE',b['password_file']).replace('ACL_FILE',b['acl_file'])
+    if hardware:expected=expected.replace('BIND_IPV4',str(address))
     if Path(b['config']).read_text(encoding='utf-8')!=expected:raise ValueError('Broker configuration drift; no overwrite')
     confined(value['state_dir'], root)
     for role in ROLES:

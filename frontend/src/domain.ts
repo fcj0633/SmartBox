@@ -1,6 +1,6 @@
 import type { Role, CommandKind, Sample } from './api/types';
 export const roles: Record<Role,string> = { LOGISTICS_OPERATOR: '物流操作者', LOGISTICS_VIEWER: '物流寄收件人', DELIVERY_USER: '外卖用户', COURIER: '骑手' };
-export const statusNames: Record<string,string> = { ONLINE: '在线', PARTIAL: '部分可用', OFFLINE: '离线', UNKNOWN: '未知', DISARMED: '已撤防', ARMING: '布防缓冲中', ARMED: '已布防', DEGRADED: '降级', PENDING: '已受理', RUNNING: '处理中', SUCCEEDED: '成功', FAILED: '失败', EXPIRED: '已超时', FRESH: '新鲜', STALE: '已过期', SNTP: '模拟已校时', UNSYNCED: '未校时', INSUFFICIENT: '证据不足' };
+export const statusNames: Record<string,string> = { ONLINE: '在线', PARTIAL: '部分可用', OFFLINE: '离线', UNKNOWN: '未知', DISARMED: '已撤防', ARMING: '布防缓冲中', ARMED: '已布防', DEGRADED: '降级', PENDING: '已受理', RUNNING: '处理中', SUCCEEDED: '成功', FAILED: '失败', EXPIRED: '已超时', FRESH: '新鲜', STALE: '已过期', SNTP: '已校时', UNSYNCED: '未校时', INSUFFICIENT: '证据不足' };
 export const label = (value: string | null | undefined) => value ? statusNames[value] ?? value : '未知';
 export const canDiagnose = (role?: Role) => !!role && role !== 'DELIVERY_USER';
 export const canCommand = (role: Role | undefined, kind: CommandKind) => role === 'LOGISTICS_OPERATOR' || (role === 'COURIER' && kind === 'sentry');
@@ -18,4 +18,4 @@ export function quality(sample?: Sample, synchronized = true): string {
   if (!synchronized) return '同步中断 · 最后数据';
   return label(sample.freshness);
 }
-export const commandNames: Record<CommandKind,string> = { sentry: '布撤防', output: '模拟输出', gps_mode: '模拟定位模式', profile: '环境画像', calibrate: '模拟校准' };
+export const commandNames: Record<CommandKind,string> = { sentry: '布撤防', output: '输出控制', gps_mode: '模拟定位模式', profile: '环境画像', calibrate: '模拟校准' };

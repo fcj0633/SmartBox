@@ -3,12 +3,24 @@ assert(sb_role == "ENV" || sb_role == "POSE", "Select exactly one role")
 static_library("smartbox") {
   sources = [
     "../app/smartbox_main.c", "../app/smartbox_tasks.c",
-    "../domain/sb_pipeline.c", "../drivers/sb_sensor_mock.c",
-    "../drivers/sb_output_mock.c", "../drivers/sb_platform_cmsis.c",
+    "../domain/sb_pipeline.c", "../drivers/sb_sensor_real.c",
+    "../drivers/sb_output_real.c", "../drivers/sb_platform_cmsis.c",
+    "../drivers/sb_hardware_sdk.c", "../drivers/sb_boot_sdk.c", "../drivers/sb_wifi_sdk.c",
     "../services/sb_config.c", "../services/sb_clock.c",
-    "../services/sb_event_buffer.c", "../services/sb_network_stub.c",
+    "../services/sb_event_buffer.c", "../services/sb_network_real.c",
+    "../services/sb_boot.c", "../services/sb_wire.c", "../services/sb_sntp.c",
   ]
   include_dirs = [ "../include", "//utils/native/lite/include",
-                   "//kernel/liteos_m/components/cmsis/2.0" ]
-  defines = [ "SB_ROLE_${sb_role}=1" ]
+                   "//kernel/liteos_m/components/cmsis/2.0",
+                   "//base/iot_hardware/interfaces/kits/wifiiot_lite",
+                   "//foundation/communication/interfaces/kits/wifi_lite/wifiservice",
+                   "//vendor/hisi/hi3861/hi3861/include",
+                   "//vendor/hisi/hi3861/hi3861/third_party/lwip_sack/include",
+                   "//third_party/cJSON",
+                   "//third_party/paho_mqtt/MQTTPacket/src",
+                   "//third_party/paho_mqtt/MQTTClient-C/src" ]
+  deps = [ "//third_party/paho_mqtt:pahomqtt_static",
+           "//third_party/cJSON:cjson_static",
+           "//utils/native/lite/kv_store/src:utils_kv_store" ]
+  defines = [ "SB_ROLE_${sb_role}=1", "SB_HARDWARE=1" ]
 }

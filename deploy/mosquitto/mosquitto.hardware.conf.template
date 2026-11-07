@@ -1,0 +1,14 @@
+# Explicit TASK-007 mode: local services plus a single validated LAN interface.
+listener 1883 127.0.0.1
+listener 1883 BIND_IPV4
+allow_anonymous false
+allow_zero_length_clientid false
+use_username_as_clientid true
+password_file PASSWORD_FILE
+acl_file ACL_FILE
+persistence false
+max_packet_size 2046
+log_dest stdout
+log_type all
+connection_messages true
+log_timestamp true

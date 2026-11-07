@@ -43,15 +43,17 @@ def main():
     p.add_argument('--allow-test-reset',action='store_true')
     p.add_argument('--report-dir',type=Path,default=ROOT/'artifacts/backend/TASK-003')
     p.add_argument('--mqtt-config',type=Path,help='Ignored project MQTT config; only for run')
+    p.add_argument('--hardware-mqtt',action='store_true',help='Explicit TASK-007 LAN broker configuration; backend still binds loopback')
     args=p.parse_args()
     try:
+        if args.hardware_mqtt and (args.action!='run' or not args.mqtt_config):raise ValueError('Hardware MQTT requires run and explicit config')
         if args.action=='unit':command=['mvn.cmd' if os.name=='nt' else 'mvn','-B','-ntp','test'];env=os.environ.copy()
         else:
             env=local_environment(args.config,args.profile)
             if args.mqtt_config:
                 if args.action!='run':raise ValueError('MQTT configuration is only for run')
                 from simulator.config import load
-                mqtt=load(args.mqtt_config);account=mqtt['accounts']['backend']
+                mqtt=load(args.mqtt_config,allow_hardware=args.hardware_mqtt);account=mqtt['accounts']['backend']
                 env.update({'SMARTBOX_MQTT_ENABLED':'true','SMARTBOX_MQTT_URL':'tcp://127.0.0.1:1883','SMARTBOX_MQTT_USER':account['username'],'SMARTBOX_MQTT_PASSWORD':account['password']})
             if args.action in ['build','test']:
                 if args.action=='test':

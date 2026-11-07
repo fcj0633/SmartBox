@@ -37,7 +37,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__);connection_arguments(p);p.add_argument('--report',type=Path)
     args=p.parse_args()
     files={f.relative_to(ROOT).as_posix():base64.b64encode(f.read_bytes()).decode() for parent in ['firmware','tests/firmware'] for f in (ROOT/parent).rglob('*') if f.is_file()}
-    sources=[name for name in files if name.endswith('.c') and not name.endswith('smartbox_main.c')]
+    sources=['firmware/'+name for name in ['app/smartbox_tasks.c','domain/sb_pipeline.c','drivers/sb_sensor_mock.c','drivers/sb_output_mock.c','drivers/sb_platform_cmsis.c','services/sb_config.c','services/sb_clock.c','services/sb_event_buffer.c','services/sb_network_stub.c']]+['tests/firmware/test_components.c']
     code,output=remote_python(args,REMOTE,{'files':files,'sources':sources},check=False)
     print(output,end='')
     if args.report:args.report.parent.mkdir(parents=True,exist_ok=True);args.report.write_text(output,encoding='utf-8')
