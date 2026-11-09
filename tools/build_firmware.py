@@ -8,13 +8,13 @@ from pathlib import Path
 import subprocess
 import sys
 import tarfile
-from firmware_support import connection_arguments,remote_python,remote_command
+from firmware_support import connection_arguments,remote_python,remote_command,source_identity
 from sync_firmware import ROOT,SAMPLE,STATE,TARGET,digest,synchronize,validate_roots
 WORKER=(ROOT/'tools/firmware_remote.py').read_text(encoding='utf-8')
 
 def write_json(path,value):path.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 def remote(args,action,work=None,**fields):
-    code,output=remote_python(args,WORKER,dict(action=action,sdk=args.remote_sdk,work=work,**fields),check=False)
+    code,output=remote_python(args,WORKER,dict(action=action,sdk=args.remote_sdk,work=work,tool_paths=getattr(args,'tool_path',[]),**fields),check=False)
     if code:raise RuntimeError(output)
     return json.loads(output.strip().splitlines()[-1])
 
@@ -46,30 +46,40 @@ def snapshot_source(run):
     write_json(run/'source-files.json',files)
     return file_hash(run/'source-files.tar')
 
+def sync(args,source,role='ENV',apply=False,restore=False):
+    if args.transport=='ssh':
+        from firmware_ssh import synchronize_ssh
+        return synchronize_ssh(args,source,role,apply,restore)
+    return synchronize(source,args.sdk_root,role,apply,restore)
+
 def restore(args,run,state):
     print('Restoring original learning entry and SDK build outputs...',flush=True)
-    synchronize(ROOT/'firmware',args.sdk_root,apply=True,restore=True)
+    sync(args,ROOT/'firmware',apply=True,restore=True)
     result=remote(args,'restore',state['backup']['work'])
     state['restore']=result;state['phase']='restored';write_json(run/'run.json',state)
     download(args,state['backup']['work']+'/state.json',run/'recovery-state.json')
     return result
 
 def execute(args):
-    source,sdk=validate_roots(ROOT/'firmware',args.sdk_root);args.sdk_root=sdk
+    source=ROOT/'firmware'
+    if args.transport=='mapped':
+        if not args.sdk_root:raise ValueError('Mapped transport requires --sdk-root')
+        source,sdk=validate_roots(source,args.sdk_root);args.sdk_root=sdk
+    else:sdk=None
     if args.recover:
         run=args.recover.resolve();state=json.loads((run/'run.json').read_text(encoding='utf-8'))
         if state['sdk_mapping']!=str(sdk) or state['remote_sdk']!=args.remote_sdk:raise ValueError('Recovery SDK mismatch')
         result=restore(args,run,state);print(json.dumps(result,ensure_ascii=False));return result
     run=args.artifacts.resolve()/datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
     run.mkdir(parents=True,exist_ok=False)
+    identity=source_identity(ROOT)
     state={'phase':'preparing','sdk_mapping':str(sdk),'remote_sdk':args.remote_sdk,'roles':[],
-           'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
-           'worktree':subprocess.check_output(['git','status','--short','--','firmware','tools','tests'],cwd=ROOT,text=True)}
+           'source_commit':identity['commit'],'worktree':identity['worktree']}
     state['source_archive_sha256']=snapshot_source(run)
     write_json(run/'run.json',state)
-    (run/'source.diff').write_bytes(subprocess.check_output(['git','diff','--binary','HEAD','--','firmware','tools','tests'],cwd=ROOT))
+    (run/'source.diff').write_bytes(identity['diff'])
     probe=remote(args,'probe')
-    if probe['entry_sha256']!=digest((sdk/SAMPLE/'BUILD.gn').read_bytes()):raise RuntimeError('Mapping/SSH entry mismatch')
+    if sdk and probe['entry_sha256']!=digest((sdk/SAMPLE/'BUILD.gn').read_bytes()):raise RuntimeError('Mapping/SSH entry mismatch')
     print('Creating and verifying Unix-permission-preserving SDK backup...',flush=True)
     state['backup']=remote(args,'backup');state['phase']='backed-up';write_json(run/'run.json',state)
     try:
@@ -77,13 +87,13 @@ def execute(args):
         state['local_backup_verified']=True;write_json(run/'run.json',state)
         print('Backup verified locally. No official build has run yet.',flush=True)
         for role in ['ENV','POSE']:
-            preview=synchronize(source,sdk,role)
+            preview=sync(args,source,role)
             write_json(run/(role+'-preview.json'),preview)
             print(role+': preview '+str(len(preview['changes']))+' controlled file changes.',flush=True)
-            applied=synchronize(source,sdk,role,apply=True)
+            applied=sync(args,source,role,apply=True)
             # Match a generated content fingerprint AND entry bytes through both access paths.
             probe=remote(args,'probe')
-            if probe['source_fingerprint']!=applied['fingerprint'] or probe['entry_sha256']!=digest((sdk/SAMPLE/'BUILD.gn').read_bytes()):
+            if probe['source_fingerprint']!=applied['fingerprint'] or (sdk and probe['entry_sha256']!=digest((sdk/SAMPLE/'BUILD.gn').read_bytes())):
                 raise RuntimeError('Mapping and SSH do not refer to the same copied application')
             remote(args,'capture-entry',state['backup']['work'])
             print(role+': compiling and linking in Ubuntu; full output goes into the role log.',flush=True)
@@ -114,7 +124,7 @@ def execute(args):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);connection_arguments(p)
-    p.add_argument('--sdk-root',type=Path,required=True);p.add_argument('--remote-sdk',required=True)
+    p.add_argument('--transport',choices=['mapped','ssh'],default='mapped');p.add_argument('--tool-path',action='append',default=[]);p.add_argument('--sdk-root',type=Path);p.add_argument('--remote-sdk',required=True)
     p.add_argument('--artifacts',type=Path,default=ROOT/'artifacts/firmware/TASK-002')
     p.add_argument('--recover',type=Path,help='Recover a prior run directory; refuses unowned/concurrent changes')
     args=p.parse_args()

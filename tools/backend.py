@@ -22,6 +22,10 @@ def local_environment(config,profile):
     value=json.loads(config.read_text(encoding='utf-8'))[profile]
     if value.get('SPRING_PROFILES_ACTIVE')!=profile:raise ValueError('Local profile mismatch')
     env=os.environ.copy();env.update(value)
+    # Local paths are repository-relative, independent of the invoking directory.
+    if value.get('SMARTBOX_BOOTSTRAP_FILE'):
+        bootstrap=Path(value['SMARTBOX_BOOTSTRAP_FILE'])
+        env['SMARTBOX_BOOTSTRAP_FILE']=str(bootstrap if bootstrap.is_absolute() else ROOT/bootstrap)
     # A previous shell must not silently leave destructive test consent enabled.
     env.pop('SMARTBOX_TEST_ALLOW_RESET',None)
     if os.name=='nt' and value.get('SMARTBOX_WINDOWS_TCP_SELECTOR')=='true':

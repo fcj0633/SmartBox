@@ -7,6 +7,8 @@ application-local.yaml
 *.local.json
 secrets/
 firmware/include/sb_local_config.h
+# Generated provenance inside delivered source archives (not a second Git baseline)
+/SOURCE.json
 # Build and dependency outputs
 **/node_modules/
 **/target/

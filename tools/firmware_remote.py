@@ -122,7 +122,9 @@ def build(root,work,state,role):
     if selected.read_text().strip()!='sb_role = "'+role+'"':raise RuntimeError('Role mismatch')
     state['phase']='building-'+role;state['expected']=None;save(work,state)
     env=os.environ.copy()
-    env['PATH']=str(Path.home()/'gn')+':'+str(Path.home()/'ninja')+':'+str(Path.home()/'gcc_riscv32/bin')+':'+env['PATH']
+    paths=payload.get('tool_paths') or [str(Path.home()/'gn'),str(Path.home()/'ninja'),str(Path.home()/'gcc_riscv32/bin')]
+    if any(not Path(p).is_absolute() or not Path(p).is_dir() for p in paths):raise RuntimeError('Invalid tool PATH')
+    env['PATH']=':'.join(paths)+':'+env['PATH']
     # Resolve and execute all tools BEFORE the official script that removes product out.
     versions={}
     tools=[['python','--version'],['gn','--version'],['ninja','--version'],['scons','--version'],

@@ -18,6 +18,16 @@ DOWN = ('cmd','event_ack','box_state')
 ROLES = {'ENV':71, 'POSE':120}
 CREATE_FLAGS = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 
+def broker_config_encoding():
+    return 'utf-8'
+
+def broker_file_references(broker):
+    if broker.get('relative_files') is not True:return broker['password_file'],broker['acl_file']
+    password=Path(broker['password_file']);acl=Path(broker['acl_file'])
+    if password.parent!=acl.parent or password.name!='passwd' or acl.name!='acl':raise ValueError('Unexpected relative broker file layout')
+    return password.name,acl.name
+
+
 def confined(path, root):
     path = Path(path).absolute()
     if any(part in ('.','..') or '\n' in part or '\r' in part for part in path.parts):
@@ -49,9 +59,10 @@ def load(path=DEFAULT, root=ROOT, allow_hardware=False):
         if not Path(b[key]).is_file(): raise ValueError('Missing broker file')
     if not Path(b['exe']).is_file() or not Path(b['passwd_exe']).is_file(): raise ValueError('Missing broker tools')
     template=(Path(root)/('deploy/mosquitto/mosquitto.hardware.conf.template' if hardware else 'deploy/mosquitto/mosquitto.conf.template')).read_text(encoding='utf-8')
-    expected=template.replace('PASSWORD_FILE',b['password_file']).replace('ACL_FILE',b['acl_file'])
+    password_ref,acl_ref=broker_file_references(b)
+    expected=template.replace('PASSWORD_FILE',password_ref).replace('ACL_FILE',acl_ref)
     if hardware:expected=expected.replace('BIND_IPV4',str(address))
-    if Path(b['config']).read_text(encoding='utf-8')!=expected:raise ValueError('Broker configuration drift; no overwrite')
+    if Path(b['config']).read_text(encoding=broker_config_encoding())!=expected:raise ValueError('Broker configuration drift; no overwrite')
     confined(value['state_dir'], root)
     for role in ROLES:
         account = value['accounts'][role]
@@ -76,7 +87,7 @@ def prepare(path=DEFAULT, root=ROOT, executable=None):
         if not exe.is_file() or not passwd.is_file(): raise ValueError('Broker tools missing')
         base.mkdir()
         value = {'format':1, 'box_id':'BOX-0001', 'state_dir':str(base/'state'),
-                 'broker':{'host':'127.0.0.1','port':1883,'exe':str(exe),'passwd_exe':str(passwd),
+                 'broker':{'host':'127.0.0.1','port':1883,'relative_files':True,'exe':str(exe),'passwd_exe':str(passwd),
                            'config':str(base/'mosquitto.conf'),'password_file':str(base/'passwd'), 'acl_file':str(base/'acl')},
                  'accounts':{}}
         names = {'ENV':'BOX-0001-ENV','POSE':'BOX-0001-POSE','backend':'smartbox_backend',
@@ -103,8 +114,9 @@ def prepare(path=DEFAULT, root=ROOT, executable=None):
                     acl.extend('topic '+('read' if key=='observer' else 'write')+' box/BOX-0001/'+node+'/'+suffix for suffix in DOWN)
             (base/'acl').write_text('\n'.join(acl)+'\n',encoding='utf-8')
             template = (root/'deploy/mosquitto/mosquitto.conf.template').read_text(encoding='utf-8')
-            template = template.replace('PASSWORD_FILE',str(base/'passwd')).replace('ACL_FILE',str(base/'acl'))
-            (base/'mosquitto.conf').write_text(template,encoding='utf-8')
+            password_ref,acl_ref=broker_file_references(value['broker'])
+            template = template.replace('PASSWORD_FILE',password_ref).replace('ACL_FILE',acl_ref)
+            (base/'mosquitto.conf').write_text(template,encoding=broker_config_encoding())
             (base/'state').mkdir()
             for role in ROLES:
                 node=names[role];atomic_json(base/'state'/(node+'.json'),{'node_id':node,'boot_id':0,'sentry_revision':0})

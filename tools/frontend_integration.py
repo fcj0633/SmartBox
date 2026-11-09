@@ -64,7 +64,7 @@ class BrowserStack(LiveRun):
         mysql=shutil.which('mysql')
         if not mysql:raise ValueError('Existing MySQL command client required')
         env=os.environ.copy();env['MYSQL_PWD']=self.env['SMARTBOX_DB_PASSWORD']
-        result=subprocess.run([mysql,'--protocol=TCP','--host=127.0.0.1','--port=3306','--user='+self.env['SMARTBOX_DB_USER'],'--database=smartbox_test','--batch','--skip-column-names'], input=statement.encode(),env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=10,creationflags=CREATE_FLAGS)
+        result=subprocess.run([mysql,'--protocol=TCP','--host=127.0.0.1','--port='+str(url.port or 3306),'--user='+self.env['SMARTBOX_DB_USER'],'--database=smartbox_test','--batch','--skip-column-names'], input=statement.encode(),env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=10,creationflags=CREATE_FLAGS)
         if result.returncode:raise AssertionError('Test-only SQL operation failed (details suppressed)')
         return result.stdout.decode().strip()
     def control(self,action):

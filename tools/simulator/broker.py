@@ -1,6 +1,7 @@
 """Start/stop only a broker process created by this object."""
 from __future__ import annotations
 import json
+import os
 from pathlib import Path
 import socket
 import subprocess
@@ -25,7 +26,9 @@ class Broker:
         self.lock=FileLock(Path(b['config']).with_suffix('.run.lock'));self.lock.__enter__()
         try:
             self.log=(self.run_dir/'broker.log').open('ab')
-            self.process=subprocess.Popen([b['exe'],'-c',b['config']],stdout=self.log,stderr=subprocess.STDOUT,creationflags=CREATE_FLAGS)
+            working=Path(b['password_file']).parent if b.get('relative_files') else None
+            config_arg=os.path.relpath(b['config'],working) if working else b['config']
+            self.process=subprocess.Popen([b['exe'],'-c',config_arg],cwd=working,stdout=self.log,stderr=subprocess.STDOUT,creationflags=CREATE_FLAGS)
             deadline=time.monotonic()+8
             while not port_open():
                 if self.process.poll() is not None:raise ValueError('Own broker exited; inspect private log')

@@ -10,7 +10,7 @@ import shutil
 import socket
 import subprocess
 from urllib.parse import urlsplit
-from simulator.config import ROOT, load, confined
+from simulator.config import ROOT, load, confined, broker_config_encoding, broker_file_references
 from simulator.storage import atomic_json, FileLock
 
 DEFAULT=ROOT/'secrets/firmware.local.json'
@@ -39,7 +39,7 @@ def known_boots():
         db='smartbox_'+profile
         if url.hostname not in ('127.0.0.1','localhost') or url.path!='/'+db or env['SMARTBOX_DB_USER']!=('smartbox_app' if profile=='dev' else 'smartbox_test_app'):raise ValueError('Project database identity mismatch')
         child=os.environ.copy();child['MYSQL_PWD']=env['SMARTBOX_DB_PASSWORD']
-        base=[exe,'--protocol=TCP','-h127.0.0.1','-u'+env['SMARTBOX_DB_USER'],'--batch','--skip-column-names',db]
+        base=[exe,'--protocol=TCP','-h127.0.0.1','-P'+str(url.port or 3306),'-u'+env['SMARTBOX_DB_USER'],'--batch','--skip-column-names',db]
         def query(sql):
             run=subprocess.run(base,input=sql.encode(),stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=child,timeout=12,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
             if run.returncode:raise ValueError('Project read-only boot inspection failed; details suppressed')
@@ -85,7 +85,8 @@ def prepare(path=DEFAULT,mqtt_path=ROOT/'secrets/mqtt.local.json'):
         GENERATED.write_text('\n'.join(lines),encoding='utf-8')
         broker=copy.deepcopy(mqtt);b=broker['broker'];b.update(mode='hardware',bind_ipv4=address,allowed_subnet=subnet,config=str(base/'mosquitto.conf'))
         template=(ROOT/'deploy/mosquitto/mosquitto.hardware.conf.template').read_text(encoding='utf-8')
-        Path(b['config']).write_text(template.replace('PASSWORD_FILE',b['password_file']).replace('ACL_FILE',b['acl_file']).replace('BIND_IPV4',address),encoding='utf-8')
+        password_ref,acl_ref=broker_file_references(b)
+        Path(b['config']).write_text(template.replace('PASSWORD_FILE',password_ref).replace('ACL_FILE',acl_ref).replace('BIND_IPV4',address),encoding=broker_config_encoding())
         atomic_json(base/'mqtt.local.json',broker)
         atomic_json(base/'provisioning.json',{'format':1,'box_id':'BOX-0001','generations':bounds,'broker_ipv4':address,'allowed_subnet':subnet,'note':'Each firmware may only connect inside its allocated boot range. Keep ledger and evidence.'})
         load(base/'mqtt.local.json',ROOT,allow_hardware=True)

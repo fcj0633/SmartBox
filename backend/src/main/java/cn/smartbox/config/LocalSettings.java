@@ -15,7 +15,9 @@ public final class LocalSettings {
         String db=profiles.contains("test")?"smartbox_test":"smartbox_dev";
         String url=env.getRequiredProperty("SMARTBOX_DB_URL");
         String migration=env.getRequiredProperty("SMARTBOX_MIGRATION_URL");
-        if(!url.matches("jdbc:mysql://127\\.0\\.0\\.1:3306/"+db+"(?:\\?.*)?")||!url.equals(migration))throw new IllegalArgumentException("Project database mismatch");
+        if(!url.matches("jdbc:mysql://127\\.0\\.0\\.1:[0-9]{1,5}/"+db+"(?:\\?.*)?")||!url.equals(migration))throw new IllegalArgumentException("Project database mismatch");
+        int port=URI.create(url.substring(5)).getPort();
+        if(port<1||port>65535)throw new IllegalArgumentException("Invalid database port");
         String app=profiles.contains("test")?"smartbox_test_app":"smartbox_app";
         String migrator=profiles.contains("test")?"smartbox_test_migrator":"smartbox_migrator";
         if(!app.equals(env.getRequiredProperty("SMARTBOX_DB_USER"))||!migrator.equals(env.getRequiredProperty("SMARTBOX_MIGRATION_USER")))throw new IllegalArgumentException("Project database account mismatch");

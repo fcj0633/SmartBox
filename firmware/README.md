@@ -1,5 +1,7 @@
 # SmartBox 固件目录与核心代码阅读指南
 
+新电脑获取 SDK、SSH 构建及烧录的完整步骤见[部署指南](../docs/delivery/deployment/开发者完整部署指南.md)。SDK 独立交付，`tools/project.py firmware-build` 通过 SSH 受控同步，不强制要求映射盘；传统映射构建入口继续保留。
+
 这个目录保存运行在 **BearPi-HM Nano** 上的 SmartBox 固件源码，使用 **C、CMSIS-RTOS2 和既有 OpenHarmony SDK**。它负责板端采集、样本快照、Wi-Fi/MQTT、时间质量以及真实输出控制；后端、数据库和网页属于仓库其他工程。
 
 **当前状态：TASK-007 已完成基础真实双板链路验证。** IA1/SC2真实数据已经过Broker、Spring Boot、MySQL到网页，补光灯、风扇及指示灯的10秒输出与自动关闭已获用户实物确认；双板310秒、断电及90秒静默/Broker恢复有实际证据。完整业务算法、Flash事件可靠性、资源峰值与长期稳定性尚未验收。历史TASK-002的Mock/未验板范围不能当作当前固件状态。证据见[任务7验证报告](../docs/testing/reports/TASK-007-双板接入验证报告.md)。

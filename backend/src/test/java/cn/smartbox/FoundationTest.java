@@ -87,6 +87,17 @@ class FoundationTest {
         assertThrows(IllegalStateException.class,()->TestDatabaseGuard.require("test",url,"smartbox_test","root@localhost","true"));
         assertThrows(IllegalStateException.class,()->TestDatabaseGuard.require("test",url,"smartbox_test","smartbox_test_app@localhost","false"));
     }
+    @Test void deploymentCanUseAnExplicitLocalDatabasePort(){
+        var e=environment();
+        e.setProperty("SMARTBOX_DB_URL","jdbc:mysql://127.0.0.1:13306/smartbox_dev");
+        e.setProperty("SMARTBOX_MIGRATION_URL","jdbc:mysql://127.0.0.1:13306/smartbox_dev");
+        assertDoesNotThrow(()->new LocalSettings(e));
+        assertDoesNotThrow(()->TestDatabaseGuard.require("test","jdbc:mysql://127.0.0.1:13306/smartbox_test","smartbox_test","smartbox_test_app@localhost","true"));
+        for(String invalid:List.of("jdbc:mysql://192.168.1.1:13306/smartbox_dev","jdbc:mysql://127.0.0.1:65536/smartbox_dev","jdbc:mysql://127.0.0.1:0/smartbox_dev")){
+            e.setProperty("SMARTBOX_DB_URL",invalid);e.setProperty("SMARTBOX_MIGRATION_URL",invalid);
+            assertThrows(IllegalArgumentException.class,()->new LocalSettings(e));
+        }
+    }
     @Test void authorizationBeforeExistence(){
         var mapper=mock(AuthMapper.class);var audit=mock(AuditService.class);var access=new BoxAccessService(mapper,new PermissionPolicy(),audit);var user=new CurrentUser(1,"u","LOGISTICS_VIEWER");
         assertEquals(403,assertThrows(ApiException.class,()->access.require(user,"BOX-0001",PermissionPolicy.Action.READ_DIAGNOSTICS)).status());verify(mapper,never()).boxExists(anyString());

@@ -1,5 +1,26 @@
 # 开发工具导航：检查、构建、运行与联调
 
+## 新环境与完整部署
+
+先读[完整部署指南](../docs/delivery/deployment/开发者完整部署指南.md)。以下为新增可复用入口；真实密码不使用命令行参数。
+
+| 入口 | 作用 | 写入与限制 |
+|---|---|---|
+| [project.py](project.py) doctor / status | 环境检查、运行状态 | 只读；doctor 不等于完整版本兼容认证 |
+| project.py init / db-init | 私有配置、首次项目库及账号 | secrets；显式输入管理员密码；不接管未知同名对象 |
+| project.py start / stop | Broker、后端、节点、网页的开发生命周期 | artifacts 与本轮子进程；端口占用失败，不杀外来进程 |
+| project.py recover-state | 强制中断后的死会话记录恢复 | 核对进程创建身份、子进程及端口，只归档记录，不结束进程 |
+| [development_config.py](development_config.py) | 随机项目凭据、可移植初始化路径与建库保护 | 不覆盖既有秘密；DDL 按归属记录续办 |
+| [firmware_ssh.py](firmware_ssh.py) / project.py firmware-build | SSH 复用三方同步算法与构建恢复 | SDK 项目副本、受控构建入口、备份与独立角色归档 |
+| [sdk_bundle.py](sdk_bundle.py) inspect / export / verify / install / source | SDK 只读盘点、清理快照、校验、Linux 安装及提交源码包 | 独立新目录；本地交付包，不自动上传发布 |
+| [deployment_smoke.py](deployment_smoke.py) | 验证统一启动、精确事件确认、输出控制和停止 | 用于显式隔离演练，不作为真实板验证 |
+| [sdk_bundle_remote.py](sdk_bundle_remote.py) | Ubuntu Python 3.8 打包/解压工作器 | 校验清单、保留权限、拒绝越界与覆盖 |
+| [deployment_rehearsal.py](deployment_rehearsal.py) | 新中文空格路径与独立 MySQL 的部署复验 | 显式新 artifacts 目录、13306；不停止共享 MySQL |
+| [test_deployment.py](../tests/test_deployment.py) | 部署保护与错误路径测试 | 临时目录与替身，不操作真实 SDK 或数据库 |
+
+`project.py install-deps` 只使用仓库 .venv 和已有锁文件；`build` 调用后端及网页工具；`check` 运行部署工具测试、文档与有效/冻结契约检查。真实集成仍需独立明确的测试配置与清理同意，不隐含在日常 check 中。
+
+
 本目录把重复的开发操作组织为可复用入口。**先选择目标和影响范围，再运行工具**：只读契约检查不启动服务，构建会产生本地文件，集成测试可能清理项目测试数据，固件同步/构建会受控写入SDK副本。不能把某个工具返回成功等同于业务需求全部验收。
 
 下列命令均从仓库根目录运行，Python依赖使用项目`.venv`；Windows可使用`.venv/Scripts/python`，Ubuntu环境使用对应虚拟环境路径。工具参数以各入口`--help`和已链接指南为准。真实连接值在忽略的本地配置中，不作为命令行密码或源码常量。
