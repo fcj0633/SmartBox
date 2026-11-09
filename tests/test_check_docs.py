@@ -28,6 +28,44 @@ class DocumentationChecks(unittest.TestCase):
             q=cls.seed/p.relative_to(ROOT);q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
         shutil.copytree(ROOT/"backend/src",cls.seed/"backend/src",dirs_exist_ok=True)
         shutil.copy2(ROOT/"backend/pom.xml",cls.seed/"backend/pom.xml")
+        # Explicit tracked frontend inputs: no runtime Git, dependencies or local secrets.
+        frontend_inputs = (
+            'index.html',
+            'package-lock.json',
+            'package.json',
+            'src/api/commands.ts',
+            'src/api/http.ts',
+            'src/api/json.ts',
+            'src/api/projection.ts',
+            'src/api/types.ts',
+            'src/app/App.vue',
+            'src/app/main.ts',
+            'src/app/style.css',
+            'src/components/SampleCard.vue',
+            'src/domain.ts',
+            'src/features/Boxes.vue',
+            'src/features/Controls.vue',
+            'src/features/Detail.vue',
+            'src/features/Login.vue',
+            'src/realtime/connection.ts',
+            'src/realtime/serial.ts',
+            'src/router/index.ts',
+            'src/stores/session.ts',
+            'tests/browser/ui.spec.ts',
+            'tests/live.config.ts',
+            'tests/live/closed-loop.spec.ts',
+            'tests/playwright.config.ts',
+            'tests/unit/core.test.ts',
+            'tsconfig.json',
+            'vite.config.ts',
+            'vitest.config.ts',
+        )
+        for relative in frontend_inputs:
+            target=cls.seed/"frontend"/relative
+            target.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copy2(ROOT/"frontend"/relative,target)
+        # Only the tracked artifact guide; no runtime evidence or credentials are copied.
+        shutil.copy2(ROOT/"artifacts/README.md",cls.seed/"artifacts/README.md")
         shutil.copytree(ROOT/"tools/simulator",cls.seed/"tools/simulator",dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copytree(ROOT/"tests/simulator",cls.seed/"tests/simulator",dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copytree(ROOT/"deploy/mosquitto",cls.seed/"deploy/mosquitto",dirs_exist_ok=True)

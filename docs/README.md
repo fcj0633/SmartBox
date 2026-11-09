@@ -1,55 +1,55 @@
-# 文档导航
+# 文档导航：按问题找到需求、设计与证据
 
-当前需求组织基线：**BL-002，2026-11-06**；当前P1接口/固件骨架/后端/双模拟节点/电脑端网页软件切片已完成，完整业务及板端仍待后续任务。本基线根据用户批准的实施计划建立；需求规则由功能需求、非功能需求、角色权限和 contracts 共同定义。原始文档保留来源，不作为冲突时的执行规范。
+这里保存SmartBox的产品规则、实现设计、开发任务、操作指南和验收记录。**当前P0/P1与TASK-007基础真实双板验证已完成，完整业务算法、设备Flash可靠性和最终验收未完成。** 当前能力先看[项目入口](../README.md)与[进度](management/当前进度.md)，不要从某份早期报告的“下一项任务”推断今天的状态。
 
-## 阅读顺序
+## 1. 按开发目标阅读
 
-1. [项目章程](management/项目章程.md) → [产品范围](requirements/product/产品范围与场景.md) → [角色与权限](requirements/product/角色与权限.md)。
-2. [需求目录及状态](requirements/README.md) → [追踪矩阵](management/需求追踪矩阵.md)。
-3. [总体设计](design/architecture/系统总体设计.md) → [模块与数据流](design/architecture/模块边界与数据流.md) → [契约索引](../contracts/README.md)。
-4. [环境清单](development/environment/环境清单.md) → [协作流程](development/guides/开发与文档协作.md) → [首轮迭代](development/iterations/ITER-001-三端骨架与通信闭环.md)。
-5. [测试策略](testing/测试策略.md) → [当前进度](management/当前进度.md) → [P0 交付记录](delivery/releases/REL-000-P0基线.md)。
-
-## 文档地图与权威来源
-
-| 内容 | 目录 | 维护方式 |
+| 想回答的问题 | 阅读入口 | 可以得到什么 |
 |---|---|---|
-| 原始输入 | requirements/baseline | 原文只读，原始需求文件已从根目录移动至此 |
-| 多份业务需求与质量要求 | requirements/modules、quality、product | 一个编号一个责任边界；Git 保存修改历史 |
-| 目标、进度、追踪、决策与变更 | management | 需求变更经 CR 记录，技术选择经 ADR 记录 |
-| 系统和各端设计 | design | 解释如何实现，引用需求和契约，不复制造协议 |
-| 具体任务、迭代和操作指南 | development | TASK 推进，ITER 汇总，不把计划结果写成实测 |
-| 测试用例与执行证据 | testing | TC 定义预期，报告记录实际，证据放 artifacts |
-| 部署、版本和演示 | delivery | 发布记录固定交付范围和限制 |
-| 外部学习资料 | references | 保留链接，不复制完整 SDK 或旧实验 |
-| 可复用格式 | templates | 新文档从模板创建，删除不适用项并说明原因 |
+| 产品为何建设、谁使用 | [产品范围](requirements/product/产品范围与场景.md)、[角色权限](requirements/product/角色与权限.md)、[系统总纲](requirements/00-系统需求规格说明书.md) | 业务场景、边界、目标和角色约束；目标不代表实现完成 |
+| 某项需求是什么、怎样验收 | [六模块需求索引](requirements/README.md)、[追踪矩阵](management/需求追踪矩阵.md) | 稳定REQ、设计、TASK、TC关系和验收依据 |
+| 系统怎样分工 | [总体设计](design/architecture/系统总体设计.md)、[模块数据流](design/architecture/模块边界与数据流.md)、[网络拓扑](design/architecture/部署与网络拓扑.md) | 目标架构与边界；其中规划能力需对照当前代码/报告 |
+| 如何修改固件/Java/网页 | [固件导读](../firmware/README.md)、[后端导读](../backend/README.md)、[前端导读](../frontend/README.md) | 真实目录、核心调用关系、修改入口及验证方式 |
+| 如何理解/修改接口 | [当前有效契约](../contracts/effective/README.md) | 冻结v1、CR-003/004补充、机器定义及检查入口 |
+| 从哪项工作继续 | [任务目录](development/tasks/README.md)、[路线图](management/路线图.md)、[进度](management/当前进度.md) | 阶段、任务依赖和实际切片；MOD不是实施顺序 |
+| 如何准备开发环境 | [环境清单](development/environment/环境清单.md)、[版本矩阵](development/environment/工具与依赖版本矩阵.md) | 现有工具和兼容依据；本机秘密需另外配置 |
+| 如何启动软件闭环 | [后端初始化](development/guides/后端数据库初始化与启动.md)、[服务端](development/guides/服务端闭环启动与验收.md)、[网页](development/guides/网页启动与首轮验收.md) | 配置、普通运行、显式测试清理及退出边界 |
+| 如何使用真实板 | [编译烧录联调](development/guides/编译烧录与联调流程.md)、[硬件说明](design/hardware/节点与演示动作.md) | 受控同步、镜像角色、烧录及用户实物操作 |
+| 应运行哪些测试 | [测试体系](../tests/README.md)、[业务TC](testing/cases/README.md)、[测试策略](testing/测试策略.md) | 自动检查层次与业务标准，不混淆软件和硬件 |
+| 结果是否可信 | [报告目录](testing/reports)、[证据规则](testing/evidence/README.md) | 实际版本、结果、限制和原始证据索引 |
+| 规则/技术为何改变 | [变更CR](management/changes)、[技术ADR](management/decisions)、[风险假设](management/风险与假设.md) | 已批准决定、未决问题和验证条件 |
+| 哪次发布完成什么 | [发布目录](delivery/releases)、[REL-001](delivery/releases/REL-001-P1软件与模拟闭环.md) | 当次交付与限制，不覆盖后续事实 |
 
-[基线修订记录 CR-001](management/changes/CR-001-原始需求规范化.md) 记录原始需求与有效规范的差异。后续批准的 CR 需更新相关规范，不能仅在变更记录里追加规则。
+## 2. 每类文档回答什么
 
-## 当前需求层次与重构基线
+| 类型 | 责任 | 不应该拿来替代什么 |
+|---|---|---|
+| SRS系统需求规格 | 全局业务目标、系统行为、跨模块流程与待决问题 | 具体实现和实测成绩 |
+| MOD / REQ | 业务模块及模块内唯一需求，规定规则与验收 | Java包、固件目录或任务编号 |
+| NFR | 全局性能、可靠性、安全和工程约束 | 单次小规模检查结果 |
+| Design设计 | 技术分工、状态/事务/接口实现方式 | 已实现声明；设计目标需查代码 |
+| TASK任务 | 在某阶段做什么、依赖什么、实际交付多少 | 完整REQ验收或全局功能清单 |
+| TC用例 | 场景、前提、步骤与通过标准 | 实际执行证据 |
+| 报告/证据 | 某版本在某环境执行后的事实、失败与限制 | 未来预期结果 |
+| ADR / CR | 技术决定／业务基线变更及影响 | 未批准业务规则的自动生效 |
+| ITER / REL | 迭代目标与当次交付范围 | 最新整个项目状态 |
 
-系统需求 → MOD模块需求 → REQ-Mxx-nnn子需求 → Design → TASK → TC。当前6个MOD、47项子需求和3项全局NFR；旧九份独立需求已迁移，不再作为有效编号。
+当前需求组织基线BL-002保留6个模块、47项功能需求和3项NFR，详见[需求索引](requirements/README.md)与[CR-002](management/changes/CR-002-需求体系与编号重构.md)。原始输入在[baseline](requirements/baseline/项目原始需求-v1.0.md)逐字保留，仅作为来源；冲突按有效需求和已批准CR处理，不重新维护旧需求体系。
 
-[需求索引](requirements/README.md)、[系统总纲](requirements/00-系统需求规格说明书.md)、[CR-002迁移与生效](management/changes/CR-002-需求体系与编号重构.md)。模块文档是业务需求权威来源，根contracts是协议细节权威来源。
+## 3. 当前系统证据与历史边界
 
-新增功能优先归已有模块；只有新业务领域才增加MOD。编号稳定不复用，修改同步设计、契约关联、任务、测试和追踪，不能改变未确认规则或按MOD顺序重排迭代。
+- [P0报告](testing/reports/P0-文档基线验收.md)：工程/文档基线，不能证明业务已实现。
+- [接口报告](testing/reports/TASK-001-契约验证报告.md)：契约准备与冻结，冻结README中的当时状态保持原样。
+- [骨架报告](testing/reports/TASK-002-固件骨架验证报告.md)、[后端基础](testing/reports/TASK-003-后端与数据库验证报告.md)：各自阶段结果；后续真实接入不回写这些历史事实。
+- [MQTT模拟](testing/reports/TASK-004-MQTT与模拟节点验证报告.md)→[服务端闭环](testing/reports/TASK-005-服务端闭环验证报告.md)→[网页](testing/reports/TASK-006-网页与首轮闭环验证报告.md)：分别补齐真实通信、保存确认和浏览器授权展示。
+- [双板报告](testing/reports/TASK-007-双板接入验证报告.md)：真实IA1/SC2、三项output、310秒及恢复。GPS仍MOCK、完整算法和Flash未验收。
 
-## TASK-001交付入口
+报告日期和输入版本必须一起读。REL-001里的“未烧录”是P1发布时范围；当前板端事实看TASK-007，而不是更改REL或早期TASK状态来消除历史差异。TASK-008～010未开始，不制造新验收记录。
 
-[版本矩阵](development/environment/工具与依赖版本矩阵.md)、[机器契约](../contracts/README.md)、[验证报告](testing/reports/TASK-001-契约验证报告.md)、[冻结与交接](development/iterations/TASK-001-接口评审与交接.md)。业务需求及P0历史验收保持原状态，后续任务按ITER-001依赖推进。
+## 4. 维护方式
 
-## 当前单人开发与固件骨架设计
+先读[开发约定](../AGENTS.md)与[文档协作指南](development/guides/开发与文档协作.md)。需求变更记录CR、技术选择记录ADR，按追踪关系同步；只有改动范围适用时才更新任务/设计/测试，不靠README批准规则。
 
-当前全部开发与验收由用户独立完成，历史分工只保留当时事实。TASK-002详细设计集中在[任务文档](development/tasks/TASK-002-双角色固件骨架.md)，已完成软件骨架、实际SDK编译链接与恢复，见[报告](testing/reports/TASK-002-固件骨架验证报告.md)；未执行板端验收，TASK-003后端基础现已完成，见[报告](testing/reports/TASK-003-后端与数据库验证报告.md)及[启动指南](development/guides/后端数据库初始化与启动.md)，按任务索引从TASK-006继续。
+目录分工：`requirements`规定业务，`design`解释实现，`development`组织工作/操作，`testing`记录标准/事实，`management`保存进度与决定，`delivery`保存交付，`references`收录外部资料，`templates`提供格式。精确协议在根contracts，原始日志/镜像在忽略的artifacts，README不复制完整协议、SQL或每次任务过程。
 
-## TASK-004交付入口
-
-[详细任务](development/tasks/TASK-004-MQTT与模拟节点.md)、[真实验证报告](testing/reports/TASK-004-MQTT与模拟节点验证报告.md)、[模拟器使用](../tools/simulator/README.md)。37项单元/临时配置与55项真实MQTT检查通过；[CR-003](management/changes/CR-003-布防有效期限计时起点.md)只明确实际ARMED后计时，不解决其他待决事项。当前TASK-005服务端闭环已完成，下一项TASK-006；完整系统验收仍待后续。
-
-## 服务端闭环交付
-
-[TASK-005报告](testing/reports/TASK-005-服务端闭环验证报告.md)、[启动复验](development/guides/服务端闭环启动与验收.md)、[有效契约](../contracts/effective/README.md)。真实上报保存、精确确认、查询/控制/WS通过；网页、完整算法和板端仍待后续。
-
-## 网页与P1交付入口
-
-[网页启动与验收](development/guides/网页启动与首轮验收.md)、[TASK-006实际报告](testing/reports/TASK-006-网页与首轮闭环验证报告.md)、[REL-001](delivery/releases/REL-001-P1软件与模拟闭环.md)。ITER-001按软件/模拟范围完成，下一项TASK-007；历史报告保留当时状态，需求/整份TC及板端不自动验收。
+修改后运行`python tools/check_docs.py`；增加代码文件链接时，文档工具临时样例也必须包含相应受控输入，不削弱检查规则。小型索引与脱敏摘要可受控，密码、JWT、ticket、原始日志及本机私有连接说明不提交。全部编号保持稳定。

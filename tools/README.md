@@ -1,81 +1,100 @@
-# 文档检查工具
+# 开发工具导航：检查、构建、运行与联调
 
-运行 `python tools/check_docs.py`，识别六模块、模块内部子需求、50行追踪及Design/TASK/TC反向关联，检查链接与锚点、64条规则迁移、历史字节保护和协议示例。无需Git远程或业务服务。
+本目录把重复的开发操作组织为可复用入口。**先选择目标和影响范围，再运行工具**：只读契约检查不启动服务，构建会产生本地文件，集成测试可能清理项目测试数据，固件同步/构建会受控写入SDK副本。不能把某个工具返回成功等同于业务需求全部验收。
 
-运行 `python -m unittest discover -s tests -p "test_check_docs.py" -v` 执行工具回归；全部破坏性样例仅在临时目录副本中进行。测试不改真实文档，不运行应用或硬件。
+下列命令均从仓库根目录运行，Python依赖使用项目`.venv`；Windows可使用`.venv/Scripts/python`，Ubuntu环境使用对应虚拟环境路径。工具参数以各入口`--help`和已链接指南为准。真实连接值在忽略的本地配置中，不作为命令行密码或源码常量。
 
-固件同步、检查与构建工具已由TASK-002交付；模拟节点仍待TASK-004。
+## 1. 项目检查与契约
 
-## 契约检查工具
+| 工具 | 什么时候用／检查什么 | 写入与依赖边界 |
+|---|---|---|
+| [check_docs.py](check_docs.py) | Markdown链接/锚点、6模块47需求、50行追踪、历史保护和示例一致性 | 日常检查只读，不需要Git远程、服务或设备 |
+| [check_contracts.py](check_contracts.py) | 冻结Schema/OpenAPI、覆盖、正反样例、容量/身份/精确确认等静态语义 | 只读，本地解析引用；不证明真鉴权、事务或动作 |
+| [effective_contracts.py](effective_contracts.py) | 默认验证当前有效定义等于冻结基线＋CR-004；`--write`才重生成 | 默认只读；生成会写有效契约文件，协议修改需先有批准依据 |
+| [requirements-contracts.txt](requirements-contracts.txt) | 契约检查依赖锁定 | 安装只进入项目虚拟环境，不升级系统Python |
 
-[check_contracts.py](check_contracts.py)验证OpenAPI/JSON Schema、覆盖清单、正反样例和明确的静态语义。依赖由[requirements-contracts.txt](requirements-contracts.txt)精确锁定，使用独立.venv，安装步骤见[版本矩阵](../docs/development/environment/工具与依赖版本矩阵.md)。
+```powershell
+.venv/Scripts/python tools/check_docs.py
+.venv/Scripts/python tools/check_contracts.py
+.venv/Scripts/python tools/effective_contracts.py
+```
 
-运行 `.venv/Scripts/python tools/check_contracts.py`，回归运行 `.venv/Scripts/python -m unittest discover -s tests -p "test_check_contracts.py" -v`。Linux将解释器路径改为`.venv/bin/python`。成功返回0，失败返回非0及文件/样例/错误位置；日常检查不联网、不写文件、不启动服务。未知引用立即失败；不能用解析器默认联网兜底。
+权威来源见[有效契约导读](../contracts/effective/README.md)。不要改冻结文件或削弱检查规则来消除错误。工具自身回归及负例入口见[测试导读](../tests/README.md)。
 
-样例context只用于检查显式规则，不是MQTT/HTTP真实鉴权。契约工具测试不执行应用或硬件TC；[实际报告](../docs/testing/reports/TASK-001-契约验证报告.md)明确未验证范围。
+## 2. 固件同步、编译与恢复
 
-## 固件工具（TASK-002）
-
-均使用标准库；Windows沿用Python 3.10.8，通过已有密钥SSH调用Ubuntu Python 3.8/GCC/SDK，不安装或升级系统工具。连接值取各电脑自己的本地说明，通过参数传入，不写入脚本或Git。
-
-| 入口 | 用途与操作边界 |
-|---|---|
-| [sync_firmware.py](sync_firmware.py) | 默认只读预览；`--apply`显式应用；`--restore-entry --apply`恢复入口。只同步C/H/GN/GNI与生成角色/源指纹，不复制SDK或日志 |
-| [check_firmware.py](check_firmware.py) | 将源码和[测试替身](../tests/firmware/test_components.c)送入Ubuntu临时目录，分别编译/运行两角色组件测试；不修改SDK |
-| [build_firmware.py](build_firmware.py) | 真实构建全流程：备份、默认预览并受控应用、核对映射与SSH、两角色编译链接/归档、恢复原环境 |
-| [firmware_support.py](firmware_support.py)、[firmware_remote.py](firmware_remote.py) | SSH传输与Ubuntu工作器；由上述入口调用，不作为常驻服务 |
-
-替换以下大写参数后执行，真实连接值仅留在本机忽略说明中。命令应整行执行：
+| 工具 | 使用场景与主要参数 | 影响范围和恢复要求 |
+|---|---|---|
+| [sync_firmware.py](sync_firmware.py) | `--sdk-root`、`--role ENV/POSE`；默认差异预览，`--apply`才应用 | 仅项目应用及受控构建入口；冲突/越界拒绝，未知文件不静默删 |
+| [build_firmware.py](build_firmware.py) | `--host/--user/--key`、映射/远程SDK根；完整双角色真实构建 | 备份旧入口/产品输出/厂商状态→同步构建→独立归档→恢复；异常保留状态，不盲删备份 |
+| [check_firmware.py](check_firmware.py) | 经SSH用已有Ubuntu GCC执行Mock/生命周期组件 | 写临时宿主目录和本地报告，不修改SDK，不证明板端调度 |
+| [check_hardware.py](check_hardware.py) | `--sdk-root`、SSH及`--report`；真实核心、SDK适配和报文检查 | Ubuntu临时组件/本地证据；不是烧录或物理动作 |
+| [firmware_support.py](firmware_support.py)、[firmware_remote.py](firmware_remote.py) | SSH和远程备份/同步/恢复的内部实现 | 给入口工具调用，不作为常驻服务 |
 
 ```text
 python tools/sync_firmware.py --sdk-root SDK_MAPPING --role ENV
-python tools/check_firmware.py --host HOST --user USER --key KEY_PATH --report artifacts/firmware/TASK-002/components.log
 python tools/build_firmware.py --sdk-root SDK_MAPPING --remote-sdk SDK_LINUX --host HOST --user USER --key KEY_PATH
-```
-
-构建工具在`artifacts/firmware/TASK-002/时间标识/`记录run.json、源码差异、包含新增文件的源码快照tar及逐文件指纹、原SDK的tar备份、按角色独立的完整构建日志、product.tar、bin/map/ELF、manifest与恢复清单。官方构建会删除原product out并改变厂商目录，所以不要绕过备份直接执行官方脚本。归档校验真实应用符号、最终ELF中的节点身份、最终map及新bin，不只检查某个日志字符串。
-
-SDK同步使用三方内容指纹。未知同名副本、人工修改、越界/链接、意外入口变化均拒绝；未知文件保留。默认预览不创建目录/锁/日志。应用时写恢复日志，崩溃后可使用`--recover-sync --apply`；若遗留锁，先核对所属进程与日志，禁止盲删锁后覆盖。
-
-失败后保留本地与Ubuntu备份，构建恢复入口为：
-
-```text
 python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --remote-sdk SDK_LINUX --host HOST --user USER --key KEY_PATH
 ```
 
-恢复只接受工具能确认归属的输出与入口版本，核对所有文件字节及Unix权限；映射盘恢复入口只允许记录过的原始/最后受控权限组合，最终由Unix归档恢复原权限。硬中断导致输出归属未知、恢复中断或发现新变化时拒绝自动覆盖，需要先检查状态与差异；备份不自动删除。构建互斥是本工具的协作锁，另检查活动构建进程；不允许同时从别的终端构建相同SDK。
+大写为占位符，先按本地连接说明替换；映射可读不等于可执行Ubuntu命令。预览不创建目录/锁/状态，应用时使用受控清单和三方指纹；SDK人工改动、未知同名目录、路径链接或并发占用需先定位。同步恢复入口使用`--restore-entry --apply`，同步中断恢复用`--recover-sync --apply`，不是删除整个SDK。
 
-工具回归（临时SDK样例，不操作真实SDK）：
+官方脚本会清空产品输出并改写厂商子树，不能绕过完整工具直接执行再假称环境未变。每角色立即保存源码快照、工具版本、日志、应用符号和镜像SHA256；恢复按字节及Unix权限核对。详见[固件导读](../firmware/README.md)、[编译烧录指南](../docs/development/guides/编译烧录与联调流程.md)。
 
-```text
-python -m unittest discover -s tests -p test_sync_firmware.py -v
-python -m unittest discover -s tests -p test_build_firmware.py -v
+## 3. MQTT模拟器与专用Broker
+
+[mqtt.py](mqtt.py)支持`prepare/broker/node/unit/integration`，内部实现见[模拟器导读](simulator/README.md)。`prepare`创建或校验本地账号/ACL/身份状态，不重置已有状态；`broker`运行独立进程；`node --role ENV/POSE`运行一个节点；`unit`只跑临时状态测试；`integration`启动专用Broker、双节点和测试端，再清理自身进程。
+
+运行配置默认在忽略的`secrets/mqtt.local.json`，依赖由[requirements-simulator.txt](requirements-simulator.txt)锁定。不接受命令行明文密码。真实Broker测试会使用1883，要求端口空闲、指定新证据目录；缺Broker失败，不静默跳过。测试控制端的event_ack不是数据库保存证据，主机内存事件队列不是Flash。
+
+## 4. 后端构建、初始化与启动
+
+[backend.py](backend.py)提供以下操作，详情见[后端导读](../backend/README.md)与[初始化指南](../docs/development/guides/后端数据库初始化与启动.md)：
+
+| 操作 | 作用与副作用 |
+|---|---|
+| `unit` | Maven单元测试，不依赖项目秘密或启动完整业务服务 |
+| `build --profile dev` | Maven验证/打包，写入target并从私有配置加载进程环境；不自动建库或启动业务服务 |
+| `bootstrap --profile dev` | 执行已有JAR的非Web初始化，事务写账号/箱体/节点/授权；冲突拒绝，不重置密码 |
+| `run --profile dev` | 普通运行，应用启动可执行待应用的Flyway迁移；按配置连接项目库 |
+| `run ... --mqtt-config ...` | 额外从项目MQTT配置注入后端账号，启动真实接入；硬件模式还需`--hardware-mqtt` |
+| `test --profile test --allow-test-reset` | 真MySQL集成，要求测试库校验及清理同意；不能并行操作同库 |
+| `smoke --profile dev` | [backend_smoke.py](backend_smoke.py)启动自身JAR执行基础HTTP/Schema验证并收尾，可能使用显式初始化配置 |
+
+配置默认取忽略的`secrets/backend.local.json`。运行账号不是root，结构迁移与应用权限分离；工具不为缺少配置猜密码，不替用户停止占用端口的其他进程。
+
+## 5. 服务端真实联调
+
+[live_integration.py](live_integration.py)组合真实Broker、后端、MySQL及两个独立模拟进程，检查接入保存、精确确认、Outbox、查询/导出、控制/WS及恢复。它不同于单独MQTT测试：确认来自事务提交后的后端，而非测试端伪造。
+
+```powershell
+.venv/Scripts/python tools/live_integration.py --allow-test-reset --run-dir artifacts/server/NEW-RUN
 ```
 
-上述两组也已在Ubuntu Python 3.8执行。组件测试替身只进入宿主测试，生产GN只链接真实SDK CMSIS。当前8帧采样/16项候选均为易失工作缓冲，网络固定返回未实现，不满足MOD-04或真实通信验收。[实际报告](../docs/testing/reports/TASK-002-固件骨架验证报告.md)记录交付结果和限制。
+按[服务端指南](../docs/development/guides/服务端闭环启动与验收.md)准备test配置；此入口只操作校验过的smartbox_test及自身进程，需新目录和空闲端口。可用`--scenario dispatch-recovery`定向复验，但不替代完整主场景。故障屏障由受限测试配置启用，不新增测试HTTP接口，不停共享MySQL。
 
-## 后端基础工具
+## 6. 网页与浏览器
 
-[backend.py](backend.py)统一执行unit/build/bootstrap/run/test/smoke；[backend_smoke.py](backend_smoke.py)启动真实JAR并离线解析冻结Schema校验响应。详细配置、命令、测试清理保护与Windows进程兼容处理见[后端初始化与启动指南](../docs/development/guides/后端数据库初始化与启动.md)。工具不保存/打印密码或JWT，不停止已有端口程序；smoke结束检查自身实际进程与端口已释放。
+[frontend.py](frontend.py)统一处理Windows兼容的Node/npm入口和前端环境隔离，避免本地秘密变成公开VITE变量。详见[前端导读](../frontend/README.md)及[网页指南](../docs/development/guides/网页启动与首轮验收.md)。
 
-真实集成必须使用test配置和显式--allow-test-reset，检查实际数据库与账号后只清理项目测试业务数据。运行命令使用dev配置，不自动初始化或重置账号。依赖复用既有.venv契约工具，不安装系统工具。实际结果见[TASK-003报告](../docs/testing/reports/TASK-003-后端与数据库验证报告.md)。
+| 操作 | 作用／会写入或启动什么 |
+|---|---|
+| `install` | 锁文件安装node_modules，准备匹配Chromium到artifacts，不改日常浏览器 |
+| `dev` | 启动自己的Vite，固定回环5173，退出清理自身进程 |
+| `check` / `build` | 类型/单元/组件；或生成dist，不证明实际服务闭环 |
+| `browser` | 隔离浏览器＋自身Vite，使用受控响应，产物存忽略目录 |
+| `integration --profile test --allow-test-reset --run-dir ...` | [frontend_integration.py](frontend_integration.py)启动真实软件链路和浏览器；可能清理测试数据/临时撤权后恢复，使用test库和专用进程 |
 
-## TASK-004模拟工具入口
+定向`--scenario authorization`只补查权限/Schema。网页、服务端和Java集成不能同时使用smartbox_test。手动dev进程与自动集成也不要争用1883/8080/5173。
 
-[mqtt.py](mqtt.py)提供prepare、broker、node、unit、integration；实现分层和命令见[模拟器说明](simulator/README.md)，[Broker模板](../deploy/mosquitto/README.md)保持与旧服务隔离。项目.venv新增paho-mqtt2.1.0并单独锁定，不改系统Python。默认本地配置在忽略的secrets/mqtt.local.json，不打印密码或以命令行传密码。真实集成自建配置和子进程，确认1883空闲后执行，结束检查进程和端口释放。测试event_ack不能证明数据库保存，storage=DEGRADED不能证明Flash可靠性。实际结果见[TASK-004报告](../docs/testing/reports/TASK-004-MQTT与模拟节点验证报告.md)。
+## 7. 真实硬件准备与串口
 
-## TASK-005当前实现入口
+[hardware.py](hardware.py)的`check`只核对私有Wi-Fi字段；`prepare`校验指定网卡、只读核对已有代次并预留新区间，生成私有头文件和硬件Broker配置；`broker --run-dir ...`复用已准备配置。**仅启动Broker不要重复prepare，不能删除或回退代次账本。** 网络地址改变后按指南重新核验配置与固件，不能假设修改电脑文件就会改变已烧录内容。
 
-[启动指南](../docs/development/guides/服务端闭环启动与验收.md)、[有效契约生成/检查](effective_contracts.py)、[真实联调](live_integration.py)。接入/查询/命令/WS职责在live包分离，LiveStore/LiveMapper隔离MyBatis持久访问；Controller不查数据库。V5～V9新增运行态、位置、事件视图、命令恢复/回执、操作顺序及质量约束，V1～V4保持。告警判断与门融合仍未知；网页及板端待后续，实际验收结果以任务报告为准。
+[capture_serial.ps1](capture_serial.ps1)以115200只读指定COM，要求新artifacts输出和限定时长，不发送数据/自动复位；烧录工具需先退出释放端口。每次插拔重新识别目标，不能把COM号当角色身份。硬件模式显式使用一个LAN IPv4和回环监听，原本机安全限制保留，不自动关闭防火墙。
 
-## TASK-006前端统一入口
+工具代码可验证协议和组件，但HiBurn选择文件、复位、断电接板、倾斜及实物观察仍需用户按[固件指南](../docs/development/guides/编译烧录与联调流程.md)完成，编译/烧录成功不等于实际动作已确认。
 
-[frontend.py](frontend.py)提供install/dev/check/build/browser/integration；[frontend_integration.py](frontend_integration.py)复用现有真实Broker/后端/双模拟进程管理。命令和安全边界见[网页指南](../docs/development/guides/网页启动与首轮验收.md)，实际结果见[报告](../docs/testing/reports/TASK-006-网页与首轮闭环验证报告.md)。集成要求--profile test、--allow-test-reset和新的artifacts目录；--scenario authorization仅定向补查，不替代完整验收。测试库授权撤销在收尾恢复，缺少配置不跳过，只清理自身进程。
+## 8. 结果与退出约定
 
-## TASK-007硬件工具
-
-[hardware.py](hardware.py)提供check、prepare、broker：check只核对私有Wi-Fi字段；prepare从现有项目运行账号只读核对代次并预留新范围，生成私有头文件与独立硬件Broker配置；broker需新的--run-dir，仅运行/停止自己的进程。命令不接收明文密码参数，不覆盖原本机Broker账号与配置。
-
-[check_hardware.py](check_hardware.py)通过既有Ubuntu GCC测试真实固件核心，检查实际生成报文的冻结/有效Schema；[capture_serial.ps1](capture_serial.ps1)仅以115200读取指定COM，输出限制到新的artifacts文件，不发送数据或在控制台打印原始串口文本。构建仍使用[build_firmware.py](build_firmware.py)，Mock回归使用[check_firmware.py](check_firmware.py)。
-
-后端仅在run加显式--mqtt-config及--hardware-mqtt时接受硬件模式配置，服务仍回环监听。硬件配置和操作步骤见[指南](../docs/development/guides/编译烧录与联调流程.md)，当前阶段结果见[报告](../docs/testing/reports/TASK-007-双板接入验证报告.md)。prepare会分配新代次区间，需要构建对应新固件；不要为了启动Broker重复prepare，不要删除或回滚本地代次账本。
+证据写入新的[artifacts运行目录](../artifacts/README.md)，受控[报告](../docs/testing/reports)保存脱敏摘要和索引；成功返回0、失败非零，缺必需依赖不静默跳过。配置、身份状态、密码散列及日志不入Git。自动入口只终止自己持有的子进程，异常或中断后先核对PID/路径/端口和恢复清单，不按端口号随意杀进程或删除备份。
