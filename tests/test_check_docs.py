@@ -69,6 +69,9 @@ class DocumentationChecks(unittest.TestCase):
         shutil.copytree(ROOT/"tools/simulator",cls.seed/"tools/simulator",dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copytree(ROOT/"tests/simulator",cls.seed/"tests/simulator",dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copytree(ROOT/"deploy/mosquitto",cls.seed/"deploy/mosquitto",dirs_exist_ok=True)
+        # Public dependency metadata only; never copy downloaded SDKs or private config.
+        (cls.seed/"deploy/sdk").mkdir(parents=True,exist_ok=True)
+        shutil.copy2(ROOT/"deploy/sdk/sources.json",cls.seed/"deploy/sdk/sources.json")
         shutil.copytree(ROOT/"contracts",cls.seed/"contracts",dirs_exist_ok=True)
         shutil.copytree(ROOT/"firmware",cls.seed/"firmware",dirs_exist_ok=True)
         shutil.copytree(ROOT/"tests/firmware",cls.seed/"tests/firmware",dirs_exist_ok=True)

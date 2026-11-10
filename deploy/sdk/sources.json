@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "checked_on": "2026-11-10",
+  "purpose": "公开的SDK获取入口与项目验证边界；不是自动安装锁文件",
+  "guide": "docs/development/guides/SDK官网下载与接入.md",
+  "official": {
+    "board": "https://www.bearpi.cn/dev_board/bearpi/hm/nano/",
+    "quick_start": "https://bearpi.cn/dev_board/bearpi/hm/nano/software_OpenHarmony/BearPi-HM_Nano十分钟上手.html",
+    "sdk_git": "https://gitee.com/bearpi/bearpi-hm_nano.git",
+    "environment_guide": "https://gitee.com/bearpi/bearpi-hm_nano/blob/master/applications/BearPi/BearPi-HM_Nano/docs/quick-start/BearPi-HM_Nano开发搭建环境.md",
+    "tool_download_page": "https://pan.baidu.com/s/1vSpPWvIhL8wCVGnEOjXS7g?pwd=1234",
+    "public_extraction_code": "1234",
+    "observed_master": "275854412f9d3f1b8fae62aeef25b81095b449ac",
+    "observed_master_method": "git ls-remote refs/heads/master；不代表已下载或构建",
+    "validated_upstream_commit": null,
+    "downloaded_archives_in_this_check": false,
+    "compatibility": "官网新取得的源码和工具需实际双角色构建核验；不能直接沿用本地快照结论"
+  },
+  "documented_tool_archives": [
+    {"name": "gn.1523.tar", "version": "1523", "official_archive_sha256": null},
+    {"name": "ninja.1.9.0.tar", "version": "1.9.0", "official_archive_sha256": null},
+    {"name": "gcc_riscv32-linux-7.3.0.tar.gz", "version": "7.3.0", "official_archive_sha256": null}
+  ],
+  "validated_local_snapshot": {
+    "kind": "本地派生快照，无已验证上游Git提交",
+    "sdk_archive_sha256": "e2106be2ab7e37debcbc241b86f7d9ea9a0df592991ff20ff67ae2a282f6c255",
+    "toolchain_archive_sha256": "0a21c35ae43a1c819ec5e63cbddb372acc460b027e2730b20dcc63deecf50765",
+    "manifest_sha256": "93e0c823b1c11a3b5757cd36e43132ea584c32722fc2f736b1ae1bf47b8bc2a8",
+    "report": "docs/testing/reports/开发部署与SDK交付验证报告.md",
+    "note": "上述哈希属于项目重新打包的本地交付，不是官网下载原归档的哈希；二进制未随本记录发布"
+  }
+}
