@@ -1,0 +1,5 @@
+@media (max-width: 600px) {
+  .direction-route .kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
