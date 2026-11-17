@@ -187,6 +187,7 @@ SbResult sb_network_poll(void) {
         /* No durable events exist yet: event_ack never manufactures saved data. */
         head=(head+1)%4;--count;
     }
+    while(sb_wire_poll(reply,sizeof(reply))==SB_OK)if(publish("command_ack",reply,1)!=SB_OK){disconnect();return SB_NO_DATA;}
     if(now.uptime_ms>=next_property) {
         if(sb_wire_property(payload,sizeof(payload))!=SB_OK){disconnect();next_try=UINT64_MAX;return SB_PLATFORM_ERROR;}
         if(publish("property",payload,0)!=SB_OK){disconnect();return SB_NO_DATA;}next_property=now.uptime_ms+1000;

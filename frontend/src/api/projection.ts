@@ -11,7 +11,8 @@ export function projectBox(source: Box, role: Role): Box {
   const result: Box = { box_id: source.box_id, online_mask: source.online_mask, connectivity: source.connectivity,
     env: sample(source.env,['temp_c','humi_pct','lux','valid','light_on','fan_on'])!,
     loc: sample(source.loc,['lat','lon','valid','src'])!,
-    door: {state:source.door.state,confidence:source.door.confidence},
+    door: {state:source.door.state,confidence:source.door.confidence,conclusion_id:source.door.conclusion_id??null,
+      observed_at:source.door.observed_at??null,historical:source.door.historical??false},
     alarm: {assessment:source.alarm.assessment,active:source.alarm.active,level:source.alarm.level} };
   if (canDiagnose(role)) {
     result.pose = sample(source.pose,['acc_g','tilt_deg','state','valid']);

@@ -19,12 +19,20 @@ typedef struct { SbRole role; SbInputKind kind; SbSource source; SbClock clock; 
         struct { float x_g,y_g,z_g,tilt_deg; } pose;
         struct { double latitude_deg,longitude_deg; } location; } value;
 } SbSensorFrame;
-typedef struct { uint64_t uptime_ms; uint32_t diagnostic_code; SbSource source;
-    bool valid; uint8_t data[32]; } SbEventCandidate;
 typedef struct { SbOutputKind kind; bool on; uint32_t duration_ms; } SbOutputRequest;
-typedef struct { bool on; uint64_t expires_ms; } SbOutputState;
+typedef struct { bool on; uint64_t expires_ms; uint64_t changed_ms; } SbOutputState;
 typedef struct { SbSensorFrame frames[SB_INPUT_COUNT]; bool present[SB_INPUT_COUNT];
     uint64_t processed; } SbSnapshot;
+typedef enum {
+    SB_EVENT_NONE=0, SB_EVENT_ENV_HIGH, SB_EVENT_ENV_LOW, SB_EVENT_ENV_RECOVERED,
+    SB_EVENT_POSE_CHANGED, SB_EVENT_IMPACT, SB_EVENT_DOOR_EVIDENCE,
+    SB_EVENT_GEOFENCE_EXIT, SB_EVENT_GEOFENCE_ENTER, SB_EVENT_SENTRY_INTRUSION
+} SbEventType;
+typedef enum { SB_LEVEL_INFO=1, SB_LEVEL_WARNING=2, SB_LEVEL_CRITICAL=3 } SbEventLevel;
+typedef enum { SB_DOOR_UNKNOWN=0, SB_DOOR_OPEN, SB_DOOR_CLOSED } SbDoorState;
+typedef enum { SB_GPS_FIXED=0, SB_GPS_ROUTE, SB_GPS_WALK } SbGpsMode;
+typedef struct { uint64_t uptime_ms; uint32_t diagnostic_code; SbSource source;
+    bool valid; SbEventType type; SbEventLevel level; char data_json[160]; } SbEventCandidate;
 typedef enum { SB_BOOTSTRAP, SB_READY, SB_FAILED } SbStartupState;
 typedef struct { SbStartupState state; uint32_t created, exited;
     uint64_t sample_queue_full, candidate_full, missed_periods, sensor_errors, network_disabled;

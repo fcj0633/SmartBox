@@ -49,7 +49,7 @@ class LiveIT {
     @BeforeAll void seed()throws Exception{
         TestDatabaseGuard.require(System.getenv("SPRING_PROFILES_ACTIVE"),System.getenv("SMARTBOX_DB_URL"),db.queryForObject("SELECT DATABASE()",String.class),db.queryForObject("SELECT CURRENT_USER()",String.class),System.getenv("SMARTBOX_TEST_ALLOW_RESET"));
         new TransactionTemplate(manager).executeWithoutResult(status->{
-            for(String table:List.of("command_receipts","command_dispatch","event_views","location_samples","node_runtime","audit_logs","idempotency_records","node_commands","command_operations","processing_outbox","events","node_latest","telemetry","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
+            for(String table:List.of("command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","processing_outbox","event_evidence","box_domain_state","door_conclusions","alarms","alarm_state","box_domain_views","event_views","location_samples","node_runtime","audit_logs","events","node_latest","telemetry","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
         });
         fixture=json.readTree(Files.readString(Path.of(System.getenv("SMARTBOX_BOOTSTRAP_FILE"))));bootstrap.initialize(fixture);
     }
@@ -75,8 +75,9 @@ class LiveIT {
     @Autowired QueryService query;
     @Autowired CommandService commands;
     @Autowired ProjectionWorker worker;
+    @Autowired DomainEventWorker domainWorker;
     @BeforeEach void clearLive(){
-        for(String table:List.of("command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","event_views","processing_outbox","events","location_samples","node_latest","telemetry","node_runtime"))db.update("DELETE FROM "+table);
+        for(String table:List.of("command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","processing_outbox","event_evidence","box_domain_state","door_conclusions","alarms","alarm_state","box_domain_views","event_views","events","location_samples","node_latest","telemetry","node_runtime"))db.update("DELETE FROM "+table);
         db.update("UPDATE nodes SET current_boot_id=NULL,last_received_at=NULL");
         db.update("UPDATE boxes SET sentry_revision=0");
     }
@@ -86,10 +87,14 @@ class LiveIT {
     ObjectNode event()throws Exception {
         ObjectNode data=input("mqtt-event.json");return data;
     }
+    ObjectNode domainEvent(String node,long boot,long seq,String type,String source,String level,String data)throws Exception{
+        ObjectNode envelope=json.createObjectNode();envelope.put("v",1);envelope.put("box_id","BOX-0001");envelope.put("node_id",node);envelope.put("boot_id",boot);envelope.put("ts",1800000000000L);envelope.put("ts_src","SNTP");envelope.put("uptime_ms",30000);envelope.put("time_uncertainty_ms",100);
+        ObjectNode e=envelope.putArray("events").addObject();e.put("event_seq",seq);e.put("ts",1800000000000L);e.put("ts_src","SNTP");e.put("uptime_ms",30000);e.put("time_uncertainty_ms",100);e.put("type",type);e.put("src",source);e.put("level",level);e.set("data",json.readTree(data));e.put("replayed",false);return envelope;
+    }
 
     @Test void batchCommitDedupCanonicalConflictRollback()throws Exception{
         var data=event();receive(data,"event");receive(data,"event");
-        assertEquals(1,store.count("SELECT COUNT(*) FROM events"));assertEquals(1,store.count("SELECT COUNT(*) FROM processing_outbox"));
+        assertEquals(1,store.count("SELECT COUNT(*) FROM events"));assertEquals(2,store.count("SELECT COUNT(*) FROM processing_outbox"));
         ((ObjectNode)data.path("events").get(0)).put("replayed",true);receive(data,"event");
         ((ObjectNode)data.path("events").get(0).path("data")).put("lux",999);
         ObjectNode newEvent=((ObjectNode)data.path("events").get(0)).deepCopy();newEvent.put("event_seq",2);((ArrayNode)data.path("events")).insert(0,newEvent);
@@ -99,12 +104,59 @@ class LiveIT {
         receive(event(),"event");var work=worker.claim("first",System.currentTimeMillis());assertNotNull(work);
         assertFalse(worker.complete(work,"wrong"));assertTrue(worker.complete(work,"first"));
         assertEquals(1,store.count("SELECT COUNT(*) FROM event_views"));assertNull(worker.claim("second",System.currentTimeMillis()));
-        assertEquals("DONE",store.one("SELECT status FROM processing_outbox").get("status"));
+        assertEquals("DONE",store.one("SELECT status FROM processing_outbox WHERE task_type='EVENT_VIEW'").get("status"));
     }
     @Test void abandonedLeaseCanBeReclaimed()throws Exception{
         receive(event(),"event");var first=worker.claim("first",System.currentTimeMillis());
         store.update("UPDATE processing_outbox SET locked_until=0");var second=worker.claim("second",System.currentTimeMillis());
         assertNotNull(second);assertFalse(worker.complete(first,"first"));assertTrue(worker.complete(second,"second"));
+    }
+    @Test void environmentAlarmStateAndRecoveryAreProjected()throws Exception{
+        ObjectNode first=event();JsonNode firstEvent=first.path("events").get(0);
+        ((ObjectNode)firstEvent).put("type","ENV_HIGH").put("level","WARNING");
+        ((ObjectNode)firstEvent).set("data",json.readTree("{\"metric\":\"temp_c\",\"value\":9,\"threshold\":8,\"profile_id\":\"demo\"}"));
+        receive(first,"event");domainWorker.runBatch();
+        var active=query.snapshot(operator(),"BOX-0001").path("alarm");
+        assertEquals("EVALUATED",active.path("assessment").asText());assertTrue(active.path("active").asBoolean());assertEquals("WARNING",active.path("level").asText());
+        ObjectNode recovered=first.deepCopy();((ObjectNode)recovered.path("events").get(0)).put("event_seq",2).put("type","ENV_RECOVERED");
+        ((ObjectNode)recovered.path("events").get(0)).set("data",json.readTree("{\"metric\":\"temp_c\",\"value\":7,\"threshold\":7,\"profile_id\":\"demo\"}"));
+        receive(recovered,"event");domainWorker.runBatch();
+        var inactive=query.snapshot(operator(),"BOX-0001").path("alarm");
+        assertEquals("EVALUATED",inactive.path("assessment").asText());assertFalse(inactive.path("active").asBoolean());assertTrue(inactive.path("level").isNull());
+        assertEquals(2,store.count("SELECT COUNT(*) FROM box_domain_views WHERE event_type='ALARM'"));
+    }
+    @Test void singleDoorEvidenceWaitsThenKeepsUnknown()throws Exception{
+        receive(event(),"event");domainWorker.runBatch();
+        assertEquals(0,store.count("SELECT COUNT(*) FROM door_conclusions"));
+        store.update("UPDATE event_evidence SET received_at=?",System.currentTimeMillis()-2100);
+        store.update("UPDATE processing_outbox SET next_attempt_at=0 WHERE task_type='DOMAIN_EVENT'");
+        domainWorker.runBatch();
+        var door=query.snapshot(operator(),"BOX-0001").path("door");
+        assertEquals("UNKNOWN",door.path("state").asText());assertEquals("INSUFFICIENT",door.path("confidence").asText());
+        assertEquals("UNKNOWN",query.snapshot(operator(),"BOX-0001").path("alarm").path("assessment").asText());
+        assertEquals(1,store.count("SELECT COUNT(*) FROM door_conclusions WHERE reason='LIGHT_ONLY'"),
+            "evidence="+store.count("SELECT COUNT(*) FROM event_evidence")+
+            ", outbox="+store.count("SELECT COUNT(*) FROM processing_outbox WHERE task_type='DOMAIN_EVENT' AND status='RETRY'")+
+            ", latest_error="+Optional.ofNullable(store.one("SELECT last_error_code FROM processing_outbox WHERE task_type='DOMAIN_EVENT' ORDER BY id DESC LIMIT 1")).map(r->r.get("last_error_code")).orElse("none"));
+        validator.validate("Snapshot",query.snapshot(operator(),"BOX-0001"));
+        var delivery=new CurrentUser(operator().id(),operator().username(),"DELIVERY_USER");
+        JsonNode view=query.history(delivery,"BOX-0001",Map.of(),false).path("items").get(0);
+        assertEquals("DOOR_CONCLUSION",view.path("type").asText());assertFalse(view.has("evidence"));validator.validate("DeliveryEventView",view);
+    }
+    @Test void oppositeSensorDoorEvidenceConcludesMediumWhenNodeHealthIsNotProven()throws Exception{
+        receive(domainEvent("BOX-0001-ENV",12,1,"DOOR_EVIDENCE","LIGHT","INFO","{\"action\":\"OPEN\",\"lux\":120,\"actuator_excluded\":true}"),"event");
+        receive(domainEvent("BOX-0001-POSE",13,1,"DOOR_EVIDENCE","TILT","INFO","{\"action\":\"OPEN\",\"tilt_deg\":70,\"actuator_excluded\":true}"),"event");
+        domainWorker.runBatch();
+        var door=query.snapshot(operator(),"BOX-0001").path("door");
+        assertEquals("OPEN",door.path("state").asText());assertEquals("MEDIUM",door.path("confidence").asText());
+        assertEquals(2,store.count("SELECT COUNT(*) FROM event_evidence"));assertEquals(1,store.count("SELECT COUNT(*) FROM door_conclusions"));
+        assertEquals("UNKNOWN",query.snapshot(operator(),"BOX-0001").path("alarm").path("assessment").asText());
+    }
+    @Test void geofenceExitStartsWarningAndEnterRecoversIt()throws Exception{
+        receive(domainEvent("BOX-0001-POSE",13,1,"GEOFENCE_EXIT","MOCK","WARNING","{\"lat\":30.001,\"lon\":120.001,\"distance_m\":157,\"src\":\"MOCK\"}"),"event");domainWorker.runBatch();
+        var active=query.snapshot(operator(),"BOX-0001").path("alarm");assertTrue(active.path("active").asBoolean());assertEquals("WARNING",active.path("level").asText());
+        receive(domainEvent("BOX-0001-POSE",13,2,"GEOFENCE_ENTER","MOCK","INFO","{\"lat\":30.0,\"lon\":120.0,\"distance_m\":8,\"src\":\"MOCK\"}"),"event");domainWorker.runBatch();
+        var recovered=query.snapshot(operator(),"BOX-0001").path("alarm");assertFalse(recovered.path("active").asBoolean());assertTrue(recovered.path("level").isNull());
     }
     @Test void concurrentOutboxClaimsHaveExactlyOneOwner()throws Exception{
         receive(event(),"event");

@@ -10,7 +10,7 @@ export interface Box {
   box_id: string; online_mask: number; connectivity: string;
   env: Sample; pose?: Sample; loc: Sample;
   alarm: { assessment: string; active: boolean | null; level: string | null };
-  door: { state: string; confidence: string };
+  door: { state: string; confidence: string; conclusion_id?: string | null; observed_at?: ExactInteger | null; historical?: boolean };
   sentry?: { state: string; revision: ExactInteger };
 }
 export interface Node { node_id: string; role: 'ENV' | 'POSE'; caps: number; required: boolean; online: boolean; boot_id: number | null; last_received_at: number | null }

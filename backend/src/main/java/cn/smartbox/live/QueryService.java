@@ -76,8 +76,14 @@ public class QueryService {
             }
         }
         out.put("online_mask",mask);out.put("connectivity",required==0?"UNKNOWN":present==required?"ONLINE":present==0?"OFFLINE":"PARTIAL");
-        ObjectNode alarm=out.putObject("alarm");alarm.put("assessment","UNKNOWN");alarm.putNull("active");alarm.putNull("level");
-        ObjectNode door=out.putObject("door");door.put("state","UNKNOWN");door.put("confidence","INSUFFICIENT");door.putNull("conclusion_id");door.putNull("observed_at");door.put("historical",false);
+        ObjectNode alarm=out.putObject("alarm");
+        var alarmRow=db.one("SELECT assessment,active,level FROM alarm_state WHERE box_id=?",box);
+        if(alarmRow==null){alarm.put("assessment","UNKNOWN");alarm.putNull("active");alarm.putNull("level");}
+        else{alarm.put("assessment",alarmRow.get("assessment").toString());if(alarmRow.get("active")==null)alarm.putNull("active");else alarm.put("active",Boolean.TRUE.equals(alarmRow.get("active"))||Objects.equals(alarmRow.get("active"),1));if(alarmRow.get("level")==null)alarm.putNull("level");else alarm.put("level",alarmRow.get("level").toString());}
+        ObjectNode door=out.putObject("door");
+        var doorRow=db.one("SELECT door_state,door_confidence,door_conclusion_id,door_observed_at,door_historical FROM box_domain_state WHERE box_id=?",box);
+        if(doorRow==null){door.put("state","UNKNOWN");door.put("confidence","INSUFFICIENT");door.putNull("conclusion_id");door.putNull("observed_at");door.put("historical",false);}
+        else{door.put("state",doorRow.get("door_state").toString());door.put("confidence",doorRow.get("door_confidence").toString());if(doorRow.get("door_conclusion_id")==null)door.putNull("conclusion_id");else door.put("conclusion_id",doorRow.get("door_conclusion_id").toString());putNumber(door,"observed_at",doorRow.get("door_observed_at"));door.put("historical",Boolean.TRUE.equals(doorRow.get("door_historical"))||Objects.equals(doorRow.get("door_historical"),1));}
         for(var row:db.rows("SELECT l.*,n.role FROM node_latest l JOIN nodes n ON l.node_id=n.node_id WHERE l.box_id=?",box))latest.put(row.get("role").toString(),row);
         out.set("env",sample(latest.get("ENV"),runtime.get("ENV"),"env"));out.set("loc",sample(latest.get("POSE"),runtime.get("POSE"),"loc"));
         if(!user.role().equals("DELIVERY_USER")){
@@ -106,7 +112,7 @@ public class QueryService {
     }
     public ObjectNode history(CurrentUser user,String box,Map<String,String> query,boolean track){
         access.require(user,box,PermissionPolicy.Action.READ_BUSINESS);Window w=window(query);
-        String table=track?"location_samples":"event_views",id=track?"id":"event_id";
+        String table=track?"location_samples":"(SELECT CONCAT('event-',event_id) AS id,box_id,received_at,event_type,level,payload FROM event_views UNION ALL SELECT view_id AS id,box_id,received_at,event_type,level,payload FROM box_domain_views) history",id=track?"id":"id";
         String where=" WHERE box_id=? AND received_at>=? AND received_at<?";List<Object> args=new ArrayList<>(List.of(box,w.from,w.to));
         if(!track){
             if(user.role().equals("DELIVERY_USER"))where+=" AND event_type IN ('DOOR_CONCLUSION','ALARM')";

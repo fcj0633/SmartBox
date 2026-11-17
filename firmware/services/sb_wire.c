@@ -1,5 +1,6 @@
 #include "sb_config.h"
 #include "sb_wire.h"
+#include "sb_rules.h"
 #include "cJSON.h"
 #include <math.h>
 #include <stdio.h>
@@ -7,7 +8,9 @@
 static uint32_t boot,property_seq;
 typedef struct {
     char request[257],operation[257],command[24],kind[16],result[12],code[32];
-    uint64_t issued,expires;uint32_t caps,duration;bool on;
+    char profile_id[49],mode[8];
+    uint64_t issued,expires;uint32_t caps,duration,revision,seed;bool on,pending;
+    float temp_low,temp_high,humidity_low,humidity_high,temp_hyst,humidity_hyst;
 } Request;
 static Request cache[32];static unsigned used,next;
 static const char *role(void) {return sb_config_get()->role==SB_ENV?"ENV":"POSE";}
@@ -162,20 +165,22 @@ SbResult sb_wire_property(char *out,size_t cap) {
     return finish(o,out,cap);
 }
 SbResult sb_wire_heartbeat(char *out,size_t cap) {
-    SbClock t;SbSnapshot s;cJSON *o,*v;bool valid;
+    SbClock t;SbSnapshot s;SbRulesStatus rules;cJSON *o,*v;bool valid;
     if(sb_clock_get(&t)!=SB_OK||sb_pipeline_snapshot(&s)!=SB_OK)return SB_PLATFORM_ERROR;
     o=envelope(&t);if(!o)return SB_PLATFORM_ERROR;
     cJSON_AddStringToObject(o,"role",role());number(o,"caps",sb_config_get()->capabilities);
-    v=cJSON_AddObjectToObject(o,"sentry");cJSON_AddStringToObject(v,"state","UNKNOWN");number(v,"revision",0);
+    (void)sb_rules_status(&rules);
+    v=cJSON_AddObjectToObject(o,"sentry");
+    cJSON_AddStringToObject(v,"state",rules.sentry_armed?"ARMED":rules.sentry_arming?"ARMING":"DISARMED");number(v,"revision",rules.sentry_revision);
     unsigned k=sb_config_get()->role==SB_ENV?SB_INPUT_ENV:SB_INPUT_POSE;
     valid=s.present[k]&&s.frames[k].valid;
     cJSON_AddStringToObject(o,"sensor_quality",valid?(k==SB_INPUT_ENV?"VALID":"UNCALIBRATED"):"INVALID");
-    number(o,"pending_events",0);number(o,"overflow_total",sb_event_buffer_rejected());
+    number(o,"pending_events",sb_event_buffer_count());number(o,"overflow_total",sb_event_buffer_rejected());
     cJSON_AddArrayToObject(o,"lost_ranges");cJSON_AddStringToObject(o,"storage","DEGRADED");
     return finish(o,out,cap);
 }
 static bool decode(cJSON *o,Request *r) {
-    uint64_t n;cJSON *p=item(o,"params"),*on;
+    uint64_t n;cJSON *p=item(o,"params"),*on,*v;
     memset(r,0,sizeof(*r));
     if(!integer(o,"v",1,1,&n)||!text(o,"box_id",sb_config_get()->box_id)||!text(o,"node_id",sb_config_get()->node_id)||
        !string(o,"request_id",r->request,sizeof(r->request))||!string(o,"operation_id",r->operation,sizeof(r->operation))||
@@ -192,54 +197,108 @@ static bool decode(cJSON *o,Request *r) {
         if(!string(p,"kind",r->kind,sizeof(r->kind))||!integer(p,"duration_s",1,30,&n)||!cJSON_IsBool(on=item(p,"on")))return false;
         r->duration=(uint32_t)n;r->on=cJSON_IsTrue(on);
         if(strcmp(r->kind,"light")&&strcmp(r->kind,"fan")&&strcmp(r->kind,"indicator"))return false;
-    }
+    } else if(!strcmp(r->command,"sentry")) {
+        if(!cJSON_IsBool(on=item(p,"on"))||!integer(p,"duration_s",0,86400,&n))return false;
+        r->duration=(uint32_t)n;r->on=cJSON_IsTrue(on);
+        if(!integer(p,"sentry_revision",1,4294967295.0,&n))return false;
+        r->revision=(uint32_t)n;
+    } else if(!strcmp(r->command,"profile")) {
+        if(!string(p,"profile_id",r->profile_id,sizeof(r->profile_id)))return false;
+        v=item(p,"temp_min_c");if(!cJSON_IsNumber(v)||!isfinite(v->valuedouble))return false;r->temp_low=(float)v->valuedouble;
+        v=item(p,"temp_max_c");if(!cJSON_IsNumber(v)||!isfinite(v->valuedouble))return false;r->temp_high=(float)v->valuedouble;
+        v=item(p,"humi_min_pct");if(!cJSON_IsNumber(v)||!isfinite(v->valuedouble))return false;r->humidity_low=(float)v->valuedouble;
+        v=item(p,"humi_max_pct");if(!cJSON_IsNumber(v)||!isfinite(v->valuedouble))return false;r->humidity_high=(float)v->valuedouble;
+        v=item(p,"temp_hysteresis_c");if(!cJSON_IsNumber(v)||!isfinite(v->valuedouble))return false;r->temp_hyst=(float)v->valuedouble;
+        v=item(p,"humi_hysteresis_pct");if(!cJSON_IsNumber(v)||!isfinite(v->valuedouble))return false;r->humidity_hyst=(float)v->valuedouble;
+    } else if(!strcmp(r->command,"gps_mode")) {
+        if(!string(p,"mode",r->mode,sizeof(r->mode))||!integer(p,"seed",0,4294967295.0,&n))return false;
+        r->seed=(uint32_t)n;
+        if(strcmp(r->mode,"FIXED")&&strcmp(r->mode,"ROUTE")&&strcmp(r->mode,"WALK"))return false;
+    } else if(!strcmp(r->command,"calibrate")) {
+        if(p->child)return false;
+    } else return false;
+    if(!strcmp(r->command,"output")&&r->caps!=(strcmp(r->kind,"indicator")==0?16:strcmp(r->kind,"light")==0?2:4))return false;
+    if(!strcmp(r->command,"sentry")&&r->caps!=64)return false;
+    if(!strcmp(r->command,"profile")&&r->caps!=1)return false;
+    if(!strcmp(r->command,"gps_mode")&&r->caps!=32)return false;
+    if(!strcmp(r->command,"calibrate")&&r->caps!=8)return false;
     return true;
 }
 static bool same(const Request *a,const Request *b) {
-    return !strcmp(a->operation,b->operation)&&!strcmp(a->command,b->command)&&!strcmp(a->kind,b->kind)&&a->issued==b->issued&&a->expires==b->expires&&a->caps==b->caps&&a->duration==b->duration&&a->on==b->on;
+    return !strcmp(a->operation,b->operation)&&!strcmp(a->command,b->command)&&!strcmp(a->kind,b->kind)&&
+       !strcmp(a->profile_id,b->profile_id)&&!strcmp(a->mode,b->mode)&&a->issued==b->issued&&a->expires==b->expires&&a->caps==b->caps&&
+       a->duration==b->duration&&a->revision==b->revision&&a->seed==b->seed&&a->on==b->on&&
+       a->temp_low==b->temp_low&&a->temp_high==b->temp_high&&a->humidity_low==b->humidity_low&&a->humidity_high==b->humidity_high&&a->temp_hyst==b->temp_hyst&&a->humidity_hyst==b->humidity_hyst;
+}
+static const char *sentry_state(void) {
+    SbRulesStatus s;(void)sb_rules_status(&s);return s.sentry_armed?"ARMED":s.sentry_arming?"ARMING":"DISARMED";
+}
+static SbResult make_ack(const Request *r,char *out,size_t cap) {
+    SbClock now;cJSON *ack,*state;
+    if(sb_clock_get(&now)!=SB_OK)return SB_PLATFORM_ERROR;
+    ack=envelope(&now);if(!ack)return SB_PLATFORM_ERROR;
+    cJSON_AddStringToObject(ack,"request_id",r->request);cJSON_AddStringToObject(ack,"operation_id",r->operation);
+    cJSON_AddStringToObject(ack,"result",r->result);cJSON_AddStringToObject(ack,"code",r->code);state=cJSON_AddObjectToObject(ack,"actual_state");
+    if(!strcmp(r->command,"output")&&!strcmp(r->code,"completed")){cJSON_AddStringToObject(state,"kind",r->kind);cJSON_AddBoolToObject(state,"on",r->on);}
+    else if(!strcmp(r->command,"sentry")){cJSON_AddStringToObject(state,"sentry",sentry_state());number(state,"sentry_revision",r->revision);}
+    else if(!strcmp(r->command,"profile")&&!strcmp(r->code,"completed"))cJSON_AddStringToObject(state,"profile_id",r->profile_id);
+    else if(!strcmp(r->command,"gps_mode")&&!strcmp(r->code,"completed"))cJSON_AddStringToObject(state,"mode",r->mode);
+    else if(!strcmp(r->command,"calibrate"))cJSON_AddBoolToObject(state,"calibrated",!strcmp(r->code,"completed"));
+    return finish(ack,out,cap);
 }
 SbResult sb_wire_command(const char *payload,size_t length,bool retained,char *reply,size_t cap) {
-    Request r;SbClock now;cJSON *o=parse(payload,length),*ack,*state;unsigned i;bool cached=false;
+    Request r;SbClock now;cJSON *o=parse(payload,length);unsigned i;bool existing=false;
     if(!o||!decode(o,&r)){cJSON_Delete(o);return SB_INVALID_ARG;}
     if(sb_clock_get(&now)!=SB_OK){cJSON_Delete(o);return SB_PLATFORM_ERROR;}
+    if(retained){strcpy(r.result,"error");strcpy(r.code,"retained_command");cJSON_Delete(o);return make_ack(&r,reply,cap);}
+    for(i=0;i<used;++i)if(!strcmp(cache[i].request,r.request)){
+        if(!same(&cache[i],&r)){strcpy(r.result,"error");strcpy(r.code,"conflicting_request");cJSON_Delete(o);return make_ack(&r,reply,cap);}
+        r=cache[i];existing=true;break;
+    }
+    if(existing){cJSON_Delete(o);return r.pending?SB_NO_DATA:make_ack(&r,reply,cap);}
     strcpy(r.result,"error");strcpy(r.code,"invalid_params");
-    if(retained)strcpy(r.code,"retained_command");
-    else if(r.expires<=r.issued||r.expires-r.issued>15000) { /* reject invalid lifetime */ }
-    else {
-        for(i=0;i<used;++i)if(!strcmp(cache[i].request,r.request)) {
-            if(same(&cache[i],&r))r=cache[i];else strcpy(r.code,"conflicting_request");cached=true;break;
-        }
-        if(!cached) {
-            if((r.caps&sb_config_get()->capabilities)!=r.caps)strcpy(r.code,"unsupported_caps");
-            else if(!now.utc_valid)strcpy(r.code,"time_unsynced");
-            else if((uint64_t)now.utc_ms>=r.expires){strcpy(r.result,"expired");strcpy(r.code,"expired");}
-            /* issued_at is creation metadata, not a not-before/scheduled-action
-             * field in the frozen contract. Keep lifetime/order and expiry
-             * validation; a zero-skew lower bound rejects valid SNTP clocks. */
-            else if(strcmp(r.command,"output"))strcpy(r.code,"unsupported_command");
-            else {
-                SbOutputKind kind=!strcmp(r.kind,"light")?SB_LIGHT:!strcmp(r.kind,"fan")?SB_FAN:SB_INDICATOR;
-                unsigned required=kind==SB_INDICATOR?16:kind==SB_LIGHT?2:4;
-                if(r.caps!=required)strcpy(r.code,"unsupported_caps");
-                else {
-                    SbOutputRequest request={kind,r.on,r.duration*1000};SbResult rc=sb_output_set(&request);
-                    if(rc==SB_OK){strcpy(r.result,"ok");strcpy(r.code,"completed");}
-                    else strcpy(r.code,rc==SB_UNSUPPORTED_CAP?"unsupported_caps":"storage_error");
-                }
-            }
-            cache[next]=r;next=(next+1)%32;if(used<32)++used;
+    if(!now.utc_valid)strcpy(r.code,"time_unsynced");
+    else if(r.expires<=r.issued||r.expires-r.issued>15000)strcpy(r.code,"invalid_params");
+    else if((uint64_t)now.utc_ms>=r.expires){strcpy(r.result,"expired");strcpy(r.code,"expired");}
+    else if((r.caps&sb_config_get()->capabilities)!=r.caps)strcpy(r.code,"unsupported_caps");
+    else if(!strcmp(r.command,"output")){
+        SbOutputKind kind=!strcmp(r.kind,"light")?SB_LIGHT:!strcmp(r.kind,"fan")?SB_FAN:SB_INDICATOR;SbOutputRequest request={kind,r.on,r.duration*1000};
+        if(sb_output_set(&request)==SB_OK){strcpy(r.result,"ok");strcpy(r.code,"completed");}
+        else strcpy(r.code,"unsupported_caps");
+    } else if(!strcmp(r.command,"profile")){
+        if(sb_config_get()->role!=SB_ENV)strcpy(r.code,"unsupported_caps");
+        else if(sb_rules_apply_profile(r.temp_low,r.temp_high,r.humidity_low,r.humidity_high,r.temp_hyst,r.humidity_hyst,r.profile_id)==SB_OK){strcpy(r.result,"ok");strcpy(r.code,"completed");}
+    } else if(!strcmp(r.command,"gps_mode")){
+        if(sb_config_get()->role!=SB_POSE)strcpy(r.code,"unsupported_caps");
+        else if(sb_rules_set_gps_mode(!strcmp(r.mode,"FIXED")?SB_GPS_FIXED:!strcmp(r.mode,"ROUTE")?SB_GPS_ROUTE:SB_GPS_WALK,r.seed)==SB_OK){strcpy(r.result,"ok");strcpy(r.code,"completed");}
+    } else if(!strcmp(r.command,"calibrate")){
+        if(sb_config_get()->role!=SB_POSE)strcpy(r.code,"unsupported_caps");
+        else if(sb_rules_start_calibration()==SB_OK){r.pending=true;strcpy(r.result,"busy");strcpy(r.code,"completed");}
+    } else if(!strcmp(r.command,"sentry")){
+        SbRulesStatus s;(void)sb_rules_status(&s);
+        if(r.revision<=s.sentry_revision)strcpy(r.code,"stale_revision");
+        else if(sb_rules_set_sentry(r.revision,r.on,r.duration)==SB_OK){
+            if(r.on){r.pending=true;strcpy(r.result,"busy");strcpy(r.code,"completed");}
+            else {strcpy(r.result,"ok");strcpy(r.code,"completed");}
         }
     }
-    ack=envelope(&now);cJSON_Delete(o);if(!ack)return SB_PLATFORM_ERROR;
-    cJSON_AddStringToObject(ack,"request_id",r.request);cJSON_AddStringToObject(ack,"operation_id",r.operation);
-    cJSON_AddStringToObject(ack,"result",r.result);cJSON_AddStringToObject(ack,"code",r.code);state=cJSON_AddObjectToObject(ack,"actual_state");
-    if(!strcmp(r.code,"completed")){cJSON_AddStringToObject(state,"kind",r.kind);cJSON_AddBoolToObject(state,"on",r.on);}
-    return finish(ack,reply,cap);
+    if(!existing){cache[next]=r;next=(next+1)%32;if(used<32)++used;}
+    cJSON_Delete(o);return r.pending?SB_NO_DATA:make_ack(&r,reply,cap);
+}
+SbResult sb_wire_poll(char *reply,size_t cap) {
+    unsigned i;SbClock now;SbRulesStatus s;
+    if(sb_clock_get(&now)!=SB_OK||sb_rules_status(&s)!=SB_OK)return SB_PLATFORM_ERROR;
+    for(i=0;i<used;++i)if(cache[i].pending){Request *r=&cache[i];bool complete=false;
+        if(!strcmp(r->command,"sentry")&&r->on&&s.sentry_armed&&s.sentry_revision==r->revision)complete=true;
+        if(!strcmp(r->command,"calibrate")&&s.calibrated)complete=true;
+        if(complete){r->pending=false;strcpy(r->result,"ok");strcpy(r->code,"completed");return make_ack(r,reply,cap);}
+    }
+    return SB_NO_DATA;
 }
 SbResult sb_wire_box_state(const char *payload,size_t length) {
-    cJSON *o=parse(payload,length);uint64_t v;char id[65];bool valid=o&&integer(o,"v",1,1,&v)&&text(o,"box_id",sb_config_get()->box_id)&&text(o,"node_id",sb_config_get()->node_id)&&
+    cJSON *o=parse(payload,length);uint64_t v;char id[65];SbDoorState door=SB_DOOR_UNKNOWN;bool valid=o&&integer(o,"v",1,1,&v)&&text(o,"box_id",sb_config_get()->box_id)&&text(o,"node_id",sb_config_get()->node_id)&&
         (text(o,"door_state","OPEN")||text(o,"door_state","CLOSED")||text(o,"door_state","UNKNOWN"))&&
         string(o,"conclusion_id",id,sizeof(id))&&cJSON_IsFalse(item(o,"historical"))&&integer(o,"ts",0,9007199254740991.0,&v);
-    /* No suppression TTL or business action is inferred from this message. */
-    cJSON_Delete(o);return valid?SB_OK:SB_INVALID_ARG;
+    if(valid){if(text(o,"door_state","OPEN"))door=SB_DOOR_OPEN;else if(text(o,"door_state","CLOSED"))door=SB_DOOR_CLOSED;}
+    cJSON_Delete(o);return valid?sb_rules_box_state(door,false,id):SB_INVALID_ARG;
 }

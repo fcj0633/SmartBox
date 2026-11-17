@@ -4,12 +4,12 @@
 |---|---|
 | 阶段 | P3 |
 | 负责人 | 用户（独立开发与验收） |
-| 状态 | 待开始（详细设计已整理，尚未实施） |
+| 状态 | 进行中（软件实现已完成；后端集成复验与板端验证待完成） |
 | 依赖 | TASK-007；软件规则测试可提前 |
 | MOD | [MOD-01](../../requirements/modules/MOD-01-物流箱运行监测.md)、[MOD-02](../../requirements/modules/MOD-02-安全防护与哨兵.md)、[MOD-05](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md) |
 | 需求 | [REQ-M01-001](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-001)、[REQ-M01-002](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-002)、[REQ-M01-003](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-003)、[REQ-M01-004](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-004)、[REQ-M01-005](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-005)、[REQ-M01-006](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-006)、[REQ-M01-007](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-007)、[REQ-M01-008](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-008)、[REQ-M01-009](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-009)、[REQ-M01-010](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-010)、[REQ-M01-011](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-011)、[REQ-M01-012](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-012)、[REQ-M01-013](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-013)、[REQ-M01-014](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-014)、[REQ-M02-001](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-001)、[REQ-M02-002](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-002)、[REQ-M02-003](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-003)、[REQ-M02-004](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-004)、[REQ-M02-005](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-005)、[REQ-M02-006](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-006)、[REQ-M05-002](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-002)、[REQ-M05-003](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-003)、[REQ-M05-004](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-004)、[NFR-001](../../requirements/quality/性能与资源约束.md) |
 
-2026-11-17 按用户指令集中完善本文详细设计。**本轮只修改文档，没有编写或运行代码、没有新增迁移、没有启动服务或连接开发板**；实际结果仍以后续实施报告为准。TASK-008 状态保持“待开始”，不因本文完成升级为进行中或已验收。详细设计以本文为唯一入口，[固件架构](../../design/firmware/固件架构与SDK接入.md)、[后端模型](../../design/backend/后端模块与数据模型.md)、[页面设计](../../design/frontend/页面与状态设计.md)只保留职责和导航。
+2026-11-17 按用户指令执行 TASK-008。详细设计以本文为唯一入口，[固件架构](../../design/firmware/固件架构与SDK接入.md)、[后端模型](../../design/backend/后端模块与数据模型.md)、[页面设计](../../design/frontend/页面与状态设计.md)只保留职责和导航。实施记录将按真实代码、测试、迁移及板端证据追加；当前任务进行中，不表示已验收。
 
 ## 1. 任务目标、当前事实与交付边界
 
@@ -126,7 +126,7 @@
 | 恢复 | 连续 3 个有效帧满足回差方向，产生一次 `ENV_RECOVERED` |
 | 计数 | 无效帧、画像切换、进入/恢复后重新计数；不把单帧尖峰升级为异常 |
 | 事件 data | `metric`、`value`、`threshold`、`profile_id`；恢复事件同样带指标、当前值和阈值 |
-| 级别（建议，待确认） | 进入 `WARNING`、恢复 `INFO`；确认前不作为业务验收结论 |
+| 级别 | 按[CR-005](../../management/changes/CR-005-哨兵快速提示与事件级别.md)：进入 `WARNING`、恢复 `INFO` |
 
 **画像采用（Q-09/CR-004）**
 
@@ -158,12 +158,12 @@
 
 - 状态切换需持续 200ms 确认；边界回差 2°；初始状态直接按区间确定。
 - 加速度近零、无效或强动态期间不计算有意义的倾角；不产生 NaN/Infinity，不更新可信姿态；保留冲击候选。
-- 状态确认后产生 `POSE_CHANGED`，data 为 `previous_state`、`state`、`tilt_deg`；单次转换只产生一条（级别建议 `INFO`，待确认）。
+- 状态确认后产生 `POSE_CHANGED`，data 为 `previous_state`、`state`、`tilt_deg`；单次转换只产生一条，级别为 `INFO`（CR-005）。
 
 **冲击**
 
 - 候选条件 `abs(|a|-1g) > 0.5g`；记录峰值、发生时间、样本质量。
-- 相邻 1 秒内的候选合并为一次 `IMPACT`；data 为 `peak_g`、`duration_ms`、`quality`；级别建议 `WARNING`，待确认。
+- 相邻 1 秒内的候选合并为一次 `IMPACT`；data 为 `peak_g`、`duration_ms`、`quality`；级别为 `WARNING`（CR-005）。
 - 这是冲击演示，不声称区分真实跌落与其他运动；不得用摔裸板验证，先注入和安全动作。
 
 ### 3.3 门证据（REQ-M01-008～009）
@@ -204,12 +204,12 @@
 | 证据情况 | 门结论 | 置信度 | 依据/说明 |
 |---|---|---|---|
 | 双源 OPEN，时间差 ≤2s，双节点在线，时间不确定度各 ≤500ms | OPEN | HIGH | REQ-M01-010 明确条件 |
-| 双源 OPEN，时间差 ≤2s，但节点离线/质量不满足 | OPEN | MEDIUM | 降级映射，本任务实现约定，待确认是否接受 |
+| 双源 OPEN，时间差 ≤2s，但节点离线/质量不满足 | OPEN | MEDIUM | 降级映射；仅当当前有效规则允许该结论时应用，不可据此宣称在线高置信 |
 | 仅 TILT OPEN 且 >60° | OPEN | MEDIUM | REQ-M01-010 明确 |
 | 仅 TILT OPEN 且 25～60° | UNKNOWN | INSUFFICIENT | “仅倾斜”，不生成开门 |
 | 仅 LIGHT OPEN | UNKNOWN | INSUFFICIENT | 生成光照异常事件/派生记录；门不变 |
 | 双源 CLOSE，时间差 ≤2s 且质量满足 | CLOSED | HIGH | 双源条件 |
-| 双源 CLOSE 但质量不满足 | CLOSED | MEDIUM | 降级映射，待确认 |
+| 双源 CLOSE 但质量不满足 | CLOSED | MEDIUM | 降级映射；时间与证据质量不满足的剩余情形保持 UNKNOWN/INSUFFICIENT |
 | 单源 CLOSE（任意 kind） | UNKNOWN | INSUFFICIENT | REQ-M01-010 明确“单源关门维持 UNKNOWN” |
 | 未校时/时间质量不明 | 双源不生成 HIGH，按降级映射；单源按单源规则 | LOW/INSUFFICIENT 或单源规则 | 不伪造 UTC；历史双源质量属 Q-11 |
 | 迟到配对超过等待窗 | 按单源结论并标记 `unfused` | 不高于单源规则 | 不强行凑高置信 |
@@ -252,7 +252,7 @@
 - 已布防时，倾角异常确认、冲击候选、未经补光污染的光照突变候选触发本地提示并生成 `SENTRY_INTRUSION` 事件候选（真实板远程发送随 TASK-009 事件链路）；不得等待云端门融合或 1.5 秒门证据。
 - `reason` 取 `LIGHT`、`POSE`、`IMPACT` 之一；带 `sentry_revision`；级别为 `CRITICAL`。
 - 本地输出要求 ≤1 秒；ENV 提示灯/风扇、POSE 提示指示灯，不使用蜂鸣器或振动器承诺。
-- **待确认**：本地提示的输出组合与持续时间需求未给出（只规定 ≤1 秒响应）。实施前由用户确认；确认前文档不把它写成已确认规则，验收只验证“有效快速异常后 1 秒内出现本地输出”，不规定具体组合。
+- 本地提示按 CR-005 使用灯光：ENV 补光灯、POSE 指示灯；不启动风扇，持续 10 秒后自动关闭。异常确认后 1 秒内开始提示。该规则不改变断网本地响应要求。
 - 断网仍保持本地布防与快速响应；到期按单调时间撤防并记录；0 不自动到期。
 - 重启后 RAM 状态丢失，当前无持久状态时节点报告 `DISARMED`（这是重启后的真实本地状态）；TASK-009 增加持久恢复后按 Q-10 显示恢复或 `DEGRADED`，不假装已恢复布防。
 
@@ -273,9 +273,9 @@
 - 门结论不是告警；门状态与告警分别表达，不互相覆盖。
 - 不提供人工已读/确认/处理/关闭；级别不等于人工处理进度。
 
-### 3.8 事件级别映射（建议，待确认）
+### 3.8 事件级别映射（CR-005已确认）
 
-有效契约要求事件带 `level`。已确认只有“哨兵侵入为 CRITICAL”；其余映射为实施建议，确认前不作为业务验收结论：`ENV_HIGH`/`ENV_LOW`/`IMPACT`/`GEOFENCE_EXIT` 建议 `WARNING`；`ENV_RECOVERED`/`POSE_CHANGED`/`DOOR_EVIDENCE`/`GEOFENCE_ENTER` 建议 `INFO`；`STORAGE_OVERFLOW`/`DEVICE_FAULT` 由生产者按实际严重度填写（TASK-009 完善）。
+有效契约要求事件带 `level`。按 CR-005：`SENTRY_INTRUSION=CRITICAL`；`ENV_HIGH`/`ENV_LOW`/`IMPACT`/`GEOFENCE_EXIT=WARNING`；`ENV_RECOVERED`/`POSE_CHANGED`/`DOOR_EVIDENCE`/`GEOFENCE_ENTER=INFO`。`STORAGE_OVERFLOW`/`DEVICE_FAULT` 仍由生产者按其故障语义处理，TASK-009完善；不属于CR-005映射范围。
 
 ## 4. 端到端数据流与职责
 
@@ -484,7 +484,7 @@ flowchart LR
 | 步骤 | 输入 | 动作 | 产出 | 检查/完成条件 | 失败处理 |
 |---|---|---|---|---|---|
 | S1 输入/门槛 | 本文、TASK-007、有效契约、Q 项 | 核对版本、参数、Q 状态、测试环境 | 实施基线与受阻清单 | 每条规则有来源、每个 Q 有处理边界 | 不猜规则/凭据；受阻项先确认 |
-| S2 固件规则 | S1、固件类型/时钟/配置 | 实现 `sb_rules` 纯规则与宿主测试 | 规则、测试、参数常量 | 第 3 节边界与 R01～R07 宿主测试通过 | 不以模拟替代 C 测试 |
+| S2 固件规则 | S1、固件类型/时钟/配置 | 实现 `sb_rules` 纯规则与宿主测试 | 规则、测试、参数常量 | 固件侧 R01～R06、R11部分、R12/R13组件规则测试通过 | R07/R08/R09属于后端融合，不能列作固件宿主测试；不以模拟替代 C 测试 |
 | S3 事件候选/网络 | S2、wire/network/缓冲 | 事件候选结构、`box_state` 窗口；不实现真实板 `event` 发送 | 候选缓冲与抑制 | 候选计数/心跳 DEGRADED、`box_state` 起窗 | 不提前发布未持久事件 |
 | S4 证据/融合/迁移 | S3、V1～V9、契约 | V10～V12、证据登记、等待配对、结论幂等 | 后端融合与派生表 | 真实 MySQL 事务/并发/重启恢复 | 冲突不覆盖；不造重复结论 |
 | S5 告警/快照/WS | S4、查询/WS 既有代码 | 告警状态、door/alarm 快照、event_feed、alarm 推送 | 业务视图与实时通知 | 四角色投影、UNKNOWN 语义、告警变化 | 不用未知冒充正常 |
@@ -547,10 +547,13 @@ flowchart LR
 
 ### 12.4 实际记录
 
-2026-11-17：按用户指令完善本文详细设计，实际执行者为当前 AI 编码代理，用户独立验收。本轮只改文档；未编写/编译代码、未新增迁移、未启动 Broker/后端/前端、未连接开发板，因此没有软件运行或板端证据。
+2026-11-17：在前期详细设计基础上实施固件规则模块、后端 V10～V12、模拟器规则场景及网页门/告警视图，详细结果见[实施报告](../../testing/reports/TASK-008-核心规则与业务视图实施报告.md)。ENV/POSE SDK 编译链接、Ubuntu C 宿主组件/规则测试 22 项、SDK 端口/启动/Wi-Fi 检查、模拟器 40 项、后端单元 30 项、前端单元 16 项、隔离浏览器 12 项、契约和文档检查通过。
+
+两角色构建已归档且 SDK 原学习入口与输出恢复成功。后端较早一轮 44 项集成通过；后续新增两项集成用例后，本轮复跑在 Java 21 本机 NIO selector 初始化阶段失败，未能复验最新后端真实集成，不能记为通过。当前没有识别到已连接板端；新固件尚未烧录和执行规则场景。现有 1883/8080/5173 硬件模式进程保持运行，未由本轮停止或重配。TASK-008 仍进行中，后端隔离数据库复验与 ENV/POSE 实板操作是剩余验收工作；事件持久化/发布及 Q-04/05/06/07/08/10/11 仍不在已完成结论内。
 
 ## 13. 本轮文档整理记录
 
-- 整理范围：本文第 1～12 节；同步 TC-001～005/008 的“TASK-008 适用验证层次（计划）”、后端/固件/网页设计的任务入口和[当前进度](../../management/当前进度.md)。
+- 本节记录实施前的详细设计阶段，不代表当前实现状态。实施后的测试和限制以[实际报告](../../testing/reports/TASK-008-核心规则与业务视图实施报告.md)为准。
+- 整理范围：本文第 1～12 节；同步 TC-001～005/008 的 TASK-008 适用验证层次、后端/固件/网页设计的任务入口和[当前进度](../../management/当前进度.md)。
 - 未改变：需求正文与编号、冻结契约、有效契约、V1～V9 迁移、源码、测试、配置、历史报告；未新增 Q/CR/ADR/RSK 编号。
 - 未完成：第 2.4 节待确认语义、板端验证和所有实现工作；这些必须在后续按 S1 门槛和用户确认推进。

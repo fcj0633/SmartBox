@@ -131,6 +131,9 @@ public class LiveWebSocket extends TextWebSocketHandler implements HandshakeInte
                 for(var row:db.rows("SELECT event_id,payload FROM event_views WHERE box_id=? AND received_at>=? ORDER BY event_id LIMIT 100",box,client.since)){
                     if(client.sent.add("ev:"+row.get("event_id")))offer(client,new Notice("box_event",box,null,json.json(row.get("payload"))));
                 }
+                for(var row:db.rows("SELECT view_id,payload FROM box_domain_views WHERE box_id=? AND received_at>=? ORDER BY received_at,view_id LIMIT 100",box,client.since)){
+                    if(client.sent.add("dv:"+row.get("view_id")))offer(client,new Notice("box_event",box,null,json.json(row.get("payload"))));
+                }
             }
             // Bounded duplicate window; WS is best effort and REST is the recovery path.
             if(client.sent.size()>2048){client.sent.clear();client.since=now;}

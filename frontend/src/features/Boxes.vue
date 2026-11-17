@@ -105,6 +105,6 @@ function sampleTag(box: Box) {
 
   <section class="disclaimer-strip">
     <span class="disclaimer-icon">i</span>
-    <div><strong>状态说明</strong><p>当前页面展示的是服务端实际返回的最新快照。告警与门状态在判断器未接入时保持“未知”；GPS 为模拟定位，不代表真实运输位置。</p></div>
+    <div><strong>状态说明</strong><p>当前页面展示的是服务端实际返回的最新快照。告警或门状态为“未知”时表示没有足够证据或尚未评估，不代表正常；GPS 为模拟定位，不代表真实运输位置。</p></div>
   </section>
 </template>

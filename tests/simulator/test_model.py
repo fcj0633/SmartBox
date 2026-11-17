@@ -98,6 +98,27 @@ class ModelTests(unittest.TestCase):
         self.model.acknowledged({'boot_id':1,'event_seqs':[7,9,999]})
         self.assertIn(8,self.model.pending);self.assertNotIn(7,self.model.pending)
         self.assertEqual('DEGRADED',self.model.heartbeat()['storage'])
+    def test_task008_rule_scenarios_use_confirmed_severity_and_schema(self):
+        scenarios={'rules-env-high':('ENV','ENV_HIGH','WARNING'),
+                   'rules-env-cycle':('ENV','ENV_HIGH','WARNING'),
+                   'rules-pose':('POSE','POSE_CHANGED','INFO'),
+                   'rules-impact':('POSE','IMPACT','WARNING'),
+                   'rules-door':('ENV','DOOR_EVIDENCE','INFO'),
+                   'rules-geofence':('POSE','GEOFENCE_EXIT','WARNING'),
+                   'rules-sentry':('ENV','SENTRY_INTRUSION','CRITICAL')}
+        for name,(role,event_type,level) in scenarios.items():
+            node='BOX-0001-'+role
+            atomic_json(self.dir/(node+'.json'),{'node_id':node,'boot_id':0,'sentry_revision':1})
+            model=Model(role,IdentityState(self.dir,node),monotonic=self.clock.mono,utc=self.clock.utc)
+            events=model.rule_events(name)
+            self.assertGreaterEqual(len(events),1,name)
+            self.assertEqual(event_type,events[0]['type'],name)
+            self.assertEqual(level,events[0]['level'],name)
+            envelope={**model.up(),'events':events}
+            self.protocol.validate('box/BOX-0001/'+node+'/event',pack(envelope),1,
+                                   identity={'box_id':'BOX-0001','node_id':node},caps=model.caps)
+        recovered=self.model.event('ENV_RECOVERED',{'metric':'temp_c','value':7,'threshold':8,'profile_id':'SIM-DEFAULT'})
+        self.assertEqual('INFO',recovered['level'])
     def test_wrong_boot_confirmation_and_original_time(self):
         e=self.model.event();self.clock.value=10
         with self.assertRaises(Rejected):self.model.acknowledged({'boot_id':2,'event_seqs':[1]})

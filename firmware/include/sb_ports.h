@@ -11,6 +11,8 @@ SbResult sb_clock_init(void);
 SbResult sb_clock_get(SbClock *out);
 SbResult sb_sensor_init(void);
 SbResult sb_sensor_read(SbInputKind kind, SbSensorFrame *out);
+SbResult sb_sensor_set_gps_mode(SbGpsMode mode,uint32_t seed);
+uint32_t sb_sensor_location_period_ms(void);
 SbResult sb_output_init(void);
 SbResult sb_output_set(const SbOutputRequest *request);
 SbResult sb_output_get(SbOutputKind kind, SbOutputState *out);
@@ -22,6 +24,7 @@ SbResult sb_event_buffer_init(void);
 SbResult sb_event_buffer_put(const SbEventCandidate *item);
 SbResult sb_event_buffer_get(SbEventCandidate *out);
 uint64_t sb_event_buffer_rejected(void);
+uint32_t sb_event_buffer_count(void);
 SbResult sb_network_poll(void);
 SbResult sb_network_publish(const SbEventCandidate *item);
 /* Advance to the first deadline strictly after now; no burst catch-up. */

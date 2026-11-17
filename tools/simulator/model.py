@@ -48,11 +48,12 @@ class Model:
             if self.location is None or self.mono()>=self.location_due:
                 if self.location_step==U32:raise Exhausted('location sequence exhausted')
                 self.location_step+=1
-                step=(0 if self.mode=='FIXED' else
-                      ((self.location_step+self.seed)%20)*0.00001 if self.mode=='ROUTE' else
-                      self.rng.uniform(-0.0001,0.0001))
-                self.location={'lat':round(30+step,7) if valid else None,
-                               'lon':round(120+step,7) if valid else None,'valid':valid,'src':'MOCK',
+                route=(0 if self.mode=='FIXED' else ((self.location_step+self.seed)%20)*0.00001 if self.mode=='ROUTE' else 0)
+                noise_m=0 if self.mode=='FIXED' else self.rng.choice((-5,-4,-3,3,4,5))
+                latitude=30+route+noise_m/111320.0
+                longitude=120+route+noise_m/96400.0
+                self.location={'lat':round(latitude,7) if valid else None,
+                               'lon':round(longitude,7) if valid else None,'valid':valid,'src':'MOCK',
                                'observation':{'sample_seq':self.location_step,**self.stamp()}}
                 self.location_due=self.mono()+(10 if self.mode=='FIXED' else 1)
             out['loc']=copy.deepcopy(self.location)
@@ -63,11 +64,14 @@ class Model:
                 'sensor_quality':'INVALID' if self.invalid else 'VALID',
                 'pending_events':len(self.pending),'overflow_total':self.overflow,
                 'lost_ranges':copy.deepcopy(self.lost),'storage':'DEGRADED'}
-    def event(self):
+    def event(self,event_type='DEVICE_FAULT',data=None,level=None,src='SIMULATOR'):
         if self.seq==U32: raise Exhausted('event sequence exhausted')
         self.seq+=1
-        event={**self.stamp(),'event_seq':self.seq,'type':'DEVICE_FAULT','src':'SIMULATOR',
-               'level':'INFO','data':{'component':'simulation','code':'TEST_INPUT'},'replayed':False}
+        if level is None:
+            level='CRITICAL' if event_type=='SENTRY_INTRUSION' else 'WARNING' if event_type in {'ENV_HIGH','ENV_LOW','IMPACT','GEOFENCE_EXIT'} else 'INFO'
+        payload=data if data is not None else {'component':'simulation','code':'TEST_INPUT'}
+        event={**self.stamp(),'event_seq':self.seq,'type':event_type,'src':src,
+               'level':level,'data':copy.deepcopy(payload),'replayed':False}
         if len(self.pending)==64:
             seq,_=self.pending.popitem(last=False);self.sent.discard(seq);self.overflow+=1
             if self.lost and self.lost[-1]['last_seq']+1==seq:
@@ -75,6 +79,24 @@ class Model:
             else:self.lost.append({'boot_id':self.boot,'first_seq':seq,'last_seq':seq})
         self.pending[self.seq]=event
         return copy.deepcopy(event)
+    def rule_events(self,scenario):
+        """Emit deterministic event inputs for real Broker/backend software tests."""
+        if scenario=='rules-env-high':return [self.event('ENV_HIGH',{'metric':'temp_c','value':9,'threshold':8,'profile_id':'SIM-DEFAULT'},src='ENV')]
+        if scenario=='rules-env-cycle':return [
+            self.event('ENV_HIGH',{'metric':'temp_c','value':9,'threshold':8,'profile_id':'SIM-DEFAULT'},src='ENV'),
+            self.event('ENV_RECOVERED',{'metric':'temp_c','value':7,'threshold':7,'profile_id':'SIM-DEFAULT'},src='ENV')]
+        if scenario=='rules-pose':return [self.event('POSE_CHANGED',{'previous_state':'NORMAL','state':'TILTED','tilt_deg':20},src='POSE')]
+        if scenario=='rules-impact':return [self.event('IMPACT',{'peak_g':1.7,'duration_ms':80,'quality':'VALID'},src='POSE')]
+        if scenario=='rules-door':
+            if self.role=='ENV':return [self.event('DOOR_EVIDENCE',{'action':'OPEN','lux':120,'actuator_excluded':True},src='LIGHT')]
+            return [self.event('DOOR_EVIDENCE',{'action':'OPEN','tilt_deg':70,'actuator_excluded':True},src='TILT')]
+        if scenario=='rules-geofence':
+            if self.role!='POSE':raise ValueError('rules-geofence requires POSE role')
+            return [self.event('GEOFENCE_EXIT',{'lat':30.001,'lon':120.001,'distance_m':157,'src':'MOCK'},src='MOCK')]
+        if scenario=='rules-sentry':
+            reason='LIGHT' if self.role=='ENV' else 'POSE'
+            return [self.event('SENTRY_INTRUSION',{'reason':reason,'sentry_revision':max(1,self.revision)},src=reason)]
+        raise ValueError('unknown rule scenario')
     def batches(self):
         batch=[]
         for seq,event in self.pending.items():

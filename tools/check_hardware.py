@@ -34,7 +34,7 @@ with tempfile.TemporaryDirectory(prefix='smartbox-hardware-') as td:
 '''
 def main():
     p=argparse.ArgumentParser(description=__doc__);connection_arguments(p);p.add_argument('--sdk-root',type=Path,required=True);p.add_argument('--report',type=Path,required=True);a=p.parse_args()
-    sources=['firmware/'+x for x in ['drivers/sb_sensor_real.c','drivers/sb_output_real.c','services/sb_boot.c','services/sb_clock.c','services/sb_config.c','services/sb_event_buffer.c','domain/sb_pipeline.c','services/sb_wire.c','services/sb_sntp.c']]+['tests/firmware/hardware/test_hardware.c','sdk-json/cJSON.c']
+    sources=['firmware/'+x for x in ['drivers/sb_sensor_real.c','drivers/sb_output_real.c','services/sb_boot.c','services/sb_clock.c','services/sb_config.c','services/sb_event_buffer.c','domain/sb_rules.c','domain/sb_pipeline.c','services/sb_wire.c','services/sb_sntp.c']]+['tests/firmware/hardware/test_hardware.c','sdk-json/cJSON.c']
     files={f.relative_to(ROOT).as_posix():base64.b64encode(f.read_bytes()).decode() for parent in ['firmware/include','tests/firmware/hardware'] for f in (ROOT/parent).rglob('*') if f.is_file() and f.name!='sb_local_config.h'}
     files.update({s:base64.b64encode((ROOT/s).read_bytes()).decode() for s in sources if not s.startswith('sdk-json/')})
     for name in ['cJSON.h','cJSON.c']:files['sdk-json/'+name]=base64.b64encode((a.sdk_root/'third_party/cJSON'/name).read_bytes()).decode()

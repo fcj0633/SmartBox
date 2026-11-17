@@ -28,7 +28,7 @@ const connectivityClass = computed(() => session.box?.connectivity === 'ONLINE' 
 const alarmText = computed(() => {
   const alarm = session.box?.alarm;
   if (!alarm || alarm.assessment !== 'EVALUATED') return '尚未完成评估';
-  return alarm.active ? '存在活动告警' : '无活动告警';
+  return alarm.active ? `存在${label(alarm.level)}级活动告警` : '无活动告警';
 });
 function nodeStatusClass(online: boolean) { return online ? 'status-good' : 'status-warning'; }
 function capText(caps: number) {
@@ -62,10 +62,10 @@ function capText(caps: number) {
         <div class="state-card-symbol symbol-amber">◉</div><div class="state-card-content"><span>环境判定</span><strong>尚未评估</strong><small>物品画像规则引擎未接入</small></div><span class="state-tag status-neutral"><i></i>UNKNOWN</span>
       </article>
       <article class="detail-state-card">
-        <div class="state-card-symbol symbol-red">!</div><div class="state-card-content"><span>告警状态</span><strong>{{ alarmText }}</strong><small>未知状态不代表环境正常</small></div><span class="state-tag status-neutral"><i></i>{{ session.box.alarm.assessment }}</span>
+        <div class="state-card-symbol symbol-red">!</div><div class="state-card-content"><span>告警状态</span><strong>{{ alarmText }}</strong><small>未知状态不代表环境正常</small></div><span class="state-tag" :class="session.box.alarm.assessment === 'EVALUATED' && session.box.alarm.active ? 'status-warning' : 'status-neutral'"><i></i>{{ session.box.alarm.assessment === 'EVALUATED' ? label(session.box.alarm.level) : '待评估' }}</span>
       </article>
       <article class="detail-state-card">
-        <div class="state-card-symbol symbol-blue">⌑</div><div class="state-card-content"><span>门状态</span><strong>{{ label(session.box.door.state) }}</strong><small>当前结论可信度：{{ label(session.box.door.confidence) }}</small></div><span class="state-tag status-neutral"><i></i>{{ session.box.door.confidence }}</span>
+        <div class="state-card-symbol symbol-blue">⌑</div><div class="state-card-content"><span>门状态</span><strong>{{ label(session.box.door.state) }}</strong><small>当前结论可信度：{{ label(session.box.door.confidence) }}<template v-if="session.box.door.historical"> · 历史结论，不代表当前状态</template></small></div><span class="state-tag status-neutral"><i></i>{{ label(session.box.door.confidence) }}</span>
       </article>
       <article v-if="session.box.sentry && canDiagnose(session.user?.role)" class="detail-state-card">
         <div class="state-card-symbol symbol-green">⌁</div><div class="state-card-content"><span>哨兵状态</span><strong>{{ label(session.box.sentry.state) }}</strong><small>修订版本 {{ String(session.box.sentry.revision) }}</small></div><span class="state-tag" :class="session.box.sentry.state === 'ARMED' ? 'status-good' : 'status-neutral'"><i></i>{{ session.box.sentry.state }}</span>
@@ -99,7 +99,7 @@ function capText(caps: number) {
     </section>
 
     <section class="disclaimer-strip detail-disclaimer">
-      <span class="disclaimer-icon">i</span><div><strong>当前能力边界</strong><p>真实双板已验证基础采集与三项输出；温湿度阈值判定、3帧去抖、姿态/冲击完整算法、门融合与告警判断仍待 TASK-008。GPS 当前为 MOCK。控制成功以节点实际回执为准。</p></div>
+      <span class="disclaimer-icon">i</span><div><strong>当前能力边界</strong><p>TASK-008 正在加入环境、姿态、冲击、门证据、围栏和哨兵规则，并由本页显示服务端评估结果；UNKNOWN 仍表示证据不足或尚未评估，不代表正常。真实双板当前已验证基础采集与输出，规则事件尚未由固件发布，GPS 为 MOCK。控制成功以节点实际回执为准。</p></div>
     </section>
   </template>
 </template>

@@ -108,7 +108,10 @@ class Node:
                             self.retry=0;self.publish('availability',{'node_id':node,'boot_id':self.model.boot,'online':True})
                             next_property=next_heartbeat=next_events=0
                             if not generated:
-                                for _ in range(self.event_count):self.model.event()
+                                if self.scenario.startswith('rules-'):
+                                    self.model.rule_events(self.scenario)
+                                else:
+                                    for _ in range(self.event_count):self.model.event()
                                 generated=True
                         while self.received:self.process(self.received.popleft())
                         for ack in self.model.tick():self.publish('command_ack',ack)

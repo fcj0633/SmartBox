@@ -15,7 +15,7 @@ def main():
     parser.add_argument('--config',type=Path)
     parser.add_argument('--run-dir',type=Path)
     parser.add_argument('--role',choices=['ENV','POSE'],default='ENV')
-    parser.add_argument('--scenario',choices=['normal','unsynced','invalid'],default='normal')
+    parser.add_argument('--scenario',choices=['normal','unsynced','invalid','rules-env-high','rules-env-cycle','rules-pose','rules-impact','rules-door','rules-geofence','rules-sentry'],default='normal')
     parser.add_argument('--events',type=int,default=1)
     parser.add_argument('--seed',type=int,default=1)
     parser.add_argument('--stop-file',type=Path)

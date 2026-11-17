@@ -7,6 +7,9 @@
 #include <string.h>
 static bool ready;
 static uint32_t loc_seq;
+static SbGpsMode gps_mode=SB_GPS_FIXED;static uint32_t gps_seed=1;
+SbResult sb_sensor_set_gps_mode(SbGpsMode mode,uint32_t seed){if(mode<SB_GPS_FIXED||mode>SB_GPS_WALK)return SB_INVALID_ARG;gps_mode=mode;gps_seed=seed?seed:1;return SB_OK;}
+uint32_t sb_sensor_location_period_ms(void){return gps_mode==SB_GPS_FIXED?10000:1000;}
 static SbResult setup(void) {
     const uint8_t light[]={0x01}, continuous[]={0x10}, sht[]={0x22,0x36};
     const uint8_t mpu[][2]={{0x6b,0x80},{0x6b,0},{0x38,0},{0x6a,0},
@@ -43,8 +46,16 @@ SbResult sb_sensor_read(SbInputKind kind,SbSensorFrame *out) {
     memset(out,0,sizeof(*out)); out->role=c->role; out->kind=kind; out->source=SB_SOURCE_REAL;
     if(sb_clock_get(&out->clock)!=SB_OK) return SB_PLATFORM_ERROR;
     if(kind==SB_INPUT_LOCATION) {
+        if(loc_seq==UINT32_MAX){out->valid=false;return SB_OK;}
         out->source=SB_SOURCE_MOCK; out->valid=true;
-        out->value.location.latitude_deg=31.2304; out->value.location.longitude_deg=121.4737;
+        uint32_t n=loc_seq+gps_seed;
+        if(gps_mode==SB_GPS_FIXED){out->value.location.latitude_deg=31.2304;out->value.location.longitude_deg=121.4737;}
+        else {int noise;uint32_t sample_seed;
+            if(gps_mode==SB_GPS_WALK)gps_seed=gps_seed*1664525u+1013904223u;
+            sample_seed=gps_mode==SB_GPS_WALK?gps_seed:gps_seed+n*7919u;
+            noise=3+(int)((sample_seed>>16)%3);if(sample_seed&1)noise=-noise;
+            out->value.location.latitude_deg=31.2304+(gps_mode==SB_GPS_ROUTE?0.0001*(n%5):0)+(double)noise/111320.0;
+            out->value.location.longitude_deg=121.4737+(gps_mode==SB_GPS_ROUTE?0.00008*(n%5):0)+(double)noise/95100.0;}
         out->sample_seq=++loc_seq; return SB_OK;
     }
     if(!ready) ready=setup()==SB_OK;

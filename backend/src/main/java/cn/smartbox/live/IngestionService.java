@@ -119,6 +119,7 @@ public class IngestionService {
                     box,node,boot,seq,nullable(event,"ts"),event.path("ts_src").asText(),new BigDecimal(event.path("uptime_ms").bigIntegerValue()),nullable(event,"time_uncertainty_ms"),now,now,event.path("type").asText(),event.path("src").asText(),event.path("level").asText(),event.path("replayed").asBoolean(),json.text(event.path("data")),json.text(event),hash);
                 long id=((Number)db.one("SELECT id FROM events WHERE node_id=? AND boot_id=? AND event_seq=?",node,boot,seq).get("id")).longValue();
                 db.update("INSERT INTO processing_outbox(event_id,task_type,next_attempt_at,created_at,updated_at) VALUES(?,'EVENT_VIEW',?,?,?)",id,now,now,now);
+                db.update("INSERT INTO processing_outbox(event_id,task_type,next_attempt_at,created_at,updated_at) VALUES(?,'DOMAIN_EVENT',?,?,?)",id,now,now,now);
             }
             if(!keys.contains(seq))keys.add(seq);
         }

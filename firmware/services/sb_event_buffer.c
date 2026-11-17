@@ -24,3 +24,7 @@ uint64_t sb_event_buffer_rejected(void) {
     if (lock<0) return UINT64_MAX;
     value=rejected; sb_platform_unlock(lock); return value;
 }
+uint32_t sb_event_buffer_count(void) {
+    uint32_t value;int32_t lock=sb_platform_lock();if(lock<0)return UINT32_MAX;
+    value=count;sb_platform_unlock(lock);return value;
+}

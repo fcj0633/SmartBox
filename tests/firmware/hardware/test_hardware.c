@@ -67,7 +67,7 @@ int main(void){
     tick+=500;CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_OK&&writes==n+1);
     command(raw,"valid",caps,kind,false,2);CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_OK&&strstr(reply,"conflicting_request")&&writes==n+1);
     command(raw,"retained",caps,kind,true,2);CHECK(sb_wire_command(raw,strlen(raw),true,reply,sizeof(reply))==SB_OK&&strstr(reply,"retained_command"));
-    command(raw,"badcaps",127,kind,true,2);CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_OK&&strstr(reply,"unsupported_caps"));
+    command(raw,"badcaps",env?16:2,env?"indicator":"light",true,2);CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_OK&&strstr(reply,"unsupported_caps"));
     command(raw,"badparams",caps,kind,true,31);CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_INVALID_ARG);
     command(raw,"expired",caps,kind,true,2);tick+=16000;CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_OK&&strstr(reply,"expired"));
     CHECK(sb_wire_command("{\"v\":1,\"v\":1}",13,false,reply,sizeof(reply))==SB_INVALID_ARG);

@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix='smartbox-components-') as td:
         binary=root/role
         cmd=['gcc','-std=c99','-Wall','-Wextra','-Werror','-Wno-misleading-indentation','-g',
              '-DSB_ROLE_'+role+'=1','-I'+str(root/'firmware/include'),'-I'+str(root/'tests/firmware'),
-             *[str(root/p) for p in payload['sources']],'-o',str(binary)]
+             *[str(root/p) for p in payload['sources']],'-lm','-o',str(binary)]
         subprocess.run(cmd,check=True)
         for mode in [-1,*range(1,9)]:
             p=subprocess.run([str(binary),str(mode)],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=10)
@@ -37,7 +37,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__);connection_arguments(p);p.add_argument('--report',type=Path)
     args=p.parse_args()
     files={f.relative_to(ROOT).as_posix():base64.b64encode(f.read_bytes()).decode() for parent in ['firmware','tests/firmware'] for f in (ROOT/parent).rglob('*') if f.is_file()}
-    sources=['firmware/'+name for name in ['app/smartbox_tasks.c','domain/sb_pipeline.c','drivers/sb_sensor_mock.c','drivers/sb_output_mock.c','drivers/sb_platform_cmsis.c','services/sb_config.c','services/sb_clock.c','services/sb_event_buffer.c','services/sb_network_stub.c']]+['tests/firmware/test_components.c']
+    sources=['firmware/'+name for name in ['app/smartbox_tasks.c','domain/sb_pipeline.c','domain/sb_rules.c','drivers/sb_sensor_mock.c','drivers/sb_output_mock.c','drivers/sb_platform_cmsis.c','services/sb_config.c','services/sb_clock.c','services/sb_event_buffer.c','services/sb_network_stub.c']]+['tests/firmware/test_components.c']
     code,output=remote_python(args,REMOTE,{'files':files,'sources':sources},check=False)
     print(output,end='')
     if args.report:args.report.parent.mkdir(parents=True,exist_ok=True);args.report.write_text(output,encoding='utf-8')

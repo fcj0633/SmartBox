@@ -52,7 +52,7 @@ class WebSocketIT {
         org.mockito.Mockito.when(clock.instant()).thenAnswer(i->Instant.ofEpochMilli(now.get()));
         TestDatabaseGuard.require(System.getenv("SPRING_PROFILES_ACTIVE"),System.getenv("SMARTBOX_DB_URL"),db.queryForObject("SELECT DATABASE()",String.class),db.queryForObject("SELECT CURRENT_USER()",String.class),System.getenv("SMARTBOX_TEST_ALLOW_RESET"));
         new TransactionTemplate(manager).executeWithoutResult(status->{
-            for(String table:List.of("command_receipts","command_dispatch","event_views","location_samples","node_runtime","audit_logs","idempotency_records","node_commands","command_operations","processing_outbox","events","node_latest","telemetry","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
+            for(String table:List.of("command_receipts","command_dispatch","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","location_samples","node_runtime","audit_logs","idempotency_records","node_commands","command_operations","processing_outbox","events","node_latest","telemetry","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
         });
         fixture=json.readTree(Files.readString(Path.of(System.getenv("SMARTBOX_BOOTSTRAP_FILE"))));bootstrap.initialize(fixture);
     }

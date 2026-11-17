@@ -1,8 +1,9 @@
 #include "sb_config.h"
 #include "sb_ports.h"
+#include "sb_rules.h"
 #include <string.h>
 static SbSnapshot snapshot;
-void sb_pipeline_init(void) { memset(&snapshot,0,sizeof(snapshot)); }
+void sb_pipeline_init(void) { memset(&snapshot,0,sizeof(snapshot)); sb_rules_init(); }
 SbResult sb_pipeline_process(const SbSensorFrame *frame) {
     int32_t lock;
     if (!frame||frame->kind<0||frame->kind>=SB_INPUT_COUNT||(frame->source!=SB_SOURCE_MOCK && frame->source!=SB_SOURCE_REAL)) return SB_INVALID_ARG;
@@ -11,8 +12,7 @@ SbResult sb_pipeline_process(const SbSensorFrame *frame) {
     lock=sb_platform_lock(); if (lock<0) return SB_PLATFORM_ERROR;
     snapshot.frames[frame->kind]=*frame; snapshot.present[frame->kind]=true; ++snapshot.processed;
     sb_platform_unlock(lock);
-    /* Future rule port goes here. No alert/door/sentry conclusion in this task. */
-    return SB_OK;
+    return sb_rules_process(frame);
 }
 SbResult sb_pipeline_snapshot(SbSnapshot *out) {
     int32_t lock;

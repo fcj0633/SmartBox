@@ -21,6 +21,7 @@ SbResult sb_output_set(const SbOutputRequest *r) {
     if(sb_hw_gpio(r->kind,r->on)!=SB_OK) { sb_platform_unlock(lock); return SB_PLATFORM_ERROR; }
     states[r->kind].on=r->on;
     states[r->kind].expires_ms=r->on?now.uptime_ms+r->duration_ms:0;
+    states[r->kind].changed_ms=now.uptime_ms;
     sb_platform_unlock(lock); return SB_OK;
 }
 SbResult sb_output_poll(void) {

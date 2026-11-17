@@ -1,5 +1,6 @@
 #include "sb_config.h"
 #include "sb_ports.h"
+#include "sb_rules.h"
 #include "cmsis_os2.h"
 #include <string.h>
 static SbAppStatus status;
@@ -65,7 +66,8 @@ static void sampling(void *arg) {
         }
         if (c->role==SB_POSE && now.uptime_ms>=location_due) {
             sample_one(SB_INPUT_LOCATION); missed=0;
-            if (sb_schedule_advance(now.uptime_ms,c->location_ms,&location_due,&missed)!=SB_OK) { fail("location deadline"); break; }
+            uint32_t location_period=sb_sensor_location_period_ms();
+            if (sb_schedule_advance(now.uptime_ms,location_period,&location_due,&missed)!=SB_OK) { fail("location deadline"); break; }
             add(&status.missed_periods,missed);
         }
         if (!pause_ms(c->role==SB_ENV?10:1)) { fail("sample delay"); break; }
@@ -81,6 +83,8 @@ static void processing(void *arg) {
         if (result==osOK) {
             if (sb_pipeline_process(&frame)!=SB_OK) { fail("pipeline"); break; }
         } else if (result!=osErrorTimeout && result!=osErrorResource) { fail("queue read"); break; }
+        SbClock now;
+        if(sb_clock_get(&now)!=SB_OK||sb_rules_poll(now.uptime_ms)!=SB_OK){fail("rules poll");break;}
         if (sb_output_poll()!=SB_OK) { fail("output clock"); break; }
     }
     exited();
