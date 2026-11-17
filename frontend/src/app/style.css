@@ -313,15 +313,6 @@ small { font-size: 11px; }
 .login-card .page-eyebrow { margin-bottom: 12px; }
 .login-card h2 { color: #1d3144; font-size: 25px; margin-bottom: 8px; }
 .login-description { margin-bottom: 27px; color: #8b98a4; font-size: 10px; line-height: 1.8; }
-.demo-account-help { margin: -10px 0 17px; border: 1px solid #e1e9ed; border-radius: 8px; background: #f8fafb; }
-.demo-account-help summary { padding: 10px 12px; color: #087e83; font-size: 10px; font-weight: 700; cursor: pointer; }
-.demo-account-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 0 10px 10px; }
-.demo-account-option { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px; border: 1px solid #e1e9ed; border-radius: 6px; background: #fff; color: #526779; text-align: left; cursor: pointer; }
-.demo-account-option:hover, .demo-account-option:focus-visible { border-color: #78b5b3; background: #f2f9f8; }
-.demo-account-option span { font-size: 9px; }
-.demo-account-option strong { max-width: 100%; color: #31475a; font-size: 9px; overflow-wrap: anywhere; }
-.demo-password-hint { padding: 0 10px 11px; color: #778894; font-size: 9px; line-height: 1.7; }
-.demo-password-hint code { color: #496276; font-size: 9px; overflow-wrap: anywhere; }
 .login-card label { display: block; margin: 16px 0 7px; color: #526779; font-size: 10px; font-weight: 700; }
 .login-card input { min-height: 43px; padding: 11px 12px; font-size: 11px; }
 .login-submit { width: 100%; min-height: 44px !important; margin-top: 21px; }

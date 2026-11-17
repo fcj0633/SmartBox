@@ -5,19 +5,8 @@ import { useSession } from '../stores/session';
 
 const session = useSession();
 const router = useRouter();
-const username = ref('');
-const password = ref('');
-const demoAccounts = [
-  { username: 'demo_logistics_viewer', role: '物流寄收件人' },
-  { username: 'demo_logistics_operator', role: '物流操作者' },
-  { username: 'demo_delivery_user', role: '外卖用户' },
-  { username: 'demo_courier', role: '骑手' },
-];
-function chooseDemoAccount(account: (typeof demoAccounts)[number]) {
-  username.value = account.username;
-  password.value = '';
-  document.getElementById('password')?.focus();
-}
+const username = ref(import.meta.env.VITE_DEFAULT_LOGIN_USERNAME || '');
+const password = ref(import.meta.env.VITE_DEFAULT_LOGIN_PASSWORD || '');
 async function login() {
   if (!username.value || !password.value || session.busy) return;
   await session.login(username.value, password.value);
@@ -50,15 +39,6 @@ async function login() {
         <div class="page-eyebrow"><span class="eyebrow-line"></span> WORKSPACE ACCESS</div>
         <h2>欢迎回来</h2>
         <p class="login-description">使用已分配的项目账号登录监测工作台。</p>
-        <details class="demo-account-help">
-          <summary>使用本机演示账号</summary>
-          <div class="demo-account-list">
-            <button v-for="account in demoAccounts" :key="account.username" type="button" class="demo-account-option" @click="chooseDemoAccount(account)">
-              <span>{{ account.role }}</span><strong>{{ account.username }}</strong>
-            </button>
-          </div>
-          <p class="demo-password-hint">密码由本机初始化时随机生成，查看 <code>secrets/backend-dev.bootstrap.local.json</code>。</p>
-        </details>
         <label for="username">账号</label>
         <input id="username" v-model="username" autocomplete="username" required maxlength="128" :disabled="session.busy" placeholder="请输入账号">
         <label for="password">密码</label>
