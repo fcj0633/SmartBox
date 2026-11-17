@@ -59,7 +59,3 @@ SDK sample 下新增 logistics_box；一次只构建一个角色，构建后立�
 ## TASK-007真实端口与网络接入
 
 双板驱动、时间质量、网络线程持有MQTT、有界缓冲、输出回执和SDK核验门槛统一见[TASK-007](../../development/tasks/TASK-007-双板实际采集与输出接入.md)。沿用现有分层与受控构建，真实/Mock来源分别表达；原始读数不代表业务规则已实现。完整算法归TASK-008，Flash可靠性归TASK-009。当前已按该设计完成基础真实驱动、网络与output板端闭环；实际结果见[任务7报告](../../testing/reports/TASK-007-双板接入验证报告.md)。完整业务算法与事件Flash可靠性仍待后续，TASK-002的Mock边界保留为其当时交付事实。
-
-## TASK-008规则实现入口
-
-[TASK-008](../../development/tasks/TASK-008-核心规则与业务视图.md)集中维护环境/姿态/门证据/围栏/哨兵规则、事件候选生成、`box_state`抑制窗口及profile/gps_mode/calibrate/sentry命令处理。计划在`firmware/domain/sb_rules.c`集中规则状态，扩展`sb_types.h`、`sb_wire`、`sb_event_buffer`；规则只依赖时钟/配置/快照，可宿主测试，不阻塞采样。事件候选在TASK-008仍是易失、`storage=DEGRADED`，**真实板`event`发布不在本任务**；Flash持久、发送/确认、跨重启补传和掉电一致性归TASK-009。当前固件仍只执行`output`，本文入口不代表其他命令或事件发送已实现。
