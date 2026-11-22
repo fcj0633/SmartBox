@@ -1,7 +1,7 @@
 export type Role = 'rider' | 'customer';
 export type Layout = 'a' | 'b';
-export type Page = 'entry' | 'home' | 'box' | 'prepare' | 'task' | 'history' | 'environment' | 'alerts' | 'account' | 'expired';
-export type Scenario = 'normal' | 'alarm' | 'offline' | 'invalid' | 'stale' | 'unknown' | 'empty' | 'revoked' | 'verify-error' | 'expired';
+export type Page = 'entry' | 'home' | 'boxes' | 'box' | 'prepare' | 'task' | 'history' | 'environment' | 'alerts' | 'account' | 'expired';
+export type Scenario = 'normal' | 'alarm' | 'offline' | 'invalid' | 'stale' | 'unknown' | 'empty' | 'revoked' | 'verify-error' | 'expired' | 'idle' | 'multiple';
 export const demoDate = '2026-11-23';
 export const currentTime = '14:32';
 export const demoCode = 'DEMO-4821';
@@ -13,6 +13,9 @@ export interface Box {
 export interface Task {
   id: string; boxId: string; item: string; description: string; state: 'ready' | 'active' | 'completed';
   start: string | null; end: string | null; temperature: number; humidity: number;
+  quality?: Scenario;
+  sampleTime?: string;
+  alarmTime?: string;
 }
 export const boxes: Box[] = [
   { id: 'SBX-24018', name: '随行箱 · 01', source: 'personal', temp: 4.8, humidity: 61, nodes: ['ENV', 'POSE'], profile: '生鲜保鲜 · 演示画像' },
@@ -30,9 +33,11 @@ export const scenarioOptions: Array<{id: Scenario; label: string}> = [
   {id:'invalid',label:'采样无效'}, {id:'stale',label:'数据过期'}, {id:'unknown',label:'判断未知'},
   {id:'empty',label:'无可用箱体'}, {id:'revoked',label:'分配已失效'},
   {id:'verify-error',label:'验证失败'}, {id:'expired',label:'访问失效'},
+  {id:'idle',label:'当前无运输'}, {id:'multiple',label:'多任务运输'},
 ];
 export const pages: Array<{id:Page; label:string; roles:Role[]}> = [
   {id:'entry',label:'入口',roles:['rider','customer']}, {id:'home',label:'首页',roles:['rider','customer']},
+  {id:'boxes',label:'我的箱体',roles:['rider']},
   {id:'box',label:'箱体详情',roles:['rider']}, {id:'prepare',label:'选箱与绑定',roles:['rider']},
   {id:'task',label:'当前运输',roles:['rider','customer']}, {id:'history',label:'运输记录',roles:['rider']},
   {id:'environment',label:'环境历史',roles:['rider','customer']}, {id:'alerts',label:'异常记录',roles:['rider','customer']},

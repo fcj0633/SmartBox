@@ -1,161 +1,324 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { reactive, ref, watch, onUnmounted, nextTick } from 'vue';
+import { usePreview } from './usePreview';
+import { boxes, demoCode, demoDate, pages, scenarioOptions, stateNames, type Page } from './model';
 import Icon from './Icon.vue';
-import BoxArt from './BoxArt.vue';
 import Environment from './Environment.vue';
-import Journey from './Journey.vue';
-import { boxes, currentTime, demoCode, demoDate, initialTasks, pages, scenarioOptions, stateNames, type Role, type Layout, type Page, type Scenario, type Task } from './model';
-
-const query = new URLSearchParams(location.search);
-const presentation = query.get('presentation') === '1';
-const role = ref<Role>(query.get('role') === 'customer' ? 'customer' : 'rider');
-const layout = ref<Layout>(query.get('layout') === 'b' ? 'b' : 'a');
-const page = ref<Page>(pages.find(p => p.id === query.get('page') && p.roles.includes(role.value))?.id || (role.value === 'customer' ? 'entry' : 'home'));
-const scenario = ref<Scenario>(scenarioOptions.find(s => s.id === query.get('scenario'))?.id || 'normal');
-const tasks = ref(initialTasks());
-const selectedBoxId = ref(boxes[0].id);
-const selectedTaskId = ref(query.get('task') === 'DEMO-1123-006' ? 'DEMO-1123-006' : 'DEMO-1123-018');
-const entered = ref(role.value === 'rider' || page.value !== 'entry');
-const transportNo = ref('DEMO-1123-018');
-const verificationCode = ref(demoCode);
-const validationError = ref('');
-const bindName = ref('鲜果补给包');
-const step = ref(1);
-const range = ref('全程');
-const historyFilter = ref('全部');
-const expandedJourney = ref(false);
+import Trend from './Trend.vue';
+import RiderHome from './RiderHome.vue';
+import TransportOverview from './TransportOverview.vue';
+import PrepareFlow from './PrepareFlow.vue';
+const p = reactive(usePreview());
+const review = ref(new URLSearchParams(location.search).get('presentation') !== '1');
 const dialog = ref<'start' | 'finish' | 'alert' | null>(null);
-const notice = ref('');
-let noticeTimer: ReturnType<typeof setTimeout> | undefined;
-
-const isCustomer = computed(() => role.value === 'customer');
-const isWork = computed(() => role.value === 'rider' && layout.value === 'b');
-const isMonitor = computed(() => isCustomer.value && layout.value === 'b');
-const title = computed(() => isCustomer.value ? layout.value === 'a' ? '运输时间线' : '环境监测页' : layout.value === 'a' ? '我的箱体' : '运输工作台');
-const visiblePages = computed(() => pages.filter(p => p.roles.includes(role.value)));
-const selectedBox = computed(() => boxes.find(b => b.id === selectedBoxId.value)!);
-const task = computed(() => tasks.value.find(t => t.id === selectedTaskId.value)!);
-const historical = computed(() => task.value.state === 'completed');
-const temperature = computed(() => isCustomer.value || ['task','environment'].includes(page.value) ? task.value.temperature : selectedBox.value.temp);
-const humidity = computed(() => isCustomer.value || ['task','environment'].includes(page.value) ? task.value.humidity : selectedBox.value.humidity);
-const source = (id: string) => boxes.find(b => b.id === id)?.source === 'personal' ? '个人拥有' : '企业分配';
-const denied = computed(() => scenario.value === 'revoked' && selectedBox.value.source === 'assigned');
-const taskList = computed(() => tasks.value.filter(t => historyFilter.value === '全部' || stateNames[t.state] === historyFilter.value));
-const riderNav = [{id:'home' as Page,label:'箱体',icon:'box'},{id:'task' as Page,label:'运输',icon:'task'},{id:'alerts' as Page,label:'异常',icon:'bell'},{id:'account' as Page,label:'我的',icon:'user'}];
-const customerNav = computed(() => isMonitor.value ? [{id:'home' as Page,label:'环境',icon:'leaf'},{id:'task' as Page,label:'运输',icon:'task'},{id:'alerts' as Page,label:'异常',icon:'bell'}] : [{id:'home' as Page,label:'运输',icon:'task'},{id:'environment' as Page,label:'环境',icon:'chart'},{id:'alerts' as Page,label:'异常',icon:'bell'}]);
-
-function toast(message: string) { notice.value = message; clearTimeout(noticeTimer); noticeTimer = setTimeout(() => notice.value = '', 3500); }
-function go(next: Page) { dialog.value = null; page.value = next; if (next !== 'entry' && isCustomer.value && !entered.value) page.value = 'entry'; window.scrollTo({top:0, behavior:'instant'}); }
-function switchRole() { entered.value = role.value === 'rider'; page.value = isCustomer.value ? 'entry' : 'home'; scenario.value = 'normal'; validationError.value = ''; }
-function reset() { tasks.value = initialTasks(); selectedBoxId.value = boxes[0].id; selectedTaskId.value = tasks.value[0].id; scenario.value = 'normal'; entered.value = !isCustomer.value; page.value = isCustomer.value ? 'entry' : 'home'; bindName.value = '鲜果补给包'; step.value = 1; validationError.value = ''; dialog.value = null; transportNo.value='DEMO-1123-018'; verificationCode.value=demoCode; range.value='全程'; historyFilter.value='全部'; expandedJourney.value=false; toast('演示已重置'); }
-function changeScenario() {
-  validationError.value = '';
-  if (scenario.value === 'revoked') { selectedBoxId.value = 'SBX-24021'; selectedTaskId.value = 'DEMO-1123-021'; }
-  if (scenario.value === 'expired') { entered.value = false; page.value = 'expired'; }
-  else if (scenario.value === 'verify-error') { entered.value = false; page.value = 'entry'; verificationCode.value = 'WRONG-DEMO'; validationError.value = '运输编号或验证码不匹配，请核对后重试。'; }
-  else if (page.value === 'expired') { page.value = isCustomer.value ? 'entry' : 'home'; entered.value = !isCustomer.value; }
+const dialogElement = ref<HTMLElement | null>(null);
+let previousFocus: HTMLElement | null = null;
+const nav = [{
+        id: 'home' as Page,
+        label: '工作台',
+        icon: 'task'
+    }, {
+        id: 'boxes' as Page,
+        label: '我的箱体',
+        icon: 'box'
+    }, {
+        id: 'history' as Page,
+        label: '运输记录',
+        icon: 'archive'
+    }, {
+        id: 'account' as Page,
+        label: '我的',
+        icon: 'user'
+    }];
+const historyFilter = ref('全部');
+function reviewPage() {
+    if (p.page === 'expired') {
+        p.entered = false;
+    }
+    else
+        p.go(p.page);
 }
-function openBox(id: string) { selectedBoxId.value = id; go('box'); }
-function openTask(id: string, next: Page = 'task') { selectedTaskId.value = id; selectedBoxId.value = task.value.boxId; go(next); }
-function prepare() { if (denied.value || scenario.value === 'empty') { toast('当前没有可用于新运输的授权箱体'); return; } selectedBoxId.value = 'SBX-24021'; selectedTaskId.value = 'DEMO-1123-021'; step.value = 1; go('prepare'); }
-function bind() {
-  if (denied.value) { toast('使用授权已失效，请联系分配方'); return; }
-  if (!bindName.value.trim()) { validationError.value = '请填写用于本次演示的物品名称'; return; }
-  const target = tasks.value.find(t => t.id === 'DEMO-1123-021')!;
-  target.item = bindName.value.trim(); validationError.value = ''; step.value = 3; toast('示例物品已绑定，可核对运输信息');
+function changeRole() {
+    p.scenario = 'normal';
+    p.reset();
 }
-function confirmStart() {
-  if (denied.value || scenario.value === 'empty') { dialog.value = null; toast('当前无箱体使用资格，不能开始运输'); return; }
-  const target = task.value;
-  if (!target.item || target.state !== 'ready' || tasks.value.some(t => t.boxId === target.boxId && t.state === 'active')) { dialog.value = null; toast('请先完成绑定，或核对箱体是否已有进行中任务'); return; }
-  target.state = 'active'; target.start = '14:32'; dialog.value = null; page.value = 'task'; toast('演示运输已开始 · 仅本地状态');
+function exit() {
+    p.entered = false;
+    p.go('entry');
 }
-function confirmFinish() {
-  if (denied.value) { dialog.value = null; toast('使用授权已失效，结束资格需按正式规则处理'); return; }
-  if (task.value.state !== 'active') { dialog.value = null; toast('该运输已结束，历史记录保持不变'); return; }
-  task.value.state = 'completed'; task.value.end = '14:32'; dialog.value = null; toast('演示运输已结束，已保留本次环境记录');
+function confirm() {
+    const ok = dialog.value === 'start' ? p.start() : p.finish();
+    if (ok)
+        dialog.value = null;
 }
-function verify() {
-  const target = tasks.value.find(t => t.id === transportNo.value.trim() && t.state !== 'ready');
-  if (!target || verificationCode.value !== demoCode || scenario.value === 'verify-error') { validationError.value = '运输编号或验证码不匹配，请核对后重试。'; return; }
-  if (scenario.value === 'expired') { entered.value = false; page.value = 'expired'; return; }
-  selectedTaskId.value = target.id; entered.value = true; validationError.value = ''; page.value = 'home';
-}
-function chooseReviewPage() {
-  if (isCustomer.value && page.value !== 'entry' && page.value !== 'expired') entered.value = true;
-  if (page.value === 'prepare') { selectedTaskId.value = 'DEMO-1123-021'; selectedBoxId.value = 'SBX-24021'; step.value = 1; }
-  if (page.value === 'expired') entered.value = false;
-}
-watch([role,layout,page,scenario,selectedTaskId], () => {
-  const next = new URL(location.href);
-  next.search = new URLSearchParams({role:role.value,layout:layout.value,page:page.value,scenario:scenario.value,task:selectedTaskId.value}).toString();
-  history.replaceState(null,'',next); document.title = `SmartBox · ${title.value}`;
+watch(dialog, async (value) => {
+    if (value) {
+        previousFocus = document.activeElement as HTMLElement;
+        await nextTick();
+        dialogElement.value?.querySelector<HTMLButtonElement>('button')?.focus();
+    }
+    else
+        previousFocus?.focus();
 });
-const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') dialog.value = null; };
-onMounted(() => { window.addEventListener('keydown',onKey); if (['expired','verify-error','revoked'].includes(scenario.value)) changeScenario(); if(page.value === 'prepare') chooseReviewPage(); });
-onUnmounted(() => { clearTimeout(noticeTimer); window.removeEventListener('keydown',onKey); });
+function keys(e: KeyboardEvent) {
+    if (e.key === 'Escape')
+        dialog.value = null;
+    if (e.key === 'Tab' && dialog.value) {
+        const controls = dialogElement.value?.querySelectorAll<HTMLElement>('button:not(:disabled)');
+        if (!controls?.length)
+            return;
+        const first = controls[0], last = controls[controls.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        }
+        else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+}
+window.addEventListener('keydown', keys);
+onUnmounted(() => window.removeEventListener('keydown', keys));
+watch(() => [p.role, p.page, p.scenario, p.selectedTaskId], () => {
+    const q = new URLSearchParams({
+        role: p.role,
+        page: p.page,
+        scenario: p.scenario,
+        task: p.selectedTaskId,
+        presentation: review.value ? '0' : '1'
+    });
+    history.replaceState(null, '', '?' + q);
+    dialog.value = null;
+    document.title = 'SmartBox · ' + (p.role === 'rider' ? '运输工作台' : '运输查看');
+});
 </script>
-
 <template>
-  <div :class="['exploration', `role-${role}`, `layout-${layout}`, { presentation }]">
-    <header class="review-bar" aria-label="设计评审工具">
-      <div class="review-title"><span class="review-logo">S</span><div><strong>SmartBox 版式实验室</strong><small>独立原型 · 所有数据均为 Demo</small></div></div>
-      <div class="review-controls"><label>用户端<select aria-label="用户端" v-model="role" @change="switchRole"><option value="rider">骑手 / 个人拥有者</option><option value="customer">普通运输用户</option></select></label><div class="layout-choice" aria-label="版式选择"><button :aria-pressed="layout === 'a'" @click="layout = 'a'">A {{isCustomer ? '运输时间线' : '我的箱体'}}</button><button :aria-pressed="layout === 'b'" @click="layout = 'b'">B {{isCustomer ? '环境监测页' : '运输工作台'}}</button></div><label>页面<select aria-label="页面" v-model="page" @change="chooseReviewPage"><option v-for="item in visiblePages" :key="item.id" :value="item.id">{{item.label}}</option></select></label><label>演示场景<select aria-label="演示场景" v-model="scenario" @change="changeScenario"><option v-for="item in scenarioOptions.filter(s => isCustomer ? !['empty','revoked'].includes(s.id) : !['verify-error'].includes(s.id))" :key="item.id" :value="item.id">{{item.label}}</option></select></label><button class="review-reset" @click="reset"><Icon name="refresh" :size="16" />重置</button></div>
+  <div :class="['preview-app',{'rider-app':p.role==='rider'}]">
+    <div v-if="review" class="review-bar" aria-label="设计评审工具"><strong>SmartBox · 交互评审</strong><label>用户端<select
+          v-model="p.role" aria-label="用户端" @change="changeRole">
+          <option value="rider">骑手 / 个人拥有者</option>
+          <option value="customer">普通运输用户</option>
+        </select></label><label>页面<select v-model="p.page" aria-label="页面" @change="reviewPage">
+          <option v-for="item in pages.filter(x=>x.roles.includes(p.role))" :key="item.id" :value="item.id">
+            {{item.label}}</option>
+        </select></label><label>演示场景<select v-model="p.scenario" aria-label="演示场景" @change="p.applyScenario">
+          <option
+            v-for="s in scenarioOptions.filter(s=>p.role==='rider'?!['verify-error'].includes(s.id):!['idle','multiple','empty','revoked'].includes(s.id))"
+            :key="s.id" :value="s.id">{{s.label}}</option>
+        </select></label><button @click="p.scenario='normal';p.reset()">重置演示</button><button
+        @click="review=false">收起评审工具</button></div>
+    <header class="product-header"><a href="#" class="brand" @click.prevent="p.go('home')"><span class="brand-symbol">
+          <Icon name="box" :size="24" />
+        </span><strong>SmartBox</strong><span class="brand-context">{{p.role==='rider'?'个人运输':'运输查看'}}</span></a>
+      <nav v-if="p.role==='rider'&&p.entered&&p.page!=='entry'" class="desktop-nav" aria-label="主要导航"><button
+          v-for="n in nav" :key="n.id" :class="{current:p.page===n.id}" @click="p.go(n.id)">{{n.label}}</button></nav>
+      <button v-if="p.role==='customer'&&p.entered" class="text-button" @click="exit">退出查看</button><span
+        v-else-if="p.role==='rider'" class="avatar">林</span>
+      <Icon v-else name="lock" :size="19" />
     </header>
-
-    <div class="product-shell">
-      <header class="product-header"><a class="brand" href="#" @click.prevent="go(isCustomer && !entered ? 'entry' : 'home')"><span class="brand-cube"><Icon name="box" :size="23" /></span><strong>SmartBox<span>{{isCustomer ? '运输守护' : '随行工作台'}}</span></strong></a><nav class="desktop-nav" v-if="entered && page !== 'expired'" aria-label="主要导航"><button v-for="item in isCustomer ? customerNav : riderNav" :key="item.id" :class="{current:page === item.id}" @click="go(item.id)">{{isWork && item.id === 'home' ? '工作台' : item.label}}</button><button v-if="!isCustomer" @click="go('history')">运输记录</button></nav><div class="header-meta"><span class="demo-label">Demo</span><span v-if="!isCustomer" class="avatar">林</span><button v-else-if="entered" class="icon-button" aria-label="退出任务查看" @click="entered=false; go('entry')"><Icon name="logout" /></button></div></header>
-
-      <main :class="['main-content',{'entry-content':page==='entry'}]">
-        <template v-if="page === 'entry'">
-          <div class="entry-layout"><section class="entry-intro"><span class="eyebrow">{{isCustomer ? '每一次运输，都有迹可循' : '让每一程，都心中有数'}}</span><h1>{{isCustomer ? '关心的物品，\n安心地看见。' : '带上箱体，\n开始今天的运输。'}}</h1><p>{{isCustomer ? '查看这一次运输的环境与记录。无需注册，输入运输编号和验证码即可。' : '你的箱体、当前运输和环境提醒，在一个轻量工作台中掌握。'}}</p><BoxArt /><div class="entry-promise"><Icon name="shield" :size="18" /><span>{{isCustomer ? '只查看获准运输，保护每一程的信息' : '个人拥有与企业分配，来源清晰可见'}}</span></div></section><section class="entry-form paper"><div class="form-badge"><Icon :name="isCustomer ? 'lock' : 'user'" /></div><h2>{{isCustomer ? '查看我的运输' : '进入骑手工作台'}}</h2><p>{{isCustomer ? '请使用运输提供方给出的查询信息' : '以示例身份体验两套版式'}}</p><form v-if="isCustomer" @submit.prevent="verify"><label class="field">运输编号<input v-model="transportNo" autocomplete="off" placeholder="输入运输编号" /></label><label class="field">验证码<input v-model="verificationCode" autocomplete="off" placeholder="输入验证码" /></label><div v-if="validationError" class="form-error" role="alert"><Icon name="alert" :size="16" />{{validationError}}</div><button class="button primary wide" type="submit">查看运输<Icon name="arrow" :size="18" /></button></form><template v-else><div class="demo-identity"><span class="avatar large">林</span><div><strong>林沐 · 示例骑手</strong><span>个人拥有 1 个箱体，企业分配 1 个箱体</span></div></div><button class="button primary wide" @click="entered=true;go('home')">进入演示工作台<Icon name="arrow" :size="18" /></button></template><div class="demo-help"><strong>公开的原型演示信息</strong><template v-if="isCustomer"><span>进行中：DEMO-1123-018</span><span>已结束：DEMO-1123-006</span><span>演示验证码：{{demoCode}}</span><button @click="transportNo='DEMO-1123-006';verificationCode=demoCode;scenario='normal';validationError=''">填入已结束任务示例</button></template><span v-else>无需真实账号，不连接正式登录服务。</span><small>凭据格式、签发和有效期限均为 Planned，不代表正式规则。</small></div></section></div>
-        </template>
-
-        <template v-else-if="page === 'expired' || (isCustomer && !entered)">
-          <section class="access-state paper"><span class="state-icon"><Icon name="lock" :size="35" /></span><span class="eyebrow">访问状态</span><h1>{{isCustomer ? '这次查看授权已失效' : '当前使用资格需要确认'}}</h1><p>{{isCustomer ? '为保护运输信息，当前页面已停止展示任务数据。请重新核对编号和验证码。' : '请联系分配方确认箱体使用资格。历史记录不会因此被删除。'}}</p><button class="button primary" @click="scenario='normal';verificationCode=demoCode;validationError='';go('entry')">{{isCustomer ? '重新验证' : '返回演示入口'}}</button><small>此处为授权失效场景演示 · Planned</small></section>
-        </template>
-
-        <template v-else>
-          <div class="page-title"><div><span class="eyebrow">{{isCustomer ? '仅限本次运输' : `${demoDate} · 星期一`}}</span><h1>{{page === 'home' ? isCustomer ? historical ? '这次运输，已有记录' : isMonitor ? '这一路，环境可见' : '你的物品，正在路上' : isWork ? '下午好，林沐' : '我的箱体' : pages.find(p=>p.id===page)?.label}}</h1><p>{{isCustomer ? historical ? '本次运输已结束，以下仅展示其历史记录。' : '从开始到结束，了解本次运输的环境与状态。' : page==='home' ? isWork ? '先处理当前运输，再从容开启下一程。' : '每一个随行箱，都有清晰的状态与归属。' : '只管理自己拥有或被有效分配的箱体。'}}</p></div><button v-if="!isCustomer && page==='home'" class="button primary desktop-action" @click="prepare"><Icon name="plus" :size="18" />准备新运输</button><span v-else class="date-chip">{{demoDate}} <span>Demo</span></span></div>
-          <div v-if="denied && !isCustomer" class="banner warn" role="status"><Icon name="lock" /><span><strong>企业分配已失效</strong>当前不允许绑定、开始、结束或控制。具体接管流程待确认。</span></div>
-          <div v-if="scenario==='offline'" class="banner warn"><Icon name="signal" /><span><strong>ENV 节点离线</strong>下方保留最后样本及原时间，离线不等于环境正常。</span></div>
-          <div v-if="['invalid','stale','unknown'].includes(scenario)" class="banner warn"><Icon name="alert" /><span><strong>{{scenario==='invalid'?'本次采样无效':scenario==='stale'?'环境数据已过期':'环境判断未知'}}</strong>请结合样本质量和更新时间查看，不能据此认定环境正常。</span></div>
-
-          <template v-if="!isCustomer && page==='home' && scenario==='empty'"><section class="empty-state paper"><BoxArt small /><h2>还没有可使用的箱体</h2><p>个人箱体需确认归属，企业箱体需由企业分配。不会自动绑定默认设备。</p><button class="button secondary" @click="go('account')">了解我的使用权限</button></section></template>
-
-          <template v-else-if="!isCustomer && page==='home' && !isWork">
-            <div class="asset-layout"><section class="asset-main"><div class="section-heading"><h2>随行箱体 <span class="count-chip">02</span></h2><span class="quiet-label">个人拥有 / 企业分配</span></div><div class="box-list"><button v-for="box in boxes" :key="box.id" :class="['box-card',{featured:box.id===selectedBoxId, revoked:denied&&box.source==='assigned'}]" @click="selectedBoxId=box.id"><div class="box-card-heading"><span :class="['ownership',box.source]">{{source(box.id)}}</span><span :class="['pill',denied&&box.source==='assigned'?'warn':'good']"><i></i>{{denied&&box.source==='assigned'?'授权失效':scenario==='offline'?'部分离线':'使用中'}}</span></div><div class="box-card-body"><div><h3>{{box.name}}</h3><span class="asset-id">{{box.id}}</span><p>{{box.source==='personal'?'属于我的个人箱体':'华东物流 · 使用权分配'}}</p></div><BoxArt small /></div><div class="box-card-footer"><span><Icon name="temp" :size="16" />{{scenario==='invalid'?'未知':box.temp.toFixed(1)+' °C'}}</span><span><Icon name="drop" :size="15" />{{scenario==='invalid'?'未知':box.humidity+'%'}}</span><span>{{tasks.some(t=>t.boxId===box.id&&t.state==='active')?'运输中':'待开始'}}<Icon name="chevron" :size="15" /></span></div></button></div><div class="asset-actions"><button class="button primary" @click="openBox(selectedBoxId)">查看箱体详情<Icon name="arrow" :size="18" /></button><button class="button secondary" @click="prepare">绑定物品 / 新运输</button></div><div class="transport-shortcut paper"><span class="shortcut-icon"><Icon name="task" /></span><div><strong>鲜果礼盒正在运输</strong><span>13:10 已开始 · 仅本次任务数据</span></div><button class="icon-button" aria-label="查看当前运输" @click="openTask('DEMO-1123-018')"><Icon name="arrow" /></button></div></section><aside class="asset-detail paper"><div class="selected-box-label"><Icon name="box" :size="18" /><span>{{selectedBox.name}} · 环境摘要</span></div><Environment context="box" :temperature="selectedBox.temp" :humidity="selectedBox.humidity" :scenario="scenario" /><div class="two-line-link"><div><strong>查看异常与变化</strong><span>了解当前任务中的环境提醒</span></div><button class="icon-button" aria-label="查看异常与变化" @click="go('alerts')"><Icon name="arrow" /></button></div></aside></div>
-          </template>
-
-          <template v-else-if="!isCustomer && page==='home' && isWork">
-            <div class="work-layout"><section class="work-main"><article class="mission-ticket"><div class="mission-top"><span class="pill dark"><i></i>{{stateNames[task.state]}}</span><span>{{task.id}}</span></div><div class="mission-title"><div><span class="quiet-label">当前运输</span><h2>{{task.item||'准备下一程'}}</h2><p>{{task.boxId}}<span>·</span>{{source(task.boxId)}}</p></div><BoxArt small /></div><div class="mission-route"><div><small>开始时间</small><strong>{{task.start||'尚未开始'}}</strong></div><div class="route-progress"><i></i><span></span><i></i><span></span><i class="hollow"></i></div><div><small>结束记录</small><strong>{{task.end||'待完成'}}</strong></div></div><button class="button amber wide" @click="go('task')">{{task.state==='completed'?'查看本次运输记录':'进入当前运输'}}<Icon name="arrow" :size="18" /></button></article><div class="work-next"><div class="section-heading"><h2>接下来</h2><button class="text-button" @click="go('history')">全部记录</button></div><button class="next-step" @click="prepare"><span class="step-number">＋</span><div><strong>为下一次运输做准备</strong><span>选箱体，核对并绑定物品</span></div><Icon name="arrow" :size="18" /></button><div class="mini-quality"><Icon name="shield" :size="18" /><span>操作与数据分开记录，环境异常不会自动结束运输。</span></div></div><div class="mobile-work-environment paper"><Environment :temperature="task.temperature" :humidity="task.humidity" :scenario="scenario" compact /><button class="text-button" @click="go('environment')">查看本次环境曲线</button></div></section><aside class="work-side"><section class="paper"><div class="section-heading"><h2>当前箱体</h2><button class="text-button" @click="go('box')">详情</button></div><div class="working-box"><span class="box-icon"><Icon name="box" :size="26" /></span><div><strong>{{selectedBox.name}}</strong><span>{{selectedBox.id}}</span></div><span class="ownership personal">{{source(selectedBox.id)}}</span></div><Environment :temperature="task.temperature" :humidity="task.humidity" :scenario="scenario" compact /></section><section class="paper work-history"><div class="section-heading"><h2>我的箱体</h2><span class="count-chip">02</span></div><button v-for="box in boxes" :key="box.id" class="simple-box-row" @click="openBox(box.id)"><Icon name="box" /><span><strong>{{box.name}}</strong><small>{{source(box.id)}}</small></span><Icon name="chevron" :size="16" /></button></section></aside></div>
-          </template>
-
-          <template v-else-if="page==='box' && !isCustomer"><div class="detail-layout"><section class="paper box-profile"><div class="profile-heading"><span :class="['ownership',selectedBox.source]">{{source(selectedBox.id)}}</span><span class="pill good">{{denied?'资格待核对':'授权使用'}}</span></div><BoxArt /><h2>{{selectedBox.name}}</h2><p>{{selectedBox.id}}</p><div class="definition-list"><div><span>归属来源</span><strong>{{selectedBox.source==='personal'?'个人拥有':'华东物流 · 企业分配'}}</strong></div><div><span>环境画像</span><strong>{{selectedBox.profile}}</strong></div><div><span>当前使用权</span><strong>{{denied?'已失效':'有效 · 演示关系'}}</strong></div></div><button class="button primary wide" @click="prepare" :disabled="denied">准备新运输</button><button class="text-button wide" @click="go('history')">查看运输记录</button></section><section class="detail-readings paper"><Environment context="box" :temperature="selectedBox.temp" :humidity="selectedBox.humidity" :scenario="scenario" /><div class="node-section"><div class="section-heading"><h2>设备节点</h2><span class="quiet-label">双节点监测</span></div><div v-for="node in selectedBox.nodes" :key="node" class="node-row"><span class="node-symbol">{{node==='ENV'?'E':'P'}}</span><span><strong>{{node==='ENV'?'ENV 环境节点':'POSE 姿态节点'}}</strong><small>{{node==='ENV'?'温度、湿度、光照':'加速度、倾角'}}</small></span><span :class="['pill',scenario==='offline'&&node==='ENV'?'warn':'good']">{{scenario==='offline'&&node==='ENV'?'离线':'在线'}} · Mock</span></div><p class="fine-print">门状态：UNKNOWN；电量与通信信号未接入，不展示虚构数值。</p></div><div class="permission-inline"><Icon name="lock" :size="17" /><span>骑手权限保持独立。设备控制、布撤防的真实接口尚未接入本原型。</span><span class="planned-label">Planned</span></div></section></div></template>
-
-          <template v-else-if="page==='prepare' && !isCustomer"><div class="prepare-layout"><section class="paper preparation"><div class="stepper"><span v-for="(label,i) in ['选择箱体','绑定物品','核对开始']" :key="label" :class="{active:step===i+1,done:step>i+1}"><b>{{step>i+1?'✓':i+1}}</b>{{label}}</span></div><div v-if="step===1"><h2>选一个可用的随行箱</h2><p class="subtext">同一箱体同时只进行一次运输 · V1 暂定</p><button v-for="box in boxes" :key="box.id" :class="['select-box-row',{chosen:selectedBoxId===box.id}]" :disabled="tasks.some(t=>t.boxId===box.id&&t.state==='active')||denied" @click="selectedBoxId=box.id"><span class="box-icon"><Icon name="box" /></span><div><strong>{{box.name}}</strong><span>{{source(box.id)}} · {{box.id}}</span></div><span class="pill" :class="tasks.some(t=>t.boxId===box.id&&t.state==='active')?'neutral':'good'">{{tasks.some(t=>t.boxId===box.id&&t.state==='active')?'已有运输':'可使用'}}</span></button><button class="button primary wide" :disabled="denied||tasks.some(t=>t.boxId===selectedBoxId&&t.state==='active')" @click="step=2">下一步：绑定物品<Icon name="arrow" :size="18" /></button></div><form v-else-if="step===2" @submit.prevent="bind"><h2>这一次，运输什么？</h2><p class="subtext">示例任务 {{task.id}}</p><label class="field">物品名称<input v-model="bindName" maxlength="50" placeholder="填写示例物品名称" /></label><label class="field">物品简述<textarea readonly>保鲜运输 · 用于版式预览的非敏感示例</textarea></label><p class="fine-print">此处单条绑定仅为演示；正式物品字段、数量及修改条件待确认。</p><div v-if="validationError" class="form-error" role="alert">{{validationError}}</div><div class="form-actions"><button class="button secondary" type="button" @click="step=1">上一步</button><button class="button primary" type="submit">绑定并核对<Icon name="check" :size="18" /></button></div></form><div v-else><h2>核对这一次运输</h2><p class="subtext">绑定已在原型中完成，尚未开始运输。</p><div class="definition-list"><div><span>运输编号</span><strong>{{task.id}}</strong></div><div><span>箱体</span><strong>{{selectedBox.name}} · {{source(selectedBox.id)}}</strong></div><div><span>物品</span><strong>{{task.item}}</strong></div><div><span>使用资格</span><strong>{{denied?'已失效':'演示有效'}}</strong></div></div><button class="button primary wide" :disabled="denied" @click="dialog='start'">确认信息并开始运输<Icon name="arrow" :size="18" /></button></div></section><aside class="prepare-aside"><BoxArt /><h3>一箱一程，记录清楚</h3><p>从开始到结束，环境数据与异常跟随这次任务。再次使用箱体时，会建立新的运输记录。</p><span class="planned-label">本地交互演示</span><p class="fine-print">开始条件、最低绑定数量和离线操作策略仍待产品确认。</p></aside></div></template>
-
-          <template v-else-if="isCustomer && page==='home' && !isMonitor"><div class="customer-journey-layout"><section class="customer-main"><article class="shipment-hero"><div class="shipment-label"><span :class="['pill',historical?'neutral':'good']"><i></i>{{stateNames[task.state]}}</span><span>本次运输 · Demo</span></div><div class="shipment-description"><div><h2>{{task.item}}</h2><p>{{historical?'这一程的记录，已经留存。':'运输有记录，关心有回应。'}}</p><span class="transport-number">{{task.id}}</span></div><BoxArt small /></div><div class="shipment-date"><Icon name="clock" :size="16" /><span>{{demoDate}} {{task.start}} 开始{{historical?'，'+task.end+' 结束':''}}</span></div></article><Journey :task="task" /><div class="customer-mobile-env paper"><Environment :temperature="temperature" :humidity="humidity" :scenario="scenario" :historical="historical" compact /><button class="text-button" @click="go('environment')">查看本次环境历史<Icon name="arrow" :size="16" /></button></div><div class="privacy-note"><Icon name="shield" :size="17" /><span>这里仅展示你的获准任务，不包含箱体其他运输信息。</span></div></section><aside class="customer-aside"><section class="paper"><Environment :temperature="temperature" :humidity="humidity" :scenario="scenario" :historical="historical" /><button class="text-button" @click="go('environment')">查看完整环境记录<Icon name="arrow" :size="16" /></button></section><button class="alert-link paper" @click="go('alerts')"><span class="soft-icon"><Icon name="bell" /></span><div><strong>异常记录</strong><span>{{scenario==='alarm'?'1 条演示环境异常':'暂无当前异常，查看本次记录'}}</span></div><Icon name="chevron" :size="18" /></button></aside></div></template>
-
-          <template v-else-if="isCustomer && page==='home' && isMonitor"><div class="monitor-layout"><section class="monitor-main"><div class="monitor-card paper"><div class="monitor-topline"><span><Icon name="leaf" :size="18" />{{task.item}}的运输环境</span><span class="mock-text">Mock Data</span></div><Environment :temperature="temperature" :humidity="humidity" :scenario="scenario" :historical="historical" prominent /><div class="monitor-links"><button class="text-button" @click="go('environment')">完整环境历史<Icon name="arrow" :size="17" /></button><button class="text-button" @click="go('alerts')">异常记录<Icon name="bell" :size="17" /></button></div></div><section class="transport-fold paper"><button class="fold-heading" :aria-expanded="expandedJourney" @click="expandedJourney=!expandedJourney"><span class="soft-icon"><Icon name="task" /></span><span><strong>{{historical?'本次运输已结束':'正在运输，持续监测'}}</strong><small>{{task.id}} · {{task.start}} 开始</small></span><Icon :name="expandedJourney?'close':'chevron'" :size="18" /></button><Journey v-if="expandedJourney" :task="task" compact /></section><div class="privacy-note"><Icon name="shield" :size="17" /><span>环境结论来自统一演示数据，不是由本页面计算阈值。</span></div></section><aside class="monitor-aside paper"><div class="section-heading"><h2>这次运输</h2><span class="pill good">{{stateNames[task.state]}}</span></div><BoxArt /><h3>{{task.item}}</h3><p>{{demoDate}} · {{task.id}}</p><Journey :task="task" compact /><button class="button secondary wide" @click="go('task')">查看运输详情</button></aside></div></template>
-
-          <template v-else-if="page==='task'"><div class="task-detail-layout"><section class="paper task-summary"><div class="section-heading"><div><span class="section-kicker">{{isCustomer?'获准任务':'当前选择的任务'}}</span><h2>{{task.item||'尚未绑定物品'}}</h2></div><span :class="['pill',historical?'neutral':'good']">{{stateNames[task.state]}}</span></div><span class="transport-number">{{task.id}}</span><Journey :task="task" /><div v-if="!isCustomer" class="task-asset-summary"><Icon name="box" /><div><strong>{{task.boxId}}</strong><span>{{source(task.boxId)}} · {{historical?'历史箱体关联':'当前运输箱体'}}</span></div></div><div v-if="!isCustomer" class="task-action-area"><button v-if="task.state==='active'" class="button primary wide" :disabled="denied" @click="dialog='finish'">结束本次运输<Icon name="check" :size="18" /></button><button v-else-if="task.state==='ready'" class="button primary wide" @click="prepare">继续绑定与准备</button><button v-else class="button secondary wide" @click="go('history')">查看运输记录</button><p class="fine-print">{{historical?'本次记录保持独立，下一次运输不会覆盖此处数据。':'结束为本地演示操作，不等于签收、告警恢复或补传完成。'}}</p></div></section><section class="paper"><Environment :temperature="temperature" :humidity="humidity" :scenario="scenario" :historical="historical" /><button class="text-button" @click="go('environment')">环境历史<Icon name="arrow" :size="17" /></button><button class="text-button task-alert-shortcut" @click="go('alerts')">异常记录</button></section></div></template>
-
-          <template v-else-if="page==='environment'"><section class="paper history-environment"><div class="environment-context"><span><Icon name="task" :size="18" />{{task.item}} · {{task.id}}</span><span class="pill neutral">{{historical?'已结束任务历史':'仅本次运输'}}</span></div><div class="range-toolbar"><div><h2>环境记录</h2><p>{{demoDate}} {{task.start}} — {{task.end||currentTime}}</p></div><div class="segmented"><button v-for="r in ['全程','前半程','后半程']" :key="r" :class="{selected:range===r}" @click="range=r">{{r}}</button></div></div><p v-if="range!=='全程'" class="range-note">已选{{range}}：时段筛选为 Planned，本版保留全程示例曲线，不伪造筛选结果。</p><Environment :temperature="task.temperature" :humidity="task.humidity" :scenario="scenario" :historical="historical" /><div class="history-stats"><div><span>数据范围</span><strong>{{task.start}} — {{task.end||currentTime}}</strong></div><div><span>样本来源</span><strong>Mock Data</strong></div><div><span>数据质量</span><strong>{{['invalid','offline'].includes(scenario)?'包含缺口':'示例有效样本'}}</strong></div></div><div class="banner info"><Icon name="shield" :size="18" /><span>仅限任务 {{task.id}}；前次或后续运输的数据均不包含在此视图。</span></div></section></template>
-
-          <template v-else-if="page==='history' && !isCustomer"><section class="paper records"><div class="section-heading"><h2>每一程，都有记录</h2><span class="quiet-label">{{demoDate}}</span></div><div class="segmented"><button v-for="filter in ['全部','运输中','已结束','待准备']" :key="filter" :class="{selected:historyFilter===filter}" @click="historyFilter=filter">{{filter}}</button></div><button v-for="record in taskList" :key="record.id" class="record-row" @click="record.state==='ready'?prepare():openTask(record.id)"><span :class="['record-symbol',{finished:record.state==='completed'}]"><Icon :name="record.state==='completed'?'archive':'task'" /></span><div><strong>{{record.item||'待绑定物品'}}</strong><span>{{record.id}}</span><small>{{record.boxId}} · {{record.start||'尚未开始'}}{{record.end?' — '+record.end:''}}</small></div><span :class="['pill',record.state==='active'?'good':'neutral']">{{stateNames[record.state]}}</span><Icon name="chevron" :size="17" /></button></section></template>
-
-          <template v-else-if="page==='alerts'"><section class="paper alerts-page"><div class="section-heading"><div><h2>本次运输的异常</h2><p class="subtext">{{task.id}} · 不包含其他任务</p></div><span :class="['pill',scenario==='alarm'?'bad':scenario==='normal'?'good':'warn']">{{scenario==='alarm'?'1 条当前异常':scenario==='normal'?'暂无当前异常':'当前判断不确定'}}</span></div><button v-if="scenario==='alarm'" class="alert-record" @click="dialog='alert'"><span class="alert-symbol"><Icon name="temp" /></span><div><strong>温度超出演示范围</strong><span>14:26 · 8.6 °C · 环境异常</span><small>统一告警示例 · Mock Data</small></div><Icon name="chevron" :size="17" /></button><div v-else class="calm-state"><span><Icon name="shield" :size="36" /></span><h3>{{scenario==='normal'?'当前没有演示异常':'请先确认环境数据质量'}}</h3><p>{{scenario==='normal'?'这是已评估正常的演示样例；异常记录只包含当前任务。':'当前存在离线、过期、无效或未知状态，不能因为没有异常记录就认为环境正常。'}}</p><button class="button secondary" @click="go('environment')">查看环境记录</button></div><div class="banner info"><Icon name="lock" :size="17" /><span>此页只读；人工确认、处理和关闭流程尚未接入。</span></div></section></template>
-
-          <template v-else-if="page==='account' && !isCustomer"><div class="account-layout"><section class="paper account-profile"><span class="avatar profile-avatar">林</span><h2>林沐</h2><p>骑手 / 个人箱体拥有者 · 示例身份</p><div class="ownership-summary"><span><strong>1</strong>个人拥有</span><span><strong>1</strong>企业分配</span></div><button class="button secondary wide" @click="entered=false;go('entry')">退出演示入口</button></section><section class="paper permissions"><div class="section-heading"><h2>我的使用权限</h2><Icon name="shield" /></div><div v-for="item in [['查看自己的箱体与任务','可查看'],['绑定物品、开始与结束运输','演示操作'],['企业分配资产的所有权','仍归企业'],['画像、校准、定位模式配置','未授予'],['灯风扇、导出、成员管理','未授予'],['布撤防及设备命令','Planned'] ]" :key="item[0]" class="permission-row"><span>{{item[0]}}</span><strong>{{item[1]}}</strong></div><p class="fine-print">拥有箱体不自动扩大设备配置权限。所有真实操作最终需由服务端授权。</p></section></div></template>
-        </template>
-      </main>
-
-      <footer class="product-footer"><span><span class="small-brand">SmartBox</span> 每一程，清晰可见。</span><span>独立设计原型 · Demo / Mock Data · 未接入真实服务</span></footer>
-      <nav v-if="entered && page!=='entry' && page!=='expired'" class="mobile-nav" aria-label="移动导航"><button v-for="item in isCustomer?customerNav:riderNav" :key="item.id" :class="{current:page===item.id}" @click="go(item.id)"><Icon :name="item.icon" :size="21" /><span>{{isWork&&item.id==='home'?'工作台':item.label}}</span></button></nav>
+    <div class="demo-strip">Demo / Mock · 数据与操作均为演示，未连接真实服务<button v-if="!review" @click="review=true"
+        aria-label="展开评审工具">评审</button></div>
+    <main class="main-content">
+      <template v-if="p.page==='expired'">
+        <section class="access-state">
+          <Icon name="lock" :size="36" />
+          <h1>访问授权已失效</h1>
+          <p>已停止展示运输数据。请重新核对运输编号和验证码。</p><button class="button primary"
+            @click="p.scenario='normal';p.error='';p.go('entry')">重新验证</button>
+          <p class="data-note">真实授权有效期与撤销服务为 Planned。</p>
+        </section>
+      </template>
+      <template v-else-if="p.page==='entry'||!p.entered">
+        <section class="entry-layout">
+          <div class="entry-intro">
+            <Icon name="box" :size="40" />
+            <h1>{{p.role==='customer'?'查看运输进度与环境':'个人运输工作台'}}</h1>
+            <p>{{p.role==='customer'?'输入运输编号和验证码，查看对应物品的运输状态、环境与异常记录。':'查看当前运输、核对箱体状态，开始和结束运输。'}}</p>
+            <div class="entry-points"><span>
+                <Icon name="task" />运输状态
+              </span><span>
+                <Icon name="leaf" />环境记录
+              </span><span>
+                <Icon name="shield" />任务隔离
+              </span></div>
+          </div>
+          <section class="entry-form">
+            <h2>{{p.role==='customer'?'验证运输信息':'进入演示工作台'}}</h2>
+            <form v-if="p.role==='customer'" @submit.prevent="p.verify"><label class="field">运输编号<input
+                  v-model="p.transportNo" autocomplete="off" placeholder="输入运输编号" /></label><label
+                class="field">验证码<input v-model="p.verificationCode" autocomplete="off" placeholder="输入验证码" /></label>
+              <p v-if="p.error" role="alert" class="form-error">{{p.error}}</p><button type="submit"
+                class="button primary wide">查看运输</button>
+            </form><template v-else>
+              <p>林沐 · 示例骑手 / 个人箱体拥有者</p><button class="button primary wide"
+                @click="p.entered=true;p.go('home')">进入工作台</button>
+            </template>
+            <details v-if="p.role==='customer'" class="demo-help" open>
+              <summary>公开演示信息</summary>
+              <p>运输中：DEMO-1123-018<br />已结束：DEMO-1123-006<br />验证码：{{demoCode}}</p>
+              <p class="data-note">公开模拟值，不是生产凭据。正式签发、限流和撤销为 Planned。</p>
+            </details>
+            <p v-else class="data-note">无需真实账号；示例身份仅用于本地预览。</p>
+          </section>
+        </section>
+      </template>
+      <template v-else>
+        <button
+          v-if="p.role==='customer'&&p.page!=='home'||p.role==='rider'&&!['home','boxes','history','account'].includes(p.page)"
+          class="back-link"
+          @click="p.go(p.role==='customer'?'home':p.page==='box'?'boxes':p.page==='environment'||p.page==='alerts'?'task':'home')">
+          <Icon name="chevron" :size="16" />{{p.role==='customer'?'返回运输概览':'返回'}}
+        </button>
+        <div v-if="!(p.role==='customer'&&['home','task'].includes(p.page))&&p.page!=='task'" class="page-title">
+          <h1>
+            {{p.page==='home'?'运输工作台':p.page==='prepare'?'开始新运输':p.page==='account'?'我的':pages.find(x=>x.id===p.page)?.label}}
+          </h1><span v-if="p.page==='home'">{{demoDate}} · 林沐</span>
+        </div>
+        <RiderHome v-if="p.role==='rider'&&p.page==='home'" :p="p" />
+        <TransportOverview v-else-if="p.page==='task'||p.role==='customer'&&p.page==='home'" :p="p"
+          @finish="dialog='finish'" />
+        <PrepareFlow v-else-if="p.page==='prepare'&&p.role==='rider'" :key="p.page+p.scenario" :p="p"
+          @start="dialog='start'" />
+        <section v-else-if="p.page==='boxes'&&p.role==='rider'" class="sheet">
+          <p>个人拥有与企业分配的箱体，使用资格分别核对。</p><button v-for="b in p.scenario==='empty'?[]:boxes" :key="b.id"
+            class="list-row box-row" @click="p.openBox(b.id)">
+            <Icon name="box" /><span><strong>{{b.name}}</strong><small>{{b.id}} ·
+                {{b.source==='personal'?'个人拥有':'企业分配'}}</small><small>{{p.scenario==='offline'?'ENV 离线':'节点在线'}} ·
+                {{p.blocked(b.id)||'可使用'}}</small></span>
+            <Icon name="chevron" :size="18" />
+          </button>
+          <p v-if="p.scenario==='empty'">暂无可用箱体，请确认归属或联系企业分配。</p>
+        </section>
+        <div v-else-if="p.page==='box'&&p.role==='rider'" class="box-detail-grid">
+          <section class="sheet">
+            <h2>{{p.box.name}}</h2>
+            <p>{{p.box.id}} · {{p.box.source==='personal'?'个人拥有':'企业分配'}}</p>
+            <p v-if="p.denied(p.box.id)" class="form-error">企业分配已失效，不能绑定、开始或结束运输。</p>
+            <dl class="definition-list">
+              <div>
+                <dt>使用状态</dt>
+                <dd>{{p.blocked(p.box.id)||'可使用'}}</dd>
+              </div>
+              <div>
+                <dt>环境画像</dt>
+                <dd>{{p.box.profile}}</dd>
+              </div>
+            </dl><button v-if="p.tasks.some(t=>t.boxId===p.box.id&&t.state==='active')" class="button primary wide"
+              @click="p.openTask(p.tasks.find(t=>t.boxId===p.box.id&&t.state==='active')!.id)">查看当前运输</button><button
+              v-else class="button primary wide" :disabled="!!p.blocked(p.box.id)"
+              @click="p.prepare(p.box.id)">开始新运输</button>
+            <details class="node-details">
+              <summary>设备节点与权限</summary>
+              <p>ENV 环境节点：{{p.scenario==='offline'?'离线':'在线'}}；POSE 姿态节点：在线。</p>
+              <p>门状态 UNKNOWN。电量与信号未接入。个人拥有不自动授予配置或控制权限。</p>
+              <p>设备控制与布撤防接口为 Planned。</p>
+            </details>
+          </section>
+          <section class="sheet">
+            <Environment :temperature="p.box.temp" :humidity="p.box.humidity" :scenario="p.scenario" />
+          </section>
+        </div>
+        <section v-else-if="p.page==='history'&&p.role==='rider'" class="sheet">
+          <div class="segmented"><button v-for="f in ['全部','运输中','已结束','待准备']" :key="f"
+              :class="{selected:f===historyFilter}" @click="historyFilter=f">{{f}}</button></div><button
+            v-for="t in p.tasks.filter(t=>historyFilter==='全部'||stateNames[t.state]===historyFilter)" :key="t.id"
+            class="list-row record-row" @click="t.state==='ready'?p.prepare(t.boxId):p.openTask(t.id)">
+            <Icon :name="t.state==='completed'?'archive':'task'" />
+            <span><strong>{{t.item||'待绑定物品'}}</strong><small>{{t.id}} ·
+                {{stateNames[t.state]}}</small><small>{{t.boxId}} ·
+                {{t.start||'尚未开始'}}{{t.end?' — '+t.end:''}}</small></span>
+            <Icon name="chevron" :size="18" />
+          </button>
+        </section>
+        <section v-else-if="p.page==='environment'" class="sheet history-environment">
+          <div class="section-heading">
+            <div>
+              <h2>{{p.task.item}} · 环境记录</h2>
+              <p>{{p.task.id}}</p>
+            </div><span>{{p.task.state==='completed'?'已结束 · 历史':'本次运输'}}</span>
+          </div>
+          <p>{{demoDate}} {{p.task.start||'尚未开始'}} — {{p.task.end||'14:32'}}</p>
+          <Environment :temperature="p.task.temperature" :humidity="p.task.humidity" :scenario="p.taskScenario"
+            :historical="p.task.state==='completed'" :sample-time="p.task.sampleTime||p.task.end||'14:32'" />
+          <h3>温度变化</h3>
+          <Trend :temperature="p.task.temperature" :start="p.task.start||'14:32'" :end="p.task.end||'14:32'"
+            :alarm="p.taskScenario==='alarm'" :gap="['invalid','offline','stale'].includes(p.taskScenario)" />
+          <p class="data-note">曲线使用公开模拟样本；缺口不连接。只包含本次运输，不能据末次读数推断全程安全。</p>
+        </section>
+        <section v-else-if="p.page==='alerts'" class="sheet alerts-page">
+          <h2>本次运输异常记录</h2>
+          <p>{{p.task.id}} · {{p.task.item}}</p><button v-if="p.taskScenario==='alarm'" class="list-row alert-record"
+            @click="dialog='alert'">
+            <Icon name="alert" /><span><strong>温度超出演示范围</strong><small>{{p.alarmTime}}
+                · 8.6 °C · 样本有效</small></span>
+            <Icon name="chevron" :size="18" />
+          </button>
+          <div v-else class="empty-record">
+            <Icon name="shield" :size="30" />
+            <h3>{{['invalid','unknown','offline','stale'].includes(p.taskScenario)?'当前环境判断不可用':'暂无本次演示异常记录'}}</h3>
+            <p>没有异常记录不代表整次运输安全；请结合环境数据与缺口查看。</p>
+          </div>
+          <p class="data-note">此页只读。人工确认、处理和关闭为 Planned。</p><button class="text-button"
+            @click="p.go('environment')">查看环境记录</button>
+        </section>
+        <section v-else-if="p.page==='account'&&p.role==='rider'" class="sheet account-page">
+          <div class="section-heading">
+            <h2>林沐</h2><span class="avatar">林</span>
+          </div>
+          <p>骑手 / 个人箱体拥有者 · 示例身份</p>
+          <h3>使用关系</h3>
+          <p>个人拥有 1 个箱体；企业分配 1 个箱体。企业资产所有权仍归企业。</p>
+          <details open>
+            <summary>我的操作权限</summary>
+            <ul>
+              <li>查看获准箱体和本人任务。</li>
+              <li>物品绑定、开始与结束运输仅更新本地原型。</li>
+              <li>箱体所有权、使用资格、设备控制资格分别核验。</li>
+              <li>画像、校准、灯风扇与布撤防未接入本原型，Planned。</li>
+            </ul>
+          </details><button class="button secondary" @click="exit">退出演示工作台</button>
+        </section>
+      </template>
+    </main>
+    <footer class="product-footer">SmartBox · 独立交互原型，真实鉴权与服务接入为 Planned。</footer>
+    <nav v-if="p.role==='rider'&&p.entered&&!['entry','expired'].includes(p.page)" class="mobile-nav" aria-label="移动导航">
+      <button v-for="n in nav" :key="n.id" :class="{current:p.page===n.id}" @click="p.go(n.id)">
+        <Icon :name="n.icon" :size="21" /><span>{{n.label}}</span>
+      </button></nav>
+    <div v-if="dialog" class="modal-shade" @click.self="dialog=null">
+      <section ref="dialogElement" class="modal" role="dialog" aria-modal="true"
+        :aria-label="dialog==='alert'?'异常详情':dialog==='start'?'确认开始运输':'确认结束运输'"><button class="modal-close"
+          aria-label="关闭弹窗" @click="dialog=null">
+          <Icon name="close" />
+        </button>
+        <h2>{{dialog==='alert'?'温度异常详情':dialog==='start'?'确认开始运输？':'确认结束运输？'}}</h2>
+        <p>
+          {{dialog==='alert'?'有效样本 8.6 °C，超出演示画像参考 2–8 °C。此为统一 Mock 告警。':dialog==='start'?'请核对箱体与物品。确认后开始记录本次演示运输。':'结束后保留本次记录，不再使用该箱体后续数据更新此任务。'}}
+        </p>
+        <dl class="definition-list">
+          <div>
+            <dt>物品</dt>
+            <dd>{{p.task.item}}</dd>
+          </div>
+          <div>
+            <dt>运输编号</dt>
+            <dd>{{p.task.id}}</dd>
+          </div>
+          <div v-if="p.role==='rider'">
+            <dt>箱体</dt>
+            <dd>{{p.task.boxId}}</dd>
+          </div>
+        </dl>
+        <p v-if="p.error" class="form-error" role="alert">{{p.error}}</p>
+        <p class="data-note">{{dialog==='alert'?'仅查看，不提供虚假处理操作。':'开始/结束条件、离线策略与物品数量仍待确认。'}}</p>
+        <div class="form-actions"><button class="button secondary"
+            @click="dialog=null">{{dialog==='alert'?'关闭':'返回核对'}}</button><button v-if="dialog!=='alert'"
+            :class="['button',dialog==='finish'?'danger':'primary']"
+            @click="confirm">{{dialog==='start'?'开始运输':'结束运输'}}</button></div>
+      </section>
     </div>
-
-    <div v-if="dialog" class="modal-shade" @click.self="dialog=null"><section class="modal" role="dialog" aria-modal="true" :aria-label="dialog==='alert'?'异常详情':dialog==='start'?'确认开始运输':'确认结束运输'"><button class="modal-close icon-button" aria-label="关闭弹窗" @click="dialog=null"><Icon name="close" /></button><span class="modal-symbol"><Icon :name="dialog==='alert'?'alert':dialog==='start'?'task':'check'" :size="27" /></span><h2>{{dialog==='alert'?'温度超出演示范围':dialog==='start'?'开始这一次运输？':'结束这一次运输？'}}</h2><p>{{dialog==='alert'?'14:26 · 环境温度 8.6 °C；画像参考 2–8 °C。此为统一演示告警，非真实规则输出。':dialog==='start'?'请核对任务、箱体与物品。本操作只更新原型会话状态。':'结束后保存本次环境与异常记录，不再用箱体后续运输数据更新此任务。'}}</p><div class="modal-summary"><strong>{{task.item}}</strong><span>{{task.id}}</span><span v-if="!isCustomer">{{task.boxId}} · {{source(task.boxId)}}</span></div><p class="fine-print">{{dialog==='alert'?'人工确认与关闭流程为 Planned。':'最低绑定数量、开始/结束条件仍待确认；此流程仅供布局评审。'}}</p><div class="form-actions"><button class="button secondary" @click="dialog=null">{{dialog==='alert'?'关闭':'再核对一下'}}</button><button v-if="dialog!=='alert'" class="button primary" @click="dialog==='start'?confirmStart():confirmFinish()">{{dialog==='start'?'开始演示运输':'结束演示运输'}}</button></div></section></div>
-    <div v-if="notice" class="toast" role="status"><Icon name="check" :size="18" />{{notice}}</div>
+    <div v-if="p.notice" class="toast" role="status">{{p.notice}}<button aria-label="关闭提示"
+        @click="p.notice=''">×</button></div>
   </div>
 </template>
