@@ -1,8 +1,10 @@
 #include "sb_config.h"
 #include "sb_ports.h"
 #include "sb_rules.h"
+#include "sb_rule_control.h"
 #include "cmsis_os2.h"
 #include <string.h>
+#include <stdio.h>
 static SbAppStatus status;
 static osMessageQueueId_t samples;
 static bool started;
@@ -75,7 +77,7 @@ static void sampling(void *arg) {
     exited(); /* Returning is required: SDK osThreadExit is an empty function. */
 }
 static void processing(void *arg) {
-    SbSensorFrame frame; uint32_t wait;
+    SbSensorFrame frame; uint32_t wait; uint64_t diagnostic_due=0;
     (void)arg;
     if (enter()) while (state_is(SB_READY)) {
         if (sb_ms_to_ticks(20,sb_platform_frequency(),&wait)!=SB_OK) { fail("queue wait"); break; }
@@ -84,8 +86,21 @@ static void processing(void *arg) {
             if (sb_pipeline_process(&frame)!=SB_OK) { fail("pipeline"); break; }
         } else if (result!=osErrorTimeout && result!=osErrorResource) { fail("queue read"); break; }
         SbClock now;
-        if(sb_clock_get(&now)!=SB_OK||sb_rules_poll(now.uptime_ms)!=SB_OK){fail("rules poll");break;}
+        if(sb_clock_get(&now)!=SB_OK||sb_control_process()!=SB_OK){fail("rules poll");break;}
         if (sb_output_poll()!=SB_OK) { fail("output clock"); break; }
+#ifdef SB_HARDWARE
+        if(now.uptime_ms>=diagnostic_due){
+            SbRulesStatus r;SbOutputState lamp={0};(void)sb_control_status(&r);
+            (void)sb_output_get(sb_config_get()->role==SB_ENV?SB_LIGHT:SB_INDICATOR,&lamp);
+            printf("SB rule uptime=%llu pose=%u calibrated=%u sentry=%u revision=%lu candidates=%llu rejected=%llu commands_full=%llu detect=%llu output=%llu lamp=%u until=%llu\n",
+                (unsigned long long)now.uptime_ms,r.pose_state,r.calibrated,r.sentry_armed?2:r.sentry_arming?1:0,(unsigned long)r.sentry_revision,
+                (unsigned long long)r.event_candidates,(unsigned long long)sb_event_buffer_rejected(),(unsigned long long)sb_control_rejected(),
+                (unsigned long long)r.fast_detected_ms,(unsigned long long)r.fast_output_ms,lamp.on,(unsigned long long)lamp.expires_ms);
+            diagnostic_due=now.uptime_ms+1000;
+        }
+#else
+        (void)diagnostic_due;
+#endif
     }
     exited();
 }

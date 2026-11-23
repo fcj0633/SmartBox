@@ -81,7 +81,7 @@ public class IngestionService {
         }else if(availability){db.update("UPDATE node_runtime SET online=?,last_seen=? WHERE node_id=?",online,now,node);}
         else db.update("UPDATE node_runtime SET online=1,last_seen=?,uptime_ms=?,ts_src=?,heartbeat=COALESCE(?,heartbeat) WHERE node_id=?",now,new BigDecimal(uptime),value.path("ts_src").asText(),heartbeat,node);
         if(heartbeat!=null){
-            var row=db.one("SELECT actual_state FROM node_runtime WHERE node_id=?",node);
+            var row=db.one("SELECT COALESCE(actual_state,JSON_OBJECT()) AS actual_state FROM node_runtime WHERE node_id=?",node);
             ObjectNode state=row.get("actual_state")==null?JsonNodeFactory.instance.objectNode():(ObjectNode)json.json(row.get("actual_state"));
             JsonNode sentry=value.path("sentry");
             if(!state.has("sentry_revision")||sentry.path("revision").bigIntegerValue().compareTo(state.path("sentry_revision").bigIntegerValue())>=0){state.set("sentry",sentry.path("state"));state.set("sentry_revision",sentry.path("revision"));db.update("UPDATE node_runtime SET actual_state=? WHERE node_id=?",json.text(state),node);}

@@ -126,3 +126,9 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 ## 8. 结果与退出约定
 
 证据写入新的[artifacts运行目录](../artifacts/README.md)，受控[报告](../docs/testing/reports)保存脱敏摘要和索引；成功返回0、失败非零，缺必需依赖不静默跳过。配置、身份状态、密码散列及日志不入Git。自动入口只终止自己持有的子进程，异常或中断后先核对PID/路径/端口和恢复清单，不按端口号随意杀进程或删除备份。
+
+## 9. TASK-008规则检查与隔离联调
+
+- [check_rules.py](check_rules.py)：使用现有SSH连接参数及`--report artifacts/新目录/rules.json`，在Ubuntu临时目录编译并运行ENV/POSE规则；对比C、Python和公开预期，覆盖邮箱边界。只产生测试临时文件和本地证据，不修改SDK，不操作开发板。
+- [task008.py](task008.py)：`software --allow-test-reset --run-dir artifacts/新目录`连接项目测试库，启动自己的本地Broker、后端18080、网页15173、两个采样驱动节点和真实浏览器。`cloud-smoke`使用已配置EMQX且不管理云端部署；会预留新的模拟启动区间，真实板下一次构建前须按硬件流程分配后续区间。缺少配置、端口占用、非项目测试库均失败，不停止已有服务。
+- [规则向量](../tests/firmware/rule-vectors.json)是共享公开输入和独立检查点；[浏览器入口](../frontend/tests/rules-live.cjs)不拦截API，验证四角色、门结论和告警开始/恢复通知。原始日志与截图留忽略目录；工具结束清理自身进程，不停止共享MySQL。

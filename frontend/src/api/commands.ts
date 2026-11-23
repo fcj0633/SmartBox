@@ -25,6 +25,6 @@ export function buildCommand(kind: CommandKind, form: FormValues): Command {
 }
 export const defaultForm = (): FormValues => ({ on: true, duration: 10, output: 'light', mode: 'FIXED', seed: 1, profile: 'NORMAL', tempMin: 0, tempMax: 40, humiMin: 20, humiMax: 80, tempHyst: 2, humiHyst: 3 });
 export function actualFields(actual: Record<string, unknown>): [string, unknown][] {
-  const allowed: Record<string,string> = { sentry: '哨兵', sentry_revision: '哨兵修订', profile_id: '已采用画像', mode: '定位模式', calibrated: '模拟校准', kind: '输出类型', on: '输出开关' };
+  const allowed: Record<string,string> = { sentry: '哨兵', sentry_revision: '哨兵修订', profile_id: '已采用画像', mode: '定位模式', calibrated: '已校准', kind: '输出类型', on: '输出开关' };
   return Object.entries(actual).filter(([k]) => k in allowed).map(([k,v]) => [allowed[k]!, v]);
 }

@@ -95,3 +95,11 @@ unit执行[状态/协议测试](../../tests/simulator/test_model.py)，使用临
 扩展输入时先在Model实现确定序列及质量标记，注入时钟覆盖边界；涉及字段或命令先核对需求/契约。扩展故障场景在Scenarios组合正常节点与独立测试端，不能为了注入错误放宽正常Protocol检查。真实retained命令应先保存、再订阅获得保留投递，不把普通在线投递当成该场景。
 
 回归需覆盖输入复现、拒绝不改状态、重复/冲突、精确确认与覆盖、断线重订阅及代次。运行目录保存脱敏状态/证据；日志、密码及散列不入Git，人工操作与真实板验收另行记录。原结果见[MQTT报告](../../docs/testing/reports/TASK-004-MQTT与模拟节点验证报告.md)，后续软件/硬件状态看当前根README。
+
+## 6. TASK-008采样驱动规则与预设事件的区别
+
+旧`rules-*`场景直接提供后端事件输入样例，用于验证接入与派生处理。新`sample-rules`场景读取[公开向量](../../tests/firmware/rule-vectors.json)，经独立的[rules.py](rules.py)状态机处理环境、加速度、光照、位置及时间，再生成事件。预期事件类型和检查点写在向量中，不能由被测状态机自动更新预期。
+
+节点启动参数为`node --role ENV --scenario sample-rules --rule-case env-live-cycle`，连接配置等参数沿用上文；POSE必须选同角色向量。输入在断网时仍推进，事件进入现有内存待确认队列，联网后精确确认才清理。多进程对齐场景通过`--rule-start-file`等待共同的未来开始时间，不能依靠进程启动先后猜测2秒融合窗口。
+
+[check_rules.py](../check_rules.py)在Ubuntu GCC运行同一输入的C规则和邮箱测试，再对照Python结果及独立预期。[task008.py](../task008.py)的`software`使用真实本地Broker、smartbox_test、18080/15173及浏览器，`cloud-smoke`使用真实云端，两者均需显式`--allow-test-reset --run-dir`。不得与其他测试同时使用smartbox_test；云端模拟节点与同身份真实板不能并行。模拟采样、C宿主和真实板的证据仍分别记录。

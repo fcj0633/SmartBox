@@ -46,6 +46,8 @@ public class DomainEventWorker {
             if(event==null)throw new IllegalStateException("domain event missing");
             String type=event.get("type").toString();
             if(type.equals("DOOR_EVIDENCE")) {
+                // Serialize conclusions per box, including two concurrent evidence workers.
+                db.one("SELECT box_id FROM boxes WHERE box_id=? FOR UPDATE",event.get("box_id"));
                 if(deferOrConclude(event,now)) {
                     db.update("UPDATE processing_outbox SET status='RETRY',next_attempt_at=?,lock_owner=NULL,locked_until=NULL,updated_at=? WHERE id=? AND lock_owner=?",
                         Math.max(now+50,((Number)event.get("received_at")).longValue()+2000),now,locked.get("id"),owner);
@@ -77,19 +79,29 @@ public class DomainEventWorker {
                 id,box,event.get("node_id"),kind,action,observed,event.get("ts_src"),uncertainty,event.get("received_at"),event.get("replayed"),json.text(data),now);
             evidence=db.one("SELECT * FROM event_evidence WHERE event_id=?",id);
         }
+        // After a restart both raw events can predate their domain-work execution.
+        // Register the complementary committed input before finalizing a single source.
+        for(var other:db.rows("SELECT * FROM events WHERE box_id=? AND node_id<>? AND type='DOOR_EVIDENCE' AND src=? AND replayed=0 AND ABS(received_at-?)<=2000 ORDER BY received_at,id LIMIT 32",
+                box,event.get("node_id"),kind.equals("LIGHT")?"TILT":"LIGHT",event.get("received_at"))){
+            if(db.one("SELECT event_id FROM event_evidence WHERE event_id=?",other.get("id"))!=null)continue;
+            JsonNode raw=json.json(other.get("data"));
+            db.update("INSERT INTO event_evidence(event_id,box_id,node_id,kind,action,observed_at,ts_src,time_uncertainty_ms,received_at,replayed,data,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                other.get("id"),box,other.get("node_id"),kind.equals("LIGHT")?"TILT":"LIGHT",raw.path("action").asText(),other.get("device_ts"),other.get("ts_src"),other.get("time_uncertainty_ms"),other.get("received_at"),other.get("replayed"),json.text(raw),now);
+        }
         if(Boolean.TRUE.equals(evidence.get("replayed"))) {
             createConclusion(List.of(evidence),"UNKNOWN","INSUFFICIENT","HISTORICAL",now,true,true);
             return false;
         }
         if(evidence.get("conclusion_id")!=null)return false;
         long received=((Number)evidence.get("received_at")).longValue();
-        var partner=db.one("SELECT * FROM event_evidence WHERE box_id=? AND node_id<>? AND kind<>? AND conclusion_id IS NULL AND replayed=0 AND ABS(received_at-?)<=2000 ORDER BY received_at,event_id LIMIT 1 FOR UPDATE",
-            box,evidence.get("node_id"),evidence.get("kind"),received);
+        var partner=db.one("SELECT * FROM event_evidence WHERE box_id=? AND node_id<>? AND kind<>? AND conclusion_id IS NULL AND replayed=0 AND ABS(received_at-?)<=2000 AND (ts_src<>'SNTP' OR ?<>'SNTP' OR ABS(observed_at-?)<=2000) ORDER BY received_at,event_id LIMIT 1 FOR UPDATE",
+            box,evidence.get("node_id"),evidence.get("kind"),received,evidence.get("ts_src"),evidence.get("observed_at"));
         if(partner!=null) {
             boolean timesComparable=Objects.equals(evidence.get("ts_src"),"SNTP")&&Objects.equals(partner.get("ts_src"),"SNTP");
             if(timesComparable&&Math.abs(((Number)evidence.get("observed_at")).longValue()-((Number)partner.get("observed_at")).longValue())>2000)partner=null;
         }
-        if(partner==null&&now<received+2000)return true;
+        long windowStart=partner==null?received:Math.min(received,((Number)partner.get("received_at")).longValue());
+        if(now<windowStart+2000)return true;
         List<Map<String,Object>> items=partner==null?List.of(evidence):List.of(evidence,partner);
         String state="UNKNOWN",confidence="INSUFFICIENT",reason="SINGLE_SOURCE_CLOSE";
         boolean historical=false,unfused=partner==null;
@@ -102,13 +114,13 @@ public class DomainEventWorker {
                 confidence=highQuality?"HIGH":"MEDIUM";
                 reason="DUAL_SOURCE";
             }
-            db.update("UPDATE event_evidence SET conclusion_id=? WHERE event_id IN (?,?)",conclusionId(id,((Number)partner.get("event_id")).longValue()),id,partner.get("event_id"));
-        } else if(action.equals("OPEN")&&kind.equals("TILT")&&data.path("tilt_deg").asDouble()>=60.0) {
+
+        } else if(action.equals("OPEN")&&kind.equals("TILT")&&data.path("tilt_deg").asDouble()>60.0) {
             state="OPEN";confidence="MEDIUM";reason="TILT_STRONG";
-            db.update("UPDATE event_evidence SET conclusion_id=? WHERE event_id=?",conclusionId(id,id),id);
+
         } else {
             reason=action.equals("OPEN")?kind.equals("LIGHT")?"LIGHT_ONLY":"TILT_WEAK":"SINGLE_SOURCE_CLOSE";
-            db.update("UPDATE event_evidence SET conclusion_id=? WHERE event_id=?",conclusionId(id,id),id);
+
         }
         String conclusion=conclusionId(id,partner==null?id:((Number)partner.get("event_id")).longValue());
         createConclusion(items,state,confidence,reason,now,historical,unfused,conclusion);
@@ -141,6 +153,17 @@ public class DomainEventWorker {
     private void createConclusion(List<Map<String,Object>> evidence,String state,String confidence,String reason,
                                   long now,boolean historical,boolean unfused,String conclusion) {
         Map<String,Object> first=evidence.get(0);String box=first.get("box_id").toString();
+        if(!historical&&!state.equals("UNKNOWN")) {
+            var previous=db.one("SELECT d.conclusion_id,d.source_event_ids FROM box_domain_state s JOIN door_conclusions d ON d.conclusion_id=s.door_conclusion_id WHERE s.box_id=? AND s.door_state=? AND s.door_confidence=? FOR UPDATE",box,state,confidence);
+            if(previous!=null) {
+                LinkedHashSet<Long> ids=new LinkedHashSet<>();
+                for(JsonNode old:json.json(previous.get("source_event_ids")))ids.add(old.asLong());
+                for(var item:evidence){ids.add(((Number)item.get("event_id")).longValue());db.update("UPDATE event_evidence SET conclusion_id=? WHERE event_id=? AND conclusion_id IS NULL",previous.get("conclusion_id"),item.get("event_id"));}
+                ArrayNode linked=JsonNodeFactory.instance.arrayNode();ids.forEach(linked::add);
+                db.update("UPDATE door_conclusions SET source_event_ids=? WHERE conclusion_id=?",json.text(linked),previous.get("conclusion_id"));
+                return;
+            }
+        }
         Long observed=null;boolean allSynced=evidence.stream().allMatch(e->Objects.equals(e.get("ts_src"),"SNTP")&&e.get("observed_at")!=null);
         if(allSynced)observed=evidence.stream().mapToLong(e->((Number)e.get("observed_at")).longValue()).max().orElseThrow();
         ArrayNode sources=JsonNodeFactory.instance.arrayNode();for(Map<String,Object> e:evidence)sources.add(((Number)e.get("event_id")).longValue());
@@ -217,7 +240,7 @@ public class DomainEventWorker {
             String owner=UUID.randomUUID().toString();Map<String,Object> work=null;
             try { work=claim(owner,clock.millis());if(work==null)return processed;if(process(work,owner))processed++; }
             catch(Exception error) {
-                log.warn("Domain event work failed for outbox id {} ({})",work==null?"unclaimed":work.get("id"),error.toString());
+                log.warn("Domain event work failed for outbox id {} ({})",work==null?"unclaimed":work.get("id"),error.getClass().getSimpleName());
                 if(work!=null)try{long now=clock.millis();db.update("UPDATE processing_outbox SET status='RETRY',last_error_code='DOMAIN_PROCESSING_FAILED',next_attempt_at=?,lock_owner=NULL,locked_until=NULL,updated_at=? WHERE id=? AND lock_owner=?",now+1000,now,work.get("id"),owner);}catch(Exception ignored){}
                 return processed;
             }

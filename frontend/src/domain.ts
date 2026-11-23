@@ -18,4 +18,4 @@ export function quality(sample?: Sample, synchronized = true): string {
   if (!synchronized) return '同步中断 · 最后数据';
   return label(sample.freshness);
 }
-export const commandNames: Record<CommandKind,string> = { sentry: '布撤防', output: '输出控制', gps_mode: '模拟定位模式', profile: '环境画像', calibrate: '模拟校准' };
+export const commandNames: Record<CommandKind,string> = { sentry: '布撤防', output: '输出控制', gps_mode: '模拟定位模式', profile: '环境画像', calibrate: '姿态校准' };

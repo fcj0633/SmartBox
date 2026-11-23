@@ -5,8 +5,8 @@ static uint32_t indices[SB_INPUT_COUNT];
 static SbGpsMode gps_mode=SB_GPS_FIXED;static uint32_t gps_seed=1;
 static uint32_t location_seq;
 SbResult sb_sensor_init(void) { memset(indices,0,sizeof(indices));location_seq=0;gps_mode=SB_GPS_FIXED;gps_seed=1;return SB_OK; }
-SbResult sb_sensor_set_gps_mode(SbGpsMode mode,uint32_t seed){if(mode<SB_GPS_FIXED||mode>SB_GPS_WALK)return SB_INVALID_ARG;gps_mode=mode;gps_seed=seed?seed:1;return SB_OK;}
-uint32_t sb_sensor_location_period_ms(void){return gps_mode==SB_GPS_FIXED?10000:1000;}
+SbResult sb_sensor_set_gps_mode(SbGpsMode mode,uint32_t seed){if(mode<SB_GPS_FIXED||mode>SB_GPS_WALK)return SB_INVALID_ARG;int32_t lock=sb_platform_lock();if(lock<0)return SB_PLATFORM_ERROR;gps_mode=mode;gps_seed=seed?seed:1;sb_platform_unlock(lock);return SB_OK;}
+uint32_t sb_sensor_location_period_ms(void){int32_t lock=sb_platform_lock();if(lock<0)return 10000;uint32_t value=gps_mode==SB_GPS_FIXED?10000:1000;sb_platform_unlock(lock);return value;}
 SbResult sb_sensor_read(SbInputKind kind,SbSensorFrame *out) {
     uint32_t i; const SbConfig *c=sb_config_get();
     if (!out || kind<0 || kind>=SB_INPUT_COUNT) return SB_INVALID_ARG;
@@ -24,7 +24,8 @@ SbResult sb_sensor_read(SbInputKind kind,SbSensorFrame *out) {
         out->value.pose.x_g=0.1f*(float)i; out->value.pose.z_g=1.0f;
         out->value.pose.tilt_deg=5.0f*(float)i; /* Fixture observation, no estimator. */
     } else {
-        if(location_seq==UINT32_MAX){out->valid=false;return SB_OK;}
+        int32_t lock=sb_platform_lock();if(lock<0)return SB_PLATFORM_ERROR;
+        if(location_seq==UINT32_MAX){out->valid=false;sb_platform_unlock(lock);return SB_OK;}
         out->sample_seq=++location_seq;
         uint32_t n=indices[kind]+gps_seed;
         if(gps_mode==SB_GPS_FIXED){out->value.location.latitude_deg=31.2304;out->value.location.longitude_deg=121.4737;}
@@ -34,6 +35,7 @@ SbResult sb_sensor_read(SbInputKind kind,SbSensorFrame *out) {
             noise=3+(int)((sample_seed>>16)%3);if(sample_seed&1)noise=-noise;
             out->value.location.latitude_deg=31.2304+(gps_mode==SB_GPS_ROUTE?0.0001*(n%5):0)+(double)noise/111320.0;
             out->value.location.longitude_deg=121.4737+(gps_mode==SB_GPS_ROUTE?0.00008*(n%5):0)+(double)noise/95100.0;}
+        sb_platform_unlock(lock);
     }
     return SB_OK;
 }

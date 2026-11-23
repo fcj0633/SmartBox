@@ -3,6 +3,7 @@
 #include "sb_ports.h"
 
 typedef struct {
+    bool pose_valid;
     bool calibrated;
     bool calibrating;
     float tilt_deg;
@@ -13,6 +14,7 @@ typedef struct {
     uint32_t sentry_revision;
     SbGpsMode gps_mode;
     char profile_id[49];
+    uint64_t fast_detected_ms,fast_output_ms;
     uint64_t event_candidates;
     uint64_t suppressed_environment_events;
 } SbRulesStatus;

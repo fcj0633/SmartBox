@@ -1,6 +1,7 @@
 #include "sb_config.h"
 #include "sb_hardware.h"
 #include "sb_wire.h"
+#include "sb_rule_control.h"
 #include "sb_sntp.h"
 #include <assert.h>
 #include <stdio.h>
@@ -132,5 +133,33 @@ int main(void){
     CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_OK&&strstr(reply,"invalid_params")&&writes==n+1);
     CHECK(sb_clock_sync(2015000,1165)==SB_OK);command(raw,"at-expiry",caps,kind,false,10);
     CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_OK&&strstr(reply,"expired")&&writes==n+1);
+    /* Network parsing queues rules; no success before processing/actual ARMED. */
+    sb_pipeline_init();sb_wire_init(20);CHECK(sb_clock_sync(3000000,1)==SB_OK);
+    snprintf(raw,sizeof(raw),"{\"v\":1,\"box_id\":\"BOX-0001\",\"node_id\":\"%s\",\"request_id\":\"arm-rule\",\"operation_id\":\"op-arm\",\"cmd\":\"sentry\",\"target_caps\":64,\"issued_at\":3000000,\"expires_at\":3015000,\"params\":{\"on\":true,\"duration_s\":2,\"sentry_revision\":1}}",sb_config_get()->node_id);
+    CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_NO_DATA);
+    CHECK(sb_wire_poll(reply,sizeof(reply))==SB_NO_DATA);
+    CHECK(sb_control_process()==SB_OK);tick+=2999;CHECK(sb_control_process()==SB_OK);
+    CHECK(sb_wire_poll(reply,sizeof(reply))==SB_NO_DATA);
+    tick+=1;CHECK(sb_control_process()==SB_OK);
+    CHECK(sb_wire_poll(reply,sizeof(reply))==SB_OK&&strstr(reply,"ARMED")&&strstr(reply,"completed"));
+    CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_OK&&strstr(reply,"completed"));
+    SbRulesStatus rules;CHECK(sb_control_status(&rules)==SB_OK&&rules.sentry_revision==1);
+    tick+=2000;CHECK(sb_control_process()==SB_OK);CHECK(sb_control_status(&rules)==SB_OK&&!rules.sentry_armed);
+    snprintf(raw,sizeof(raw),"{\"v\":1,\"box_id\":\"BOX-0001\",\"node_id\":\"%s\",\"door_state\":\"OPEN\",\"conclusion_id\":\"rule-box\",\"historical\":false,\"ts\":3000000}",sb_config_get()->node_id);
+    CHECK(sb_wire_box_state(raw,strlen(raw))==SB_OK);
+    CHECK(sb_control_status(&rules)==SB_OK&&rules.door!=SB_DOOR_OPEN);
+    CHECK(sb_control_process()==SB_OK);CHECK(sb_control_status(&rules)==SB_OK&&rules.door==SB_DOOR_OPEN);
+    if(env){
+        snprintf(raw,sizeof(raw),"{\"v\":1,\"box_id\":\"BOX-0001\",\"node_id\":\"%s\",\"request_id\":\"rule-profile\",\"operation_id\":\"op-profile\",\"cmd\":\"profile\",\"target_caps\":1,\"issued_at\":3000000,\"expires_at\":3015000,\"params\":{\"profile_id\":\"TEST\",\"temp_min_c\":2,\"temp_max_c\":30,\"humi_min_pct\":30,\"humi_max_pct\":85,\"temp_hysteresis_c\":1,\"humi_hysteresis_pct\":3}}",sb_config_get()->node_id);
+        CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_NO_DATA);
+        CHECK(sb_control_process()==SB_OK);CHECK(sb_wire_poll(reply,sizeof(reply))==SB_OK&&strstr(reply,"profile_id"));
+        CHECK(sb_control_status(&rules)==SB_OK&&!strcmp(rules.profile_id,"TEST"));
+    }else{
+        snprintf(raw,sizeof(raw),"{\"v\":1,\"box_id\":\"BOX-0001\",\"node_id\":\"%s\",\"request_id\":\"rule-calibrate\",\"operation_id\":\"op-calibrate\",\"cmd\":\"calibrate\",\"target_caps\":8,\"issued_at\":3000000,\"expires_at\":3015000,\"params\":{}}",sb_config_get()->node_id);
+        CHECK(sb_wire_command(raw,strlen(raw),false,reply,sizeof(reply))==SB_NO_DATA);CHECK(sb_control_process()==SB_OK);
+        SbSensorFrame frame={0};frame.role=SB_POSE;frame.kind=SB_INPUT_POSE;frame.source=SB_SOURCE_MOCK;frame.valid=true;frame.value.pose.z_g=1;
+        for(unsigned j=0;j<=150;++j){CHECK(sb_clock_get(&frame.clock)==SB_OK);CHECK(sb_pipeline_process(&frame)==SB_OK);CHECK(sb_control_process()==SB_OK);if(j<150)tick+=20;}
+        CHECK(sb_wire_poll(reply,sizeof(reply))==SB_OK&&strstr(reply,"calibrated\":true"));
+    }
     printf("PASS hardware role=%s checks=%u\n",env?"ENV":"POSE",tests);return 0;
 }

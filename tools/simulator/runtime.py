@@ -14,14 +14,56 @@ from .protocol import Protocol, pack, unpack, Rejected
 from .storage import IdentityState, FileLock, atomic_json
 
 class Node:
-    def __init__(self,config,role,run_dir,scenario='normal',events=1,seed=1):
+    def __init__(self,config,role,run_dir,scenario='normal',events=1,seed=1,rule_case=None,rule_start_file=None):
         self.config=config;self.role=role;self.run_dir=Path(run_dir);self.scenario=scenario
+        self.rule_input=None;self.rule_engine=None;self.rule_index=0;self.rule_unpublished=False;self.rule_start_file=rule_start_file;self.rule_started=None;self.rule_offset_ms=0
+        if scenario=='sample-rules':
+            from .rules import Rules
+            from .config import ROOT
+            cases=json.loads((ROOT/'tests/firmware/rule-vectors.json').read_text(encoding='utf-8'))['cases']
+            self.rule_input=next((c for c in cases if c['id']==rule_case and c['role']==role),None)
+            if self.rule_input is None:raise ValueError('A matching public role/case is required')
+            self.rule_engine=Rules(role)
         self.event_count=events;self.seed=seed;self.received=deque(maxlen=32)
         self.ready=False;self.connected=False;self.subscriptions=set();self.drops=0
         self.connections=0;self.published=0;self.box_count=0;self.model=None
         self.retry=0;self.retry_at=0;self.resubscribe=False;self.rng=random.Random(seed)
         self.protocol=Protocol();self.client=None;self.needs_connect=True
         self.connection_error=None
+    def advance_rules(self):
+        if self.rule_input is None:return
+        if self.rule_started is None:
+            if self.rule_start_file:
+                if not self.rule_start_file.is_file():return
+                self.rule_utc_base=json.loads(self.rule_start_file.read_text())['start_at']
+                self.rule_started=self.model.mono()+(self.rule_utc_base-self.model.utc())/1000
+                self.rule_offset_ms=round((self.rule_started-self.model.started)*1000)
+            else:self.rule_started=self.model.started
+        if self.model.mono()<self.rule_started:return
+        elapsed=int((self.model.mono()-self.rule_started)*1000);steps=self.rule_input['steps']
+        while self.rule_index<len(steps) and steps[self.rule_index]['ms']<=elapsed:
+            self.rule_engine.step(steps[self.rule_index]);self.rule_index+=1
+        self.rule_engine.poll(elapsed)
+        while self.rule_engine.events:
+            self.rule_unpublished=True
+            event=self.rule_engine.events.pop(0);generated=self.model.event(event['type'],event['data'],event['level'],event['src'])
+            self.model.pending[generated['event_seq']].update(ts=self.rule_utc_base+event['uptime_ms'],uptime_ms=self.rule_offset_ms+event['uptime_ms'])
+    def property(self):
+        out=self.model.property()
+        if self.rule_input is None:return out
+        engine=self.rule_engine;sample=engine.last_samples.get('env' if self.role=='ENV' else 'pose')
+        if sample:
+            ms,a=sample;valid=bool(a[3]);out.update(ts=self.rule_utc_base+ms,uptime_ms=self.rule_offset_ms+ms)
+            if self.role=='ENV':out['env'].update(temp_c=a[0] if valid else None,humi_pct=a[1] if valid else None,lux=a[2] if valid else None,valid=valid,light_on=engine.lamp)
+            else:
+                valid=valid and engine.calibrated
+                names=['NORMAL','TILTED','SIDEWAYS','INVERTED']
+                out['pose'].update(acc_g=a[:3] if valid else None,tilt_deg=engine.tilt if valid else None,state=names[engine.pose or 0] if valid else 'UNKNOWN',valid=valid)
+        gps=engine.last_samples.get('gps')
+        if not gps and any(step['op']=='gps' for step in self.rule_input['steps']):out['loc']={'lat':None,'lon':None,'valid':False,'src':'MOCK'}
+        if gps:
+            ms,a=gps;out['loc']={'lat':a[0] if a[3] else None,'lon':a[1] if a[3] else None,'valid':bool(a[3]),'src':'MOCK','observation':{'sample_seq':a[2],'ts':self.rule_utc_base+ms,'ts_src':'SNTP','uptime_ms':self.rule_offset_ms+ms,'time_uncertainty_ms':1}}
+        return out
     def topic(self,suffix):return 'box/BOX-0001/'+self.config['accounts'][self.role]['username']+'/'+suffix
     def receive(self,client,userdata,message):
         if len(message.payload)>1536 or len(self.received)==32:
@@ -73,13 +115,14 @@ class Node:
             except (Rejected,ValueError,UnicodeError):return
     def save(self):
         atomic_json(self.run_dir/(self.role+'.status.json'),{**self.model.snapshot(),'ready':self.ready,
-                    'connections':self.connections,'connection_error':self.connection_error,'retry_count':self.retry,'retry_in_s':max(0,round(self.retry_at-time.monotonic(),3)),'dropped':self.drops,'published':self.published,'pid':__import__('os').getpid()})
+                    'rule_steps':self.rule_index,'rule_complete':self.rule_input is not None and self.rule_index==len(self.rule_input['steps']),'connections':self.connections,'connection_error':self.connection_error,'retry_count':self.retry,'retry_in_s':max(0,round(self.retry_at-time.monotonic(),3)),'dropped':self.drops,'published':self.published,'pid':__import__('os').getpid()})
     def run(self,stop_file=None):
         self.run_dir.mkdir(parents=True,exist_ok=True)
         node=self.config['accounts'][self.role]['username'];state_dir=Path(self.config['state_dir'])
         with FileLock(state_dir/(node+'.lock')):
             identity=IdentityState(state_dir,node)
             self.model=Model(self.role,identity,self.seed,self.scenario!='unsynced',self.scenario=='invalid')
+            self.rule_utc_base=self.model.utc()
             self.client=mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,client_id=node,clean_session=True,protocol=mqtt.MQTTv311,reconnect_on_failure=False)
             from broker_profiles import configure_client
             configure_client(self.client,self.config)
@@ -111,12 +154,14 @@ class Node:
                         code,mid=self.client.subscribe([(self.topic(x),1) for x in DOWN])
                         if code==mqtt.MQTT_ERR_SUCCESS:self.subscriptions.add(mid)
                         else:self.needs_connect=True
+                    self.advance_rules()
                     if self.ready:
                         if not previously_ready:
                             self.retry=0;self.publish('availability',{'node_id':node,'boot_id':self.model.boot,'online':True})
                             next_property=next_heartbeat=next_events=0
                             if not generated:
-                                if self.scenario.startswith('rules-'):
+                                if self.scenario=='sample-rules':pass
+                                elif self.scenario.startswith('rules-'):
                                     self.model.rule_events(self.scenario)
                                 else:
                                     for _ in range(self.event_count):self.model.event()
@@ -124,13 +169,13 @@ class Node:
                         while self.received:self.process(self.received.popleft())
                         for ack in self.model.tick():self.publish('command_ack',ack)
                         if now>=next_property:
-                            self.publish('property',self.model.property());next_property=now+1
+                            self.publish('property',self.property());next_property=now+1
                         if now>=next_heartbeat:
                             self.publish('heartbeat',self.model.heartbeat());next_heartbeat=now+30
-                        if now>=next_events:
+                        if now>=next_events or self.rule_unpublished:
                             for batch in self.model.batches():
                                 if self.publish('event',batch):self.model.sent.update(e['event_seq'] for e in batch['events'])
-                            next_events=now+5
+                            self.rule_unpublished=False;next_events=now+5
                     else:
                         # Local simulated deadlines still advance during network loss.
                         self.model.tick()

@@ -1,9 +1,10 @@
 #include "sb_config.h"
 #include "sb_ports.h"
 #include "sb_rules.h"
+#include "sb_rule_control.h"
 #include <string.h>
 static SbSnapshot snapshot;
-void sb_pipeline_init(void) { memset(&snapshot,0,sizeof(snapshot)); sb_rules_init(); }
+void sb_pipeline_init(void) { memset(&snapshot,0,sizeof(snapshot)); sb_rules_init(); sb_control_init(); }
 SbResult sb_pipeline_process(const SbSensorFrame *frame) {
     int32_t lock;
     if (!frame||frame->kind<0||frame->kind>=SB_INPUT_COUNT||(frame->source!=SB_SOURCE_MOCK && frame->source!=SB_SOURCE_REAL)) return SB_INVALID_ARG;

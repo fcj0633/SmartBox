@@ -53,6 +53,7 @@ class DocumentationChecks(unittest.TestCase):
             'src/stores/session.ts',
             'tests/browser/ui.spec.ts',
             'tests/live.config.ts',
+            'tests/rules-live.cjs',
             'tests/live/closed-loop.spec.ts',
             'tests/playwright.config.ts',
             'tests/unit/core.test.ts',

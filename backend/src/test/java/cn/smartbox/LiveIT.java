@@ -147,6 +147,8 @@ class LiveIT {
         receive(domainEvent("BOX-0001-ENV",12,1,"DOOR_EVIDENCE","LIGHT","INFO","{\"action\":\"OPEN\",\"lux\":120,\"actuator_excluded\":true}"),"event");
         receive(domainEvent("BOX-0001-POSE",13,1,"DOOR_EVIDENCE","TILT","INFO","{\"action\":\"OPEN\",\"tilt_deg\":70,\"actuator_excluded\":true}"),"event");
         domainWorker.runBatch();
+        assertEquals(0,store.count("SELECT COUNT(*) FROM door_conclusions"));
+        Thread.sleep(2100);domainWorker.runBatch();
         var door=query.snapshot(operator(),"BOX-0001").path("door");
         assertEquals("OPEN",door.path("state").asText());assertEquals("MEDIUM",door.path("confidence").asText());
         assertEquals(2,store.count("SELECT COUNT(*) FROM event_evidence"));assertEquals(1,store.count("SELECT COUNT(*) FROM door_conclusions"));
@@ -234,4 +236,56 @@ class LiveIT {
         assertEquals(1,query.history(operator(),"BOX-0001",Map.of(),true).path("total").asInt());
     }
 
+
+    @Autowired org.springframework.core.env.Environment domainEnvironment;
+    DomainEventWorker domainAt(long now){return new DomainEventWorker(store,validator,Clock.fixed(Instant.ofEpochMilli(now),ZoneOffset.UTC),manager,domainEnvironment);}
+    long lastReceived(){return ((Number)store.one("SELECT MAX(received_at) AS t FROM events").get("t")).longValue();}
+    void bothOnline()throws Exception{
+        var env=input("mqtt-heartbeat.json");env.put("boot_id",12);receive(env,"heartbeat");
+        var pose=input("mqtt-pose-heartbeat.json");pose.put("boot_id",13);receive(pose,"heartbeat");
+    }
+    @ParameterizedTest @CsvSource({"0,500,HIGH","2000,500,HIGH","0,501,MEDIUM","2001,500,MEDIUM"})
+    void doorPairTimeAndQualityBoundaries(long delta,long uncertainty,String expected)throws Exception{
+        bothOnline();
+        var first=domainEvent("BOX-0001-ENV",12,1,"DOOR_EVIDENCE","LIGHT","INFO","{\"action\":\"OPEN\",\"lux\":120,\"actuator_excluded\":true}");
+        var second=domainEvent("BOX-0001-POSE",13,1,"DOOR_EVIDENCE","TILT","INFO","{\"action\":\"OPEN\",\"tilt_deg\":70,\"actuator_excluded\":true}");
+        ((ObjectNode)first.path("events").get(0)).put("time_uncertainty_ms",uncertainty);
+        ((ObjectNode)second.path("events").get(0)).put("ts",1800000000000L+delta);
+        receive(first,"event");receive(second,"event");long start=((Number)store.one("SELECT MIN(received_at) AS t FROM events").get("t")).longValue();
+        domainAt(start).runBatch();assertEquals(0,store.count("SELECT COUNT(*) FROM door_conclusions"));
+        domainAt(start+1999).runBatch();assertEquals(0,store.count("SELECT COUNT(*) FROM door_conclusions"));
+        domainAt(start+2100).runBatch();
+        var door=query.snapshot(operator(),"BOX-0001").path("door");assertEquals("OPEN",door.path("state").asText());assertEquals(expected,door.path("confidence").asText());
+        assertEquals(2,store.count("SELECT COUNT(*) FROM event_evidence WHERE conclusion_id IS NOT NULL"));
+    }
+    @ParameterizedTest @CsvSource({"30,UNKNOWN","60,UNKNOWN","60.01,OPEN","70,OPEN"})
+    void singleTiltRequiresStrictlyOverSixty(double tilt,String state)throws Exception{
+        receive(domainEvent("BOX-0001-POSE",13,1,"DOOR_EVIDENCE","TILT","INFO","{\"action\":\"OPEN\",\"tilt_deg\":"+tilt+",\"actuator_excluded\":true}"),"event");
+        domainAt(lastReceived()+2100).runBatch();var door=query.snapshot(operator(),"BOX-0001").path("door");assertEquals(state,door.path("state").asText());
+    }
+    @Test void repeatedKnownDoorEvidenceLinksWithoutDuplicateConclusion()throws Exception{
+        for(int seq=1;seq<=2;seq++){
+            receive(domainEvent("BOX-0001-POSE",13,seq,"DOOR_EVIDENCE","TILT","INFO","{\"action\":\"OPEN\",\"tilt_deg\":70,\"actuator_excluded\":true}"),"event");domainAt(lastReceived()+2100).runBatch();
+        }
+        assertEquals(1,store.count("SELECT COUNT(*) FROM door_conclusions"));assertEquals(1,store.count("SELECT COUNT(*) FROM box_domain_views WHERE event_type='DOOR_CONCLUSION'"));
+        assertEquals(2,store.count("SELECT COUNT(*) FROM event_evidence WHERE conclusion_id IS NOT NULL"));
+    }
+    @Test void historicalEvidenceCannotChangeCurrentDoor()throws Exception{
+        receive(domainEvent("BOX-0001-POSE",13,1,"DOOR_EVIDENCE","TILT","INFO","{\"action\":\"OPEN\",\"tilt_deg\":70,\"actuator_excluded\":true}"),"event");domainAt(lastReceived()+2100).runBatch();
+        var history=domainEvent("BOX-0001-POSE",13,2,"DOOR_EVIDENCE","TILT","INFO","{\"action\":\"CLOSE\",\"tilt_deg\":0,\"actuator_excluded\":true}");((ObjectNode)history.path("events").get(0)).put("replayed",true);
+        receive(history,"event");domainAt(lastReceived()+2200).runBatch();
+        assertEquals("OPEN",query.snapshot(operator(),"BOX-0001").path("door").path("state").asText());
+        assertEquals(1,store.count("SELECT COUNT(*) FROM door_conclusions WHERE historical=1"));
+    }
+
+    @Test void committedDoorPairBacklogSurvivesConcurrentWorkers()throws Exception{
+        bothOnline();
+        receive(domainEvent("BOX-0001-ENV",12,1,"DOOR_EVIDENCE","LIGHT","INFO","{\"action\":\"OPEN\",\"lux\":120,\"actuator_excluded\":true}"),"event");
+        receive(domainEvent("BOX-0001-POSE",13,1,"DOOR_EVIDENCE","TILT","INFO","{\"action\":\"OPEN\",\"tilt_deg\":70,\"actuator_excluded\":true}"),"event");
+        var processor=domainAt(lastReceived()+2100);var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+        try{var a=pool.submit(()->processor.runBatch());var b=pool.submit(()->processor.runBatch());a.get(15,java.util.concurrent.TimeUnit.SECONDS);b.get(15,java.util.concurrent.TimeUnit.SECONDS);}finally{pool.shutdownNow();}
+        assertEquals(1,store.count("SELECT COUNT(*) FROM door_conclusions"));
+        assertEquals("HIGH",query.snapshot(operator(),"BOX-0001").path("door").path("confidence").asText());
+        assertEquals(2,store.count("SELECT COUNT(*) FROM event_evidence WHERE conclusion_id IS NOT NULL"));
+    }
 }

@@ -4,7 +4,7 @@
 |---|---|
 | 阶段 | P3 |
 | 负责人 | 用户（独立开发与验收） |
-| 状态 | 进行中（软件实现已完成；后端集成复验与板端验证待完成） |
+| 状态 | 已完成（本轮交付；跳过板端项未验收） |
 | 依赖 | TASK-007；软件规则测试可提前 |
 | MOD | [MOD-01](../../requirements/modules/MOD-01-物流箱运行监测.md)、[MOD-02](../../requirements/modules/MOD-02-安全防护与哨兵.md)、[MOD-05](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md) |
 | 需求 | [REQ-M01-001](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-001)、[REQ-M01-002](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-002)、[REQ-M01-003](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-003)、[REQ-M01-004](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-004)、[REQ-M01-005](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-005)、[REQ-M01-006](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-006)、[REQ-M01-007](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-007)、[REQ-M01-008](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-008)、[REQ-M01-009](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-009)、[REQ-M01-010](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-010)、[REQ-M01-011](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-011)、[REQ-M01-012](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-012)、[REQ-M01-013](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-013)、[REQ-M01-014](../../requirements/modules/MOD-01-物流箱运行监测.md#req-m01-014)、[REQ-M02-001](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-001)、[REQ-M02-002](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-002)、[REQ-M02-003](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-003)、[REQ-M02-004](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-004)、[REQ-M02-005](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-005)、[REQ-M02-006](../../requirements/modules/MOD-02-安全防护与哨兵.md#req-m02-006)、[REQ-M05-002](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-002)、[REQ-M05-003](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-003)、[REQ-M05-004](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-004)、[NFR-001](../../requirements/quality/性能与资源约束.md) |
@@ -264,11 +264,11 @@
 
 | alarm_key | 开始 | 自动恢复 | 级别 |
 |---|---|---|---|
-| `env.temp.high`、`env.temp.low`、`env.humi.high`、`env.humi.low` | 对应 `ENV_HIGH`/`ENV_LOW` | 同指标 `ENV_RECOVERED` | 进入建议 `WARNING`（待确认） |
-| `sentry.intrusion` | `SENTRY_INTRUSION` | 收到哨兵实际 `DISARMED`（撤防）时收敛；当前约定，待确认 | `CRITICAL`（已确认） |
-| `geofence.exit` | `GEOFENCE_EXIT` | `GEOFENCE_ENTER` | 建议 `WARNING`（待确认） |
+| `env.temp.high`、`env.temp.low`、`env.humi.high`、`env.humi.low` | 对应 `ENV_HIGH`/`ENV_LOW` | 同指标 `ENV_RECOVERED` | 进入 `WARNING`（CR-005已确认） |
+| `sentry.intrusion` | `SENTRY_INTRUSION` | 恢复条件待确认；不得因撤防自动清除 | `CRITICAL`（已确认） |
+| `geofence.exit` | `GEOFENCE_EXIT` | `GEOFENCE_ENTER` | `WARNING`（CR-005已确认） |
 
-- 哨兵侵入除撤防外的恢复方式未定义（Q-05/Q-10相关）；本任务只按撤防收敛并如实记录，不把该约定写成已确认业务规则。
+- 哨兵侵入除撤防外的恢复方式未定义（Q-05/Q-10相关）；当前保留侵入告警，不自行定义自动恢复，不把撤防当作告警已恢复。
 - `IMPACT`、仅光照异常：先作为原始事件/派生记录保存；其“活动告警”开始/恢复语义未确认（Q-05/Q-07），不进入快照 active，不虚构恢复。
 - 门结论不是告警；门状态与告警分别表达，不互相覆盖。
 - 不提供人工已读/确认/处理/关闭；级别不等于人工处理进度。
@@ -329,7 +329,7 @@ flowchart LR
 | [sb_wire.c](../../../firmware/services/sb_wire.c) | 扩展命令处理：profile/gps_mode/calibrate/sentry；保持 1536 字节限制与 32 条结果缓存；事件编码与发送留 TASK-009 |
 | [sb_network_real.c](../../../firmware/services/sb_network_real.c) | 保留现有事件未实现桩，不提前发布未持久事件；确保命令与 `box_state` 接收不阻塞 |
 | [sb_event_buffer.c](../../../firmware/services/sb_event_buffer.c) | 事件项改为带类型/时间/数据的本地候选；仍是易失缓冲，满时计数不阻塞采样，不发送 |
-| [smartbox_tasks.c](../../../firmware/app/smartbox_tasks.c) | 处理线程在快照后调用规则；网络线程处理命令/`box_state`；事件发布与确认清理留 TASK-009 |
+| [smartbox_tasks.c](../../../firmware/app/smartbox_tasks.c) | 处理线程在快照后调用规则并执行有界规则命令；网络线程仅提交命令/`box_state`并消费实际结果；事件发布与确认清理留 TASK-009 |
 | [BUILD.gn](../../../firmware/build/BUILD.gn) | 加入新源文件；保持角色互斥 |
 | [check_firmware.py](../../../tools/check_firmware.py)、[check_hardware.py](../../../tools/check_hardware.py) | 同步新增源文件和宿主测试；不能让新规则绕过现有编译/检查 |
 
@@ -338,8 +338,8 @@ flowchart LR
 | 命令 | 固件行为 | 回执 |
 |---|---|---|
 | `output` | 既有真实输出，保持 | 立即 `ok` + `kind/on` |
-| `profile` | 校验上下限/回差；采用配置并清零未触发计数；保留已有告警 | 立即 `ok` + `profile_id` |
-| `gps_mode` | 切换 FIXED/ROUTE/WALK，设置种子，重置位置观测调度 | 立即 `ok` + `mode` |
+| `profile` | 校验上下限/回差；处理线程采用配置并清零未触发计数；保留已有告警 | 实际采用后 `ok` + `profile_id`，入队不代表完成 |
+| `gps_mode` | 处理线程切换 FIXED/ROUTE/WALK，设置种子，重置位置观测调度 | 实际切换后 `ok` + `mode`，入队不代表完成 |
 | `calibrate` | 进入 3 秒静置采样；仅有效、近静止样本参与 | 3 秒后 `ok` + `calibrated` 或错误码 |
 | `sentry` | 校验 revision/必需能力；布防 3 秒缓冲后进入 ARMED，撤防按实际状态即时处理；`duration_s` 从 ARMED 起算；重复请求缓存 | 布防 3 秒后实际状态；撤防返回实际状态；旧 revision 拒绝；到期由本地单调时间处理 |
 
@@ -557,3 +557,13 @@ flowchart LR
 - 整理范围：本文第 1～12 节；同步 TC-001～005/008 的 TASK-008 适用验证层次、后端/固件/网页设计的任务入口和[当前进度](../../management/当前进度.md)。
 - 未改变：需求正文与编号、冻结契约、有效契约、V1～V9 迁移、源码、测试、配置、历史报告；未新增 Q/CR/ADR/RSK 编号。
 - 未完成：第 2.4 节待确认语义、板端验证和所有实现工作；这些必须在后续按 S1 门槛和用户确认推进。
+
+## 14. 后续实施基线（2026-11-23）
+
+用户批准继续已确认范围：先软件再接板，双板短测至少1分钟；Q-04/05/06/07/08/10/11保留。云端迁移报告已提供34项单元、46项真实集成成功证据，旧Java阻塞不再作为当前阻塞。此前22项C组件及预设rules-*事件不足以逐项证明R01～R14；本轮使用共享采样向量分别运行C与Python，补充规则命令队列、真实服务和板端证据。
+
+`sb_rule_control`以8个有界槽保存请求和执行结果，处理线程统一修改规则，网络线程只提交/取结果；校准与布防不因入队返回成功。易失候选仍16项，不发布、不宣称Flash可靠。新增限频串口规则摘要用于本地时序及用户物理确认。详细结果按本轮实施报告追加，未通过前不升级任务状态。
+
+## 15. 本轮结束与剩余验证（2026-11-23）
+
+用户决定跳过余下ENV抑制窗口、ENV断网提示及其他剩余实板补测；最新要求先完成TASK-008并提交，TASK-009后续另行准备。上述项目记为未执行/未验证，不填通过。已完成的软件、两角色真实构建/烧录、ENV与POSE本地提示、POSE断网保持及60.578秒双板观察见[报告](../../testing/reports/TASK-008-核心规则与业务视图实施报告.md)。真实冲击、全姿态物理边界、板端完整事件内容与资源峰值也未验收；软件向量不替代这些结果。Q项和完整REQ/TC状态保持。TASK-009可以在已确认事件接口上准备持久化，须携带这些限制，不将它们作为已验证依赖。

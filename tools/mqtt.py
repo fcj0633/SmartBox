@@ -16,7 +16,9 @@ def main():
     parser.add_argument('--broker-profile',choices=['local','cloud'],default='local')
     parser.add_argument('--run-dir',type=Path)
     parser.add_argument('--role',choices=['ENV','POSE'],default='ENV')
-    parser.add_argument('--scenario',choices=['normal','unsynced','invalid','rules-env-high','rules-env-cycle','rules-pose','rules-impact','rules-door','rules-geofence','rules-sentry'],default='normal')
+    parser.add_argument('--scenario',choices=['sample-rules','normal','unsynced','invalid','rules-env-high','rules-env-cycle','rules-pose','rules-impact','rules-door','rules-geofence','rules-sentry'],default='normal')
+    parser.add_argument('--rule-start-file',type=Path,help='Optional shared start_at barrier for deterministic dual-node tests')
+    parser.add_argument('--rule-case',help='Public rule-vectors case for sample-rules')
     parser.add_argument('--events',type=int,default=1)
     parser.add_argument('--seed',type=int,default=1)
     parser.add_argument('--stop-file',type=Path)
@@ -45,7 +47,7 @@ def main():
             if not 0<=args.events<=1000:raise ValueError('Event fixture count outside bounds')
             from simulator.runtime import Node
             stop=confined(args.stop_file,ROOT) if args.stop_file else None
-            Node(config,args.role,run_dir,args.scenario,args.events,args.seed).run(stop)
+            Node(config,args.role,run_dir,args.scenario,args.events,args.seed,args.rule_case,confined(args.rule_start_file,ROOT) if args.rule_start_file else None).run(stop)
         return 0
     except (ValueError,OSError,KeyError,AssertionError) as error:
         # No traceback/config/raw payload from operational failures enters shared output.
