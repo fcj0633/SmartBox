@@ -12,7 +12,7 @@
 | 找真实代码/接口 | [后端](../backend/README.md) · [前端](../frontend/README.md) · [有效契约](../contracts/effective/README.md) | 旧接口仍需兼容；新需求尚待实现 |
 | 查任务和实际进度 | [任务索引](development/tasks/README.md) · [当前进度](management/当前进度.md) | 已交付、待做、跳过测试分开阅读 |
 | 看企业端首切片设计/实现 | [TASK-015 企业端运营控制台首切片](development/tasks/TASK-015-企业端运营控制台首切片.md) | 运营总览/运输/模拟地图/只读资产与告警；设计、代码与未验证边界同页 |
-| 看下一份资产/场景设计 | [TASK-016 企业模拟资产与场景管理](development/tasks/TASK-016-企业模拟资产与场景管理.md) | 模拟箱体创建/编辑/场景/启停；设计草案，未实施 |
+| 看下一份资产/场景实现 | [TASK-016 企业模拟资产与场景管理](development/tasks/TASK-016-企业模拟资产与场景管理.md) | 模拟箱体创建/编辑/场景/启停与最近事件；DEMO 已完成，真实设备/生产未验收 |
 
 ## 按专项定位，不从旧草案开始
 

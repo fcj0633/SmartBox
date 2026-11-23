@@ -4,14 +4,14 @@
 |---|---|
 | 阶段 | 企业端 V2.0 / 资产与场景切片 |
 | 负责人 | 用户 |
-| 状态 | **设计草案，未实施（2026-11-24）** |
+| 状态 | **首切片实现完成（DEMO），2026-11-24；真实设备/生产未验收** |
 | 依赖 | [TASK-015 首切片](TASK-015-企业端运营控制台首切片.md)、V16、现有 `/enterprise/console/**`、`DemoFleetService`、`AssetsPage` |
 | 产品依据 | [企业端 V2.0 需求](../../requirements/product/企业端物流运营控制台-V2.0-需求规格.md)、[CR-007](../../management/changes/CR-007-企业端优先与物流运营控制台.md) |
 | 需求范围 | E2-ASSET-04/05/06/07 |
 | 视觉依据 | [`frontend/design-exploration` 的 `direction=route`](../../../frontend/design-exploration/README.md) |
 | 明确不做 | 八分区详情、告警人工处置、CSV、真实 GPS、真实 MQTT 新身份、真实箱体删除、客户/骑手/访客新增功能 |
 
-> **状态口径：**本文是详细设计，不是已实现功能。V17、API、前端交互和场景事实生成均待实施；在代码、浏览器和最小验证实际执行后，才能另写实施结果并把任务改为完成。本文不改变 TASK-015 的已完成范围，也不把模拟箱体说成真实 MQTT 设备。
+> **状态口径：**设计已经按本文实施，实际结果见第 16 节。V17、API、前端交互和场景事实生成已在隔离 `smartbox_test` 执行最小验证；真实设备、MQTT 模拟身份、开发库迁移和生产环境仍未验收。本文不改变 TASK-015 的已完成范围，也不把模拟箱体说成真实 MQTT 设备。
 
 ## 1. 目标、范围与非目标
 
@@ -150,7 +150,7 @@ ALTER TABLE boxes ADD CONSTRAINT chk_demo_scenario CHECK (
 
 - **快照**：`DemoFleetService` 每 5 秒从数据库读取启用、SIMULATED、指定场景的箱体，写 `node_runtime`/`node_latest`；不写 REAL。
 - **env_high / normal 告警**：场景切换服务构造合法的 ENV_HIGH/ENV_RECOVERED 事件，经现有 `IngestionService` 的事件/Outbox 链路进入 `events`、`processing_outbox`，由 `DomainEventWorker` 生成/恢复告警。事件身份、boot/seq、内容要唯一，避免重复。
-- **impact**：只产生 IMPACT 设备事件（同一受控事件入口），不改写 `alarms`；当前规则不会把 IMPACT 变成告警，不能在前端或服务端假造。
+- **impact**：只产生 IMPACT 设备事件（同一受控事件入口），不改写 `alarms`；当前规则不会把 IMPACT 变成告警，不能在前端或服务端假造。箱体总览通过只读事件接口展示该事件。
 - **offline/stale**：只改变快照/在线/新鲜度，不生成告警；已有告警不会被场景切换偷偷清除。
 - **normal**：仅清理本任务产生的环境告警；不触碰真实箱体或其他来源告警。
 - 现有示例种子中的静态 `IMPACT:pose` 告警作为历史演示数据处理：实施时从示例种子移除；已有测试库记录不强制清理，但不得作为动态场景承诺。
@@ -210,8 +210,9 @@ ALTER TABLE boxes ADD CONSTRAINT chk_demo_scenario CHECK (
 | POST | `/enterprise/console/boxes/{id}/scenario` | 切换场景；body `{scenario}` |
 | POST | `/enterprise/console/boxes/{id}/disable` | 停用模拟输入 |
 | POST | `/enterprise/console/boxes/{id}/enable` | 启用模拟输入 |
+| GET | `/enterprise/console/boxes/{id}/events` | 只读最近设备事件（最多 10 条）；用于 impact 事件可见 |
 
-- `GET /enterprise/console/boxes`、`GET /boxes/{id}` 返回新增字段：`purpose, notes, demo_scenario, demo_enabled`。
+- `GET /enterprise/console/boxes`、`GET /boxes/{id}` 返回新增字段：`purpose, notes, demo_scenario, demo_enabled`；`GET /boxes/{id}/events` 返回最近事件。
 - 所有端点要求 `LOGISTICS_OPERATOR`＋企业范围；跨企业 404。
 - 错误码：`VALIDATION_ERROR`、`NOT_FOUND`、`ASSET_NOT_SIMULATED`、`INVALID_SCENARIO`、`BOX_IN_USE`。
 - 不修改旧 `/enterprise/boxes`、`/rider/**`、`/boxes/**`；新字段为增量。
@@ -298,13 +299,13 @@ ALTER TABLE boxes ADD CONSTRAINT chk_demo_scenario CHECK (
 
 ## 15. 完成定义与待确认假设
 
-文档完成需满足：
+设计/实施检查（实际结果见第 16 节）：
 
-- [ ] V17、API、场景矩阵、前端交互、错误/失败模式、最小验证均可直接实施。
-- [ ] 明确区分 REAL/SIMULATED、MOCK 位置、DEMO 快照、真实 MQTT，不混用。
-- [ ] 不把 IMPACT 说成现有规则告警；不把模拟箱体说成实体设备。
-- [ ] 旧接口/旧页面/真实板/MQTT 不变。
-- [ ] 更新任务索引、当前进度、文档入口、追踪说明；`check_docs.py` 通过。
+- [x] V17、API、场景矩阵、前端交互、错误/失败模式、最小验证均可直接实施。
+- [x] 明确区分 REAL/SIMULATED、MOCK 位置、DEMO 快照、真实 MQTT，不混用。
+- [x] 不把 IMPACT 说成现有规则告警；不把模拟箱体说成实体设备。
+- [x] 旧接口/旧页面/真实板/MQTT 不变。
+- [x] 更新任务索引、当前进度、文档入口、追踪说明；`check_docs.py` 通过。
 
 **待确认假设：**
 
@@ -314,3 +315,28 @@ ALTER TABLE boxes ADD CONSTRAINT chk_demo_scenario CHECK (
 4. 本任务只在 `smartbox_test` 验证，不清理 `smartbox_dev`、不停止既有服务、不改真实板/MQTT。
 
 如果以上任一假设需要改变，应另开设计/CR，不把扩展内容塞进本任务。
+
+## 16. 实施结果（2026-11-24）
+
+### 16.1 已实现
+
+- V17 `purpose/notes/demo_scenario/demo_enabled`、SIMULATED 回填 normal、CHECK 约束。
+- `EnterpriseAssetService` 创建/编辑/场景/停用/启用；`DemoScenarioService` 通过现有 `IngestionService`/`DomainEventWorker` 产生 `env_high` 告警和 `normal` 恢复；`impact` 只产生 IMPACT 事件。
+- `DemoFleetService` 改为数据库驱动，支持 normal/env_high/offline/stale/impact、启停和 `smartbox.demo.fleet.tick` 测试开关。
+- `GET /enterprise/console/boxes/{id}/events` 最近设备事件；Box DTO 返回 purpose/notes/scenario/enabled。
+- 资产页新建/编辑/场景/启停抽屉、场景列、操作列；箱体总览显示元信息/场景/最近设备事件。
+- console 契约与示例种子更新；示例静态 IMPACT 告警移除。
+
+### 16.2 实际检查
+
+- V17 在 `smartbox_test` 由 Flyway 从 V16 升到 V17。
+- 后端：`MockPositionProjectorTest` 5 项、`EnterpriseConsoleIT` 10 项通过（含创建/编辑/场景/停用/impact 事件/离线/过期）。
+- 前端：`npm --prefix frontend run typecheck`、`build` 通过。
+- 浏览器：TASK-016 主路径创建→编辑→env_high→告警中心→normal/停用；1440×900 和 768×1024 截图保存在本机忽略目录 `artifacts/task016-ui/`。
+- `python tools/check_docs.py`：通过，`links=3498, markdown=153`（只覆盖文档/迁移/样例，不代表应用或硬件验收）。
+
+### 16.3 未验证/边界
+
+- 真实板/MQTT、开发库 `smartbox_dev` 的 V17、八分区详情、告警人工处置、CSV、完整 `mvn verify`（本机既有 Mockito/JDK 自附加问题）未验证或未执行。
+- 场景 `impact` 不产生告警，这是当前规则边界；如需冲击告警需另评 DEMO 规则。
+- 新建模拟箱体不申请真实 MQTT 账号/ACL，仅由演示快照服务产生 SIMULATED/DEMO 事实。
