@@ -6,8 +6,9 @@ import { useSession } from '../stores/session';
 const session = useSession();
 const router = useRouter();
 const route = useRoute();
-const username = ref(import.meta.env.VITE_DEFAULT_LOGIN_USERNAME || '');
-const password = ref(import.meta.env.VITE_DEFAULT_LOGIN_PASSWORD || '');
+// DEMO convenience only: the local demo account is admin/admin. Do not reuse outside this demo.
+const username = ref(import.meta.env.VITE_DEFAULT_LOGIN_USERNAME || 'admin');
+const password = ref(import.meta.env.VITE_DEFAULT_LOGIN_PASSWORD || 'admin');
 async function login() {
   if (!username.value || !password.value || session.busy) return;
   await session.login(username.value, password.value);
