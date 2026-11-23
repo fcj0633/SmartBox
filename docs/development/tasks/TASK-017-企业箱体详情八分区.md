@@ -106,15 +106,18 @@ Tab 用 URL `?tab=` 保留；切 Tab 不丢箱体上下文。
 - 前端 `vue-tsc --noEmit`、`vite build` 通过。
 - 浏览器：登录→资产→详情，8 个 Tab 全部可切换；环境/姿态空态、模拟箱趋势、控制中心只读、日志；无页面错误。
 - 截图（本机忽略目录）：`artifacts/task017-ui/desktop-detail-environment.png`、`desktop-detail-environment-sim.png`、`desktop-detail-control.png`、`tablet-detail-control.png`。
+- **真实开发板（2026-11-24 04:31）：** V17 已应用到 `smartbox_dev`（flyway 17）；用只读后端 `18081`（MQTT 关闭、workers 关闭）+ 前端 `15175` 验证 `BOX-0001`：`connectivity=PARTIAL`、POSE `FRESH`、ENV `STALE`；POSE 1h 样本 200、ENV 1h 样本 0；姿态曲线正常渲染，环境为空态。真实截图 `artifacts/task017-ui/desktop-real-pose.png`、`desktop-real-env.png`。
 - `python tools/check_docs.py` 通过。
 
 ### 6.2 未验证/未实现
 
 - 控制中心提交、PENDING、设备 ACK、失败/超时归后续控制任务；本轮只读历史。
 - 告警人工处置/转交/备注未实现。
-- 真实板/MQTT 详情、真实命令执行、真实 GPS/ETA/围栏、轨迹回放、3D 姿态、CSV 未验证。
+- 真实板详情只验证到 POSE；ENV 自 03:38 后无新心跳，完整 ONLINE、双板详情和 ENV 趋势未验证。
+- 新 `18081` 为只读观察实例，未启用 MQTT；真实 MQTT 入湖仍由现有 8081 负责，双实例同时订阅可能重复入库，故未开启。
+- 真实命令执行、真实 GPS/ETA/围栏、轨迹回放、3D 姿态、CSV 未验证。
 - 完整 `mvn verify` 的既有 Mockito/JDK 自附加问题仍单独记录；本轮使用定向测试。
-- 开发库 `smartbox_dev` 未作为验证目标。
+- 开发库迁移已执行；生产/其他环境迁移仍未验收。
 
 ## 7. 后续
 
