@@ -43,7 +43,7 @@ frontend/
 | 文件 | 具体作用与修改入口 |
 |---|---|
 | [main.ts](src/app/main.ts)、[App.vue](src/app/App.vue) | 装配Vue/Pinia/Router、布局、账号退出和全局状态 |
-| [router](src/router/index.ts) | 三条主路由、回退和内存登录态守卫；不替代箱体授权 |
+| [router](src/router/index.ts) | 设备及三端业务路由、公开track例外与内存登录态守卫；不替代箱体授权 |
 | [Login](src/features/Login.vue)、[Boxes](src/features/Boxes.vue) | 登录输入与授权列表，调用Session而不散落拼接请求 |
 | [Detail](src/features/Detail.vue) | 组织当前箱体、采样质量、节点及控制区域，随路由切换打开/清理scope |
 | [Controls](src/features/Controls.vue) | 角色可用表单、目标提示、参数与确认、重复提交限制及操作结果 |
@@ -125,3 +125,11 @@ check为类型和[单元/组件](tests/unit/core.test.ts)，build生成dist；br
 | 新通知行为 | 先明确REST恢复依据，再改Realtime/SerialRead；覆盖持续通知、断线、取消和权限变化 |
 
 开发日志、截图和测试证据不保存密码、JWT或ticket，不启用会捕获凭据的原始HAR/trace。完整历史/轨迹/导出、安全业务算法与长期可靠性仍在后续任务范围，本页不批准新业务。
+
+## 企业、骑手与访客正式入口（TASK-013）
+
+业务代码位于[src/business](src/business)：[企业](src/business/Enterprise.vue)读真实资产/候选/任务，[骑手](src/business/Rider.vue)读资产/运输记录，[运输详情](src/business/TransportDetail.vue)操作物品/开始/结束/分享，[访客](src/business/Track.vue)独立验证，[监测](src/business/MonitoringPanel.vue)只展示任务DTO。原型目录保持Mock，不读取其业务数组。
+
+公开track在Router和App同时绕过登录约束；访客令牌独立于JWT，仅内存，刷新失效。任务请求复用无损JSON和业务错误码，10秒串行轮询，卸载取消，403/404清除资源。旧boxes保持独立权限。
+
+[真实浏览器脚本](tests/transport-live.cjs)不拦截最终API，[单元检查](tests/unit/business.test.ts)覆盖公开路由、UNKNOWN与错误码。运行见[指南](../docs/development/guides/三端运输业务启动与验收.md)，来源和限制见[报告](../docs/testing/reports/TASK-013-三端运输业务联调报告.md)。实体手机、实板和公网未验收。

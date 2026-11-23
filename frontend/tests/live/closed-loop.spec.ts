@@ -20,7 +20,7 @@ async function login(page:Page,role:string,box=1){
   const user=fixture.users.find((u:any)=>u.role===role&&u.box_ids.join()===`BOX-000${box}`);
   if(!user)throw new Error('Missing test account for role');
   await page.goto('/login');await page.getByLabel('账号',{exact:true}).fill(user.username);await page.getByLabel('密码',{exact:true}).fill(user.password);
-  await page.getByRole('button',{name:'进入工作台'}).click();await expect(page).toHaveURL(/\/boxes$/,{timeout:20000});
+  await page.locator('.login-submit').click();await expect(page).toHaveURL(/\/(boxes|enterprise|rider)$/,{timeout:20000});if(!page.url().endsWith('/boxes'))await page.getByRole('link',{name:'设备监测',exact:true}).click();
 }
 async function detail(page:Page){await page.getByRole('link').filter({has:page.getByRole('heading',{name:'BOX-0001',exact:true})}).click();await expect(page.getByRole('heading',{name:'环境监测'})).toBeVisible({timeout:15000});}
 async function command(page:Page,kind:string,accepted=true){

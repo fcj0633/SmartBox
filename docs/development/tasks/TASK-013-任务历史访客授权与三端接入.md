@@ -4,7 +4,7 @@
 |---|---|
 | 阶段 | CR-006 / 候选 BL-003 |
 | 负责人 | 用户 |
-| 状态 | 待开始（详细开发方案已编写，未实施） |
+| 状态 | 已完成（DEMO三端运输业务与模拟节点闭环；真实板演示、完整可靠补传及生产安全待后续） |
 | 依赖 | TASK-011、TASK-012；完整补传另依赖 TASK-009 |
 | MOD | [MOD-06](../../requirements/modules/MOD-06-用户与权限管理.md)、[MOD-07](../../requirements/modules/MOD-07-运输任务与过程管理.md) |
 | 需求 | [REQ-M06-008](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-008)、[REQ-M07-005](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-005)、[REQ-M07-006](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-006)、[REQ-M07-008](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-008) |
@@ -136,7 +136,7 @@
 建议在 `backend/src/main/resources/db/migration/V15__transport_guest_access.sql` 追加**一张最小访问表**；如果本轮确有必要给任务数据加索引，另评审迁移编号，不与本表混写无关的复杂变更。
 
 ```sql
--- DDL 是开发计划示例，不是已执行迁移
+-- 结构说明，实际已部署版本以V15迁移为准
 CREATE TABLE transport_guest_access (
   task_id BIGINT NOT NULL PRIMARY KEY,
   code_hash VARCHAR(100) NOT NULL,
@@ -174,6 +174,7 @@ CREATE TABLE transport_guest_access (
 
 | 权限 | 方法与候选路径 | 作用 |
 |---|---|---|
+| 企业管理员 JWT | `GET /api/v1/enterprise/riders` | 启用的受控演示骑手候选，仅ID/用户名 |
 | 骑手 JWT | `POST /api/v1/rider/transports/{id}/access-code` | 本人 ACTIVE/有效 COMPLETED 任务生成/重新生成验证码；原文只在响应中显示一次 |
 | 骑手 JWT | `GET /api/v1/rider/transports/{id}/monitoring` | 本任务白名单环境/设备事件历史 |
 | 企业管理员 JWT | `GET /api/v1/enterprise/transports` | 本企业拥有箱体的任务列表，含任务状态与简要物品 |
@@ -336,8 +337,12 @@ flowchart TD
 6. **数据库与兼容性**：新访客表外键影响测试清理顺序；不改冻结迁移，不在开发库清库。
 7. **公网部署边界**：受控 DEMO 的内存限流、单活动访客会话和轻量测试不是生产级安全。若要公开公网访问，需要补真实限流、会话安全、审计和部署审查。
 
-## 13. 当前状态与完成判定
+## 13. 实际实施记录（2026-11-23）
 
-本次仅完善 **TASK-013 开发计划文档**，不编写 V15、Java/Vue 代码，不启动 MySQL/HTTP/浏览器测试，也不声称访客凭据/三端接入已实现。TASK-011、TASK-012 的实际完成状态与已有报告保持不变。
+本轮从845afc2快进同步22da24b，保留ui-design。用户确认先用隔离测试库、真实Broker和独立模拟节点验收，真实板另验；另确认新增演示骑手候选接口，实际共8个接口。当前实现以本节、[增量契约](../../../contracts/http/transport-view/README.md)及[启动指南](../guides/三端运输业务启动与验收.md)为准，前文示例为设计来源。
 
-**TASK-013 判定为“DEMO 三端业务已完成”的条件：** 真实后端可提供任务范围监测；骑手/企业/普通用户三个界面使用真实 API；普通用户凭编号与验证码仅查看本任务；一次企业分配→骑手运输→普通用户查看→结束历史的链路可复验；关键越权/时间质量检查通过，来源为 Mock 或未完成的范围均明确记录。
+V15只新增访客表；监测按设备可信时间的完整误差区间归属，不读后续node_latest。验证码10位、BCrypt、会话30分钟、结束后7天、单活动会话及双维度内存限流已实现。公开track与登录状态分离。
+
+企业资产/任务、骑手准备/开始/结束/监测/分享、访客验证页面均已接入真实API。34项单元、79项MySQL/HTTP/WS集成、19项前端单元/组件检查通过；真实三端浏览器链路及12项旧页面隔离浏览器通过，390×844和1440×900核验留图。测试后开发库升级V15，原账号/授权/节点/任务/权属/分配保留，无假在线或采样。
+
+S1～S8已完成，实板、生产公网、完整补传和完整候选BL-003未验收；TASK-009未启动，本轮不推送。实际证据及失败修正见[联调报告](../../testing/reports/TASK-013-三端运输业务联调报告.md)。

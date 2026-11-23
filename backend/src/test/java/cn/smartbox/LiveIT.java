@@ -49,7 +49,7 @@ class LiveIT {
     @BeforeAll void seed()throws Exception{
         TestDatabaseGuard.require(System.getenv("SPRING_PROFILES_ACTIVE"),System.getenv("SMARTBOX_DB_URL"),db.queryForObject("SELECT DATABASE()",String.class),db.queryForObject("SELECT CURRENT_USER()",String.class),System.getenv("SMARTBOX_TEST_ALLOW_RESET"));
         new TransactionTemplate(manager).executeWithoutResult(status->{
-            for(String table:List.of("transport_tasks","box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","processing_outbox","event_evidence","box_domain_state","door_conclusions","alarms","alarm_state","box_domain_views","event_views","location_samples","node_runtime","audit_logs","events","node_latest","telemetry","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
+            for(String table:List.of("transport_guest_access","transport_tasks","box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","processing_outbox","event_evidence","box_domain_state","door_conclusions","alarms","alarm_state","box_domain_views","event_views","location_samples","node_runtime","audit_logs","events","node_latest","telemetry","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
         });
         fixture=json.readTree(Files.readString(Path.of(System.getenv("SMARTBOX_BOOTSTRAP_FILE"))));bootstrap.initialize(fixture);
     }
@@ -77,7 +77,7 @@ class LiveIT {
     @Autowired ProjectionWorker worker;
     @Autowired DomainEventWorker domainWorker;
     @BeforeEach void clearLive(){
-        for(String table:List.of("transport_tasks","box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","processing_outbox","event_evidence","box_domain_state","door_conclusions","alarms","alarm_state","box_domain_views","event_views","events","location_samples","node_latest","telemetry","node_runtime"))db.update("DELETE FROM "+table);
+        for(String table:List.of("transport_guest_access","transport_tasks","box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","processing_outbox","event_evidence","box_domain_state","door_conclusions","alarms","alarm_state","box_domain_views","event_views","events","location_samples","node_latest","telemetry","node_runtime"))db.update("DELETE FROM "+table);
         db.update("UPDATE nodes SET current_boot_id=NULL,last_received_at=NULL");
         db.update("UPDATE boxes SET sentry_revision=0");
     }

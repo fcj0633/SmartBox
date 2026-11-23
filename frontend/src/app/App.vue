@@ -6,12 +6,12 @@ import { roles, time } from '../domain';
 
 const session = useSession();
 const router = useRouter();
-watch(() => session.identityValid, valid => { if (!valid) void router.replace('/login'); });
+watch(() => session.identityValid, valid => { if (!valid && !router.currentRoute.value.meta.public) void router.replace('/login'); });
 function logout() { session.logout(); void router.replace('/login'); }
 </script>
 
 <template>
-  <RouterView v-if="$route.path === '/login'" />
+  <RouterView :key="$route.path" v-if="$route.path === '/login' || $route.meta.public || $route.meta.business" />
   <div v-else class="app-shell">
     <aside class="app-sidebar">
       <RouterLink to="/boxes" class="brand-lockup" aria-label="SmartBox 首页">
@@ -21,6 +21,7 @@ function logout() { session.logout(); void router.replace('/login'); }
 
       <div class="sidebar-section-label">工作空间</div>
       <nav class="primary-nav" aria-label="主导航">
+        <RouterLink v-if="session.businessHome !== '/boxes'" :to="session.businessHome" class="nav-link">运输工作台</RouterLink>
         <RouterLink to="/boxes" class="nav-link">
           <span class="nav-icon">▦</span><span>箱体总览</span><span class="nav-trailing">{{ session.user?.box_ids.length ?? 0 }}</span>
         </RouterLink>

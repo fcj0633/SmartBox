@@ -1,0 +1,80 @@
+[
+  {
+    "definition": "VerifyRequest",
+    "valid": true,
+    "value": {
+      "transport_no": "TR-11111111111111111111",
+      "code": "Example123"
+    }
+  },
+  {
+    "definition": "VerifyRequest",
+    "valid": false,
+    "value": {
+      "transport_no": "TR-11111111111111111111",
+      "code": "Example123",
+      "task_id": 2
+    }
+  },
+  {
+    "definition": "CodeResponse",
+    "valid": true,
+    "value": {
+      "request_id": "example",
+      "data": {
+        "transport_no": "TR-11111111111111111111",
+        "code": "Example123",
+        "valid_until": null
+      }
+    }
+  },
+  {
+    "definition": "SessionResponse",
+    "valid": true,
+    "value": {
+      "request_id": "example",
+      "data": {
+        "token": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "expires_at": 1234
+      }
+    }
+  },
+  {
+    "definition": "SessionResponse",
+    "valid": false,
+    "value": {
+      "request_id": "example",
+      "data": {
+        "token": "bad",
+        "expires_at": 1234
+      }
+    }
+  },
+  {
+    "definition": "RidersResponse",
+    "valid": true,
+    "value": {
+      "request_id": "example",
+      "data": [
+        {
+          "user_id": 1,
+          "username": "demo_rider"
+        }
+      ]
+    }
+  },
+  {
+    "definition": "RidersResponse",
+    "valid": false,
+    "value": {
+      "request_id": "example",
+      "data": [
+        {
+          "user_id": 1,
+          "username": "demo_rider",
+          "password_hash": "forbidden"
+        }
+      ]
+    }
+  }
+]

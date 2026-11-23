@@ -60,3 +60,5 @@
 目录分工：`requirements`规定业务，`design`解释实现，`development`组织工作/操作，`testing`记录标准/事实，`management`保存进度与决定，`delivery`保存交付，`references`收录外部资料，`templates`提供格式。精确协议在根contracts，原始日志/镜像在忽略的artifacts，README不复制完整协议、SQL或每次任务过程。
 
 修改后运行`python tools/check_docs.py`；增加代码文件链接时，文档工具临时样例也必须包含相应受控输入，不削弱检查规则。小型索引与脱敏摘要可受控，密码、JWT、ticket、原始日志及本机私有连接说明不提交。全部编号保持稳定。
+
+三端运输业务的初始化、角色入口与隔离复验见[三端指南](development/guides/三端运输业务启动与验收.md)，实际软件/模拟结果和未验边界见[TASK-013报告](testing/reports/TASK-013-三端运输业务联调报告.md)。

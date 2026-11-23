@@ -1,7 +1,7 @@
 import { decode, encode } from './json';
 import type { Envelope } from './types';
 export class ApiError extends Error {
-  constructor(public status: number, public requestId = '') {
+  constructor(public status: number, public requestId = '', public code = '') {
     super(({ 400: '请求参数不符合要求', 401: '登录信息无效或已过期', 403: '无权访问此资源', 404: '资源不存在', 409: '请求内容与已有操作冲突', 503: '服务暂不可用' } as Record<number,string>)[status] ?? '暂时无法连接服务');
   }
 }
@@ -20,7 +20,7 @@ export class Http {
     const body = decode<Envelope<T>>(await response.text());
     if (!response.ok) {
       if (response.status === 401 && !options.login && tokenAtStart === this.token) this.onUnauthorized();
-      throw new ApiError(response.status, body.request_id);
+      throw new ApiError(response.status, body.request_id, (body as Envelope<T> & { error?: { code?: string } }).error?.code ?? '');
     }
     return body.data;
   }

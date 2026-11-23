@@ -1,0 +1,560 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smartbox.invalid/contracts/http/transport-view/responses.schema.json",
+  "$defs": {
+    "FullTask": {
+      "type": "object",
+      "required": [
+        "task_id",
+        "transport_no",
+        "box_id",
+        "status",
+        "item_name",
+        "item_description",
+        "started_at",
+        "ended_at",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "task_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "transport_no": {
+          "type": "string",
+          "pattern": "^TR-[0-9A-F]{20}$"
+        },
+        "box_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,48}$"
+        },
+        "status": {
+          "enum": [
+            "READY",
+            "ACTIVE",
+            "COMPLETED"
+          ]
+        },
+        "item_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "item_description": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "updated_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "Task": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "transport_no": {
+          "type": "string",
+          "pattern": "^TR-[0-9A-F]{20}$"
+        },
+        "status": {
+          "enum": [
+            "READY",
+            "ACTIVE",
+            "COMPLETED"
+          ]
+        },
+        "item_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "item_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "task_id",
+        "transport_no",
+        "status",
+        "item_name",
+        "item_description",
+        "started_at",
+        "ended_at"
+      ],
+      "additionalProperties": false
+    },
+    "Sample": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "observed_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "temperature": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "humidity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "time_quality": {
+          "const": "SNTP"
+        }
+      },
+      "required": [
+        "id",
+        "observed_at",
+        "temperature",
+        "humidity",
+        "valid",
+        "time_quality"
+      ],
+      "additionalProperties": false
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "observed_at": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "type": {
+          "type": "string"
+        },
+        "level": {
+          "enum": [
+            "INFO",
+            "WARNING",
+            "CRITICAL"
+          ]
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "observed_at",
+        "type",
+        "level",
+        "description"
+      ],
+      "additionalProperties": false
+    },
+    "Environment": {
+      "type": "object",
+      "properties": {
+        "assessment": {
+          "const": "UNKNOWN"
+        },
+        "latest_temperature": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latest_humidity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time_quality": {
+          "enum": [
+            "UNKNOWN",
+            "SNTP"
+          ]
+        },
+        "data_state": {
+          "enum": [
+            "READY",
+            "INSUFFICIENT",
+            "AVAILABLE",
+            "INVALID"
+          ]
+        }
+      },
+      "required": [
+        "assessment",
+        "latest_temperature",
+        "latest_humidity",
+        "observed_at",
+        "time_quality",
+        "data_state"
+      ],
+      "additionalProperties": false
+    },
+    "Monitoring": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "$ref": "#/$defs/Task"
+        },
+        "environment": {
+          "$ref": "#/$defs/Environment"
+        },
+        "samples": {
+          "type": "array",
+          "maxItems": 30,
+          "items": {
+            "$ref": "#/$defs/Sample"
+          }
+        },
+        "events": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/Event"
+          }
+        }
+      },
+      "required": [
+        "task",
+        "environment",
+        "samples",
+        "events"
+      ],
+      "additionalProperties": false
+    },
+    "MonitoringResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/Monitoring"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "TaskResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/FullTask"
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "TasksResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/FullTask"
+          }
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "RidersResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user_id": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9223372036854775807
+              },
+              "username": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "user_id",
+              "username"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "CodeResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "transport_no": {
+              "type": "string"
+            },
+            "code": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9]{10}$"
+            },
+            "valid_until": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "transport_no",
+            "code",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "VerifyRequest": {
+      "type": "object",
+      "properties": {
+        "transport_no": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "transport_no",
+        "code"
+      ],
+      "additionalProperties": false
+    },
+    "SessionResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "token": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{43}$"
+            },
+            "expires_at": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "token",
+            "expires_at"
+          ],
+          "additionalProperties": false
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "data",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "request_id",
+        "error"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -9,6 +9,7 @@ async function setup(page:Page,role='LOGISTICS_OPERATOR',ids=['BOX-0001','BOX-00
     else if(p.endsWith('/me')) data={username:'isolated-user',role,box_ids:ids};
     else if(p.endsWith('/ws-ticket')) data={ticket:'isolated-ticket',expires_at:Date.now()+30000};
     else if(p.endsWith('/nodes'))data=[{node_id:'BOX-0001-ENV',role:'ENV',caps:71,online:true,required:true,boot_id:1,last_received_at:Date.now()}];
+    else if(p.endsWith('/enterprise/boxes'))return route.fulfill({status:403,json:{error:{code:'FORBIDDEN',message:'not registered'},request_id:'isolated'}});
     else if(p.endsWith('/boxes'))data=ids.map(x=>box(x));
     else data=box(p.split('/')[4]);
     if(role==='DELIVERY_USER')for(const b of Array.isArray(data)?data:[data]){if(b?.box_id){delete b.pose;delete b.sentry;}}

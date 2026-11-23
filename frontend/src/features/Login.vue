@@ -11,7 +11,13 @@ async function login() {
   if (!username.value || !password.value || session.busy) return;
   await session.login(username.value, password.value);
   password.value = '';
-  if (session.identityValid) await router.replace('/boxes');
+  if (session.identityValid) {
+    let home='/boxes';
+    if (session.user?.role==='COURIER') home='/rider';
+    else if(session.user?.role==='LOGISTICS_OPERATOR') { try { await session.request('/enterprise/boxes');home='/enterprise'; } catch { /* Unregistered operators retain their device workspace. */ } }
+    session.businessHome=home;
+    await router.replace(home);
+  }
 }
 </script>
 

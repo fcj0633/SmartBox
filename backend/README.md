@@ -120,7 +120,7 @@ MQTT订阅消息不携带发布者认证用户名，接入身份建立在Broker 
 
 ## 7. 数据库迁移与本地配置
 
-迁移文件在[Flyway目录](src/main/resources/db/migration)，当前28张业务表；Flyway自己的历史表另计。
+迁移文件在[Flyway目录](src/main/resources/db/migration)，当前29张业务表；Flyway自己的历史表另计。
 
 | 版本组 | 实际用途 |
 |---|---|
@@ -133,9 +133,11 @@ MQTT订阅消息不携带发布者认证用户名，接入身份建立在Broker 
 | V9 | 运行态、位置和回执数据约束 |
 | V10～V12 | 门证据/结论、告警记录、业务视图与状态 |
 | V13 | 演示企业、箱体所有权、当前骑手分配 |
+| V14 | 运输任务、单箱ACTIVE约束 |
+| V15 | 单任务访客验证码与会话摘要 |
 | V14 | 骑手运输任务、生成列同箱唯一 ACTIVE |
 
-新增结构追加新版本，不修改已应用V1～V13，不自动clean/repair或用自动建表替代迁移。`smartbox_dev`与`smartbox_test`独立，迁移账号与运行账号权限分离，应用不使用root；测试清理只在显式配置和校验通过时执行。
+新增结构追加新版本，不修改已应用V1～V15，不自动clean/repair或用自动建表替代迁移。`smartbox_dev`与`smartbox_test`独立，迁移账号与运行账号权限分离，应用不使用root；测试清理只在显式配置和校验通过时执行。
 
 [application.yml](src/main/resources/application.yml)是受控配置入口，真实账号/密码/JWT密钥及演示初始化文件在忽略的`secrets/`，新机器需按[初始化指南](../docs/development/guides/后端数据库初始化与启动.md)准备。开发账号与授权不是通用DDL迁移的一部分，重复初始化不重置密码或覆盖已有授权。版本见[pom.xml](pom.xml)和[版本矩阵](../docs/development/environment/工具与依赖版本矩阵.md)。
 
@@ -169,7 +171,7 @@ MQTT配置需要已有项目Broker；真实板使用显式`--mqtt-config secrets
 
 [AssetController](src/main/java/cn/smartbox/asset/AssetController.java)接收四个JWT资产请求，[AssetService](src/main/java/cn/smartbox/asset/AssetService.java)验证当前启用账号、企业管理员与受控骑手，再通过[AssetMapper](src/main/resources/mapper/AssetMapper.xml)读写三表。写入先锁箱体权属行，再当前读分配记录；同骑手重复分配保留原时间，其他骑手冲突409。收回删除当前分配，提交后独立尽力审计。
 
-[AssetBootstrapService](src/main/java/cn/smartbox/asset/AssetBootstrapService.java)是独立非Web种子入口，通过用户名解析账号，不改旧Bootstrap格式或密码。V13新增企业、所有权和当前分配；完整结构目前为28张业务表（Flyway历史表另计）。原V1～V12不可改写。
+[AssetBootstrapService](src/main/java/cn/smartbox/asset/AssetBootstrapService.java)是独立非Web种子入口，通过用户名解析账号，不改旧Bootstrap格式或密码。V13新增企业、所有权和当前分配；完整结构目前为29张业务表（Flyway历史表另计）。原V1～V12不可改写。
 
 四个接口及返回结构见[资产增量契约](../contracts/http/assets/README.md)。资产元数据不含传感快照，`OWNED/ASSIGNED`与旧 `user_box_access` 分离；收回不吊销旧人工设备授权。TASK-012的运输开始会在自身事务内重新锁读资格，并在收回时增加 ACTIVE 守卫。
 
@@ -180,3 +182,9 @@ MQTT配置需要已有项目Broker；真实板使用显式`--mqtt-config secrets
 [TransportController](src/main/java/cn/smartbox/transport/TransportController.java)提供6个JWT骑手接口；[TransportService](src/main/java/cn/smartbox/transport/TransportService.java)在事务中锁 `box_ownerships`、重验当前使用权、锁任务并做READY→ACTIVE→COMPLETED转换；[TransportMapper](src/main/resources/mapper/TransportMapper.xml)用生成列唯一索引保证同箱最多一个ACTIVE。开始前检查必需节点现有90秒在线窗口和 `alarm_state` 风险确认；结束允许设备离线；`unassign` 在持有同一权属锁时拒绝ACTIVE。
 
 V14新增 `transport_tasks`；`TransportIT` 使用真实MySQL/HTTP覆盖主流程、同箱排他、并发启动、收回守卫、离线、风险、越权和物品边界。在线/告警测试夹具不是真实设备证据；开发库节点过期时开始返回 `BOX_OFFLINE`，不伪造。页面、访客和任务历史归TASK-013。接口见[运输增量契约](../contracts/http/transport/README.md)，结果见[报告](../docs/testing/reports/TASK-012-运输任务事务后端验证报告.md)。
+
+## 任务范围监测与访客访问（TASK-013）
+
+V15新增单任务访客访问表，当前29张业务表，历史表另计。[监测服务](src/main/java/cn/smartbox/transport/TransportMonitoringService.java)共用可信任务时间投影，[访客服务](src/main/java/cn/smartbox/transport/GuestAccessService.java)处理码散列、会话和内存限流，[Mapper](src/main/resources/mapper/TransportMonitoringMapper.xml)执行范围查询。企业/骑手先JWT授权，访客由专用令牌固定任务，不构造虚假账号或箱体权限。
+
+[8接口契约](../contracts/http/transport-view/README.md)与冻结接口分开；只有两个public入口精确放行，设备权限不变。运行见[三端指南](../docs/development/guides/三端运输业务启动与验收.md)，实测见[报告](../docs/testing/reports/TASK-013-三端运输业务联调报告.md)。V1～V14不改写。

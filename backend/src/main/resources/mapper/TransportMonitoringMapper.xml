@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.smartbox.transport.TransportMonitoringMapper">
+ <sql id="enterpriseScope">FROM transport_tasks t JOIN box_ownerships o ON o.box_id=t.box_id AND o.owner_type='ENTERPRISE' JOIN enterprises e ON e.id=o.enterprise_id WHERE e.admin_user_id=#{user}</sql>
+ <select id="enterpriseTasks" resultType="map">SELECT t.* <include refid="enterpriseScope"/> ORDER BY t.created_at DESC,t.id DESC LIMIT 50</select>
+ <select id="enterpriseTask" resultType="map">SELECT t.* <include refid="enterpriseScope"/> AND t.id=#{id}</select>
+ <sql id="trusted">box_id=#{box} AND ts_src='SNTP' AND device_ts IS NOT NULL AND time_uncertainty_ms IS NOT NULL AND time_uncertainty_ms>=0 AND CAST(device_ts AS DECIMAL(20,0))-CAST(time_uncertainty_ms AS DECIMAL(20,0))>=#{start} AND CAST(device_ts AS DECIMAL(20,0))+CAST(time_uncertainty_ms AS DECIMAL(20,0))&lt;#{end}</sql>
+ <select id="samples" resultType="map">SELECT id,device_ts,payload FROM telemetry WHERE <include refid="trusted"/> AND JSON_CONTAINS_PATH(payload,'one','$.env') ORDER BY device_ts DESC,id DESC LIMIT 30</select>
+ <select id="events" resultType="map">SELECT id,device_ts,type,level FROM events WHERE <include refid="trusted"/> ORDER BY device_ts DESC,id DESC LIMIT 20</select>
+ <select id="riders" resultType="map">SELECT id,username FROM users WHERE enabled=1 AND role_code='COURIER' ORDER BY username</select>
+ <select id="accessForUpdate" resultType="map">SELECT * FROM transport_guest_access WHERE task_id=#{id} FOR UPDATE</select>
+ <select id="session" resultType="map">SELECT task_id,session_expires_at FROM transport_guest_access WHERE session_hash=#{hash}</select>
+ <insert id="code">INSERT INTO transport_guest_access(task_id,code_hash,issued_at) VALUES(#{id},#{hash},#{now}) ON DUPLICATE KEY UPDATE code_hash=#{hash},issued_at=#{now},session_hash=NULL,session_expires_at=NULL</insert>
+ <update id="sessionSet">UPDATE transport_guest_access SET session_hash=#{hash},session_expires_at=#{expires} WHERE task_id=#{id}</update>
+</mapper>

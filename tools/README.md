@@ -146,3 +146,9 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 [check_transport_contracts.py](check_transport_contracts.py)只读检查6个骑手运输增量接口、JSON Schema、局部引用和正反样例；[契约说明](../contracts/http/transport/README.md)与[回归测试](../tests/test_transport_contracts.py)分开维护。原冻结11接口仍由`check_contracts.py`检查。
 
 运输真实集成复用`assets.py test --profile test --allow-test-reset`（Maven `TransportIT`），迁移/运行复用`assets.py bootstrap/run --profile dev`；开始运输需要真实必需节点在线，测试夹具只在 `TransportIT` 中使用，开发库不得伪造在线。完整结果见[TASK-012报告](../docs/testing/reports/TASK-012-运输任务事务后端验证报告.md)。
+
+## 三端运输联调工具
+
+[transport_view.py](transport_view.py)要求显式test、清理同意和新的artifacts目录，使用1883/18080/15173，启动并清理自有Broker、后端、双模拟节点、网页与浏览器；保留8080/5173及共享MySQL。它会重置smartbox_test，拒绝开发库；模拟事件经真实MQTT输入，不冒充固件可靠事件。见[指南](../docs/development/guides/三端运输业务启动与验收.md)。
+
+[check_transport_view_contracts.py](check_transport_view_contracts.py)只读校验8接口、本地Schema/OpenAPI、认证边界和样例，原冻结/资产/运输契约各自保留检查入口。

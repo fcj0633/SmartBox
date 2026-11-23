@@ -65,6 +65,12 @@ class DocumentationChecks(unittest.TestCase):
             target=cls.seed/"frontend"/relative
             target.parent.mkdir(parents=True,exist_ok=True)
             shutil.copy2(ROOT/"frontend"/relative,target)
+        # TASK-013 public production sources only; no node_modules or local inputs.
+        shutil.copytree(ROOT/"frontend/src/business", cls.seed/"frontend/src/business", dirs_exist_ok=True)
+        for name in ("tests/unit/business.test.ts", "tests/transport-live.cjs"):
+            target=cls.seed/"frontend"/name
+            target.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copy2(ROOT/"frontend"/name,target)
         # Existing role prototype README links are checked too; copy only public sources.
         for directory in ("src", "tests"):
             shutil.copytree(ROOT/"frontend/role-design-exploration"/directory,

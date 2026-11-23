@@ -32,11 +32,11 @@ class TransportIT {
     JsonNode fixture;final HttpClient http=HttpClient.newHttpClient();
     @BeforeAll void accounts()throws Exception{
         TestDatabaseGuard.require(System.getenv("SPRING_PROFILES_ACTIVE"),System.getenv("SMARTBOX_DB_URL"),db.queryForObject("SELECT DATABASE()",String.class),db.queryForObject("SELECT CURRENT_USER()",String.class),System.getenv("SMARTBOX_TEST_ALLOW_RESET"));
-        for(String table:List.of("transport_tasks","box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","processing_outbox","events","location_samples","node_latest","telemetry","node_runtime","audit_logs","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
+        for(String table:List.of("transport_guest_access","transport_tasks","box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","processing_outbox","events","location_samples","node_latest","telemetry","node_runtime","audit_logs","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
         fixture=json.readTree(Files.readString(Path.of(System.getenv("SMARTBOX_BOOTSTRAP_FILE"))));bootstrap.initialize(fixture);
     }
     @BeforeEach void reset(){
-        db.update("DELETE FROM transport_tasks");db.update("DELETE FROM box_assignments");db.update("DELETE FROM box_ownerships");db.update("DELETE FROM enterprises");
+        db.update("DELETE FROM transport_guest_access");db.update("DELETE FROM transport_tasks");db.update("DELETE FROM box_assignments");db.update("DELETE FROM box_ownerships");db.update("DELETE FROM enterprises");
         db.update("DELETE FROM node_runtime");db.update("DELETE FROM alarm_state");
         seed.initialize(config.seed());
         long now=System.currentTimeMillis();

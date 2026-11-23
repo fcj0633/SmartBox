@@ -10,6 +10,7 @@ import { Realtime, type ConnectionState } from '../realtime/connection';
 
 export const useSession = defineStore('session', () => {
   const http = new Http();
+  const businessHome = ref('/boxes');
   const user = ref<User | null>(null), boxes = ref<Box[]>([]), box = ref<Box | null>(null), nodes = ref<Node[]>([]);
   const operation = ref<Operation | null>(null), error = ref(''), operationError = ref('');
   const notice = ref('');
@@ -30,7 +31,7 @@ export const useSession = defineStore('session', () => {
     connection.value = 'disconnected';
   }
   function logout(message = '') {
-    session++; http.token = ''; stopScope(); user.value = null; boxes.value = [];
+    session++; businessHome.value='/boxes'; http.token = ''; stopScope(); user.value = null; boxes.value = [];
     clearTimeout(expires); busy.value = false; loading.value = false; error.value = message; notice.value = message;
   }
   http.onUnauthorized = () => logout('登录已过期，请重新登录');
@@ -155,6 +156,6 @@ export const useSession = defineStore('session', () => {
       if (e instanceof ApiError && e.status >= 400 && e.status < 500) pending.value = null;
     } finally { if (epoch === scope && account === session) submitting.value = false; }
   }
-  return { user, boxes, box, nodes, operation, error, notice, operationError, busy, loading, submitting, connection, lastSync, synchronized, pending, identityValid,
-    login, logout, openScope, stopScope, refresh, refreshOperation, submit };
+  return { businessHome, user, boxes, box, nodes, operation, error, notice, operationError, busy, loading, submitting, connection, lastSync, synchronized, pending, identityValid,
+    request: http.request.bind(http), login, logout, openScope, stopScope, refresh, refreshOperation, submit };
 });

@@ -18,7 +18,7 @@ public class SecurityConfig {
     @Bean public SecurityFilterChain security(HttpSecurity http,TokenService tokens,AuthMapper users,AuditService audit,ObjectMapper json)throws Exception {
         http.csrf(c->c.disable()).sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .requestCache(r->r.disable()).formLogin(f->f.disable()).httpBasic(b->b.disable()).logout(l->l.disable()).cors(c->{})
-            .authorizeHttpRequests(a->a.requestMatchers("/api/v1/auth/login","/actuator/health","/ws").permitAll().anyRequest().authenticated())
+            .authorizeHttpRequests(a->a.requestMatchers(org.springframework.http.HttpMethod.POST,"/api/v1/public/transport-access/verify").permitAll().requestMatchers(org.springframework.http.HttpMethod.GET,"/api/v1/public/transport-view").permitAll().requestMatchers("/api/v1/auth/login","/actuator/health","/ws").permitAll().anyRequest().authenticated())
             .exceptionHandling(e->e.authenticationEntryPoint((req,res,error)->{
                 audit.record(null,null,null,"ACCESS_DENIED","UNAUTHORIZED");
                 RequestContextFilter.write(res,json,401,"UNAUTHORIZED","身份无效或已过期");
@@ -36,7 +36,7 @@ public class SecurityConfig {
     }
     @Bean(name="corsConfigurationSource") public CorsConfigurationSource cors(LocalSettings settings){
         CorsConfiguration c=new CorsConfiguration();c.setAllowedOrigins(settings.origins());c.setAllowedMethods(List.of("GET","POST","OPTIONS"));
-        c.setAllowedHeaders(List.of("Authorization","Content-Type","Idempotency-Key"));c.setAllowCredentials(false);
+        c.setAllowedHeaders(List.of("Authorization","Content-Type","Idempotency-Key","X-Transport-View-Token"));c.setAllowCredentials(false);
         UrlBasedCorsConfigurationSource source=new UrlBasedCorsConfigurationSource();source.registerCorsConfiguration("/**",c);return source;
     }
 }

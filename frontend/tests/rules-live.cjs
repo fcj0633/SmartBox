@@ -7,7 +7,7 @@ const fs=require('node:fs/promises');const path=require('node:path');
   for(const user of input.users){
    const context=await browser.newContext({viewport:{width:1440,height:900}});const page=await context.newPage();let alarms=0;
    page.on('websocket',ws=>ws.on('framereceived',frame=>{try{const m=JSON.parse(String(frame.payload));if(m.type==='box_event'&&m.data?.type==='ALARM')alarms++;}catch{}}));
-   await page.goto(input.url+'/login');await page.locator('#username').fill(user.username);await page.locator('#password').fill(user.password);await page.locator('.login-submit').click();await page.waitForURL('**/boxes');
+   await page.goto(input.url+'/login');await page.locator('#username').fill(user.username);await page.locator('#password').fill(user.password);await page.locator('.login-submit').click();await page.waitForURL(/\/(boxes|enterprise|rider)$/);if(!page.url().endsWith('/boxes'))await page.getByRole('link',{name:'设备监测',exact:true}).click();
    const response=page.waitForResponse(r=>r.url().includes('/BOX-0001/latest')&&r.status()===200);await page.locator('a[href="/boxes/BOX-0001"]').click();const data=(await(await response).json()).data;
    if(data.door.state!=='OPEN'||data.door.confidence!=='HIGH')throw Error('Real dual-source conclusion missing');
    await page.getByText('实时通道已连接',{exact:true}).waitFor();

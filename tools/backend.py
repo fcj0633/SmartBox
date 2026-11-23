@@ -28,6 +28,8 @@ def local_environment(config,profile):
         env['SMARTBOX_BOOTSTRAP_FILE']=str(bootstrap if bootstrap.is_absolute() else ROOT/bootstrap)
     # A previous shell must not silently leave destructive test consent enabled.
     env.pop('SMARTBOX_TEST_ALLOW_RESET',None)
+    asset_seed=ROOT/'secrets'/('assets-'+profile+'.local.json')
+    if asset_seed.is_file(): env['SMARTBOX_ASSET_SEED_FILE']=str(asset_seed)
     if os.name=='nt' and value.get('SMARTBOX_WINDOWS_TCP_SELECTOR')=='true':
         # This host cannot connect AF_UNIX. A regular-file directory makes the
         # JDK's private selector pipe take its built-in TCP fallback on bind.
