@@ -7,7 +7,7 @@ export interface Asset { box_id: string; display_name: string; source?: string; 
 export interface Monitoring { task: Task; environment: { assessment: string; latest_temperature: number|null; latest_humidity: number|null; observed_at: number|null; time_quality: string; data_state: string }; samples: {id:number;observed_at:number;temperature:number|null;humidity:number|null;valid:boolean}[]; events: {id:number;observed_at:number;type:string;level:string;description:string}[] }
 export const stateName = (value: string) => ({ READY:'待开始', ACTIVE:'运输中', COMPLETED:'已结束' }[value] ?? value);
 export const date = (value: number|null) => value===null?'—':new Date(value).toLocaleString('zh-CN',{hour12:false});
-export const errorText = (error: unknown) => error instanceof ApiError ? ({BOX_OFFLINE:'箱体节点离线，请等待设备上线后重试',RISK_CONFIRMATION_REQUIRED:'环境状态有风险或尚未完成判断，需要确认后开始',BOX_IN_USE:'箱体已有进行中的运输',BOX_ALREADY_ACTIVE:'箱体已有进行中的运输',ACTIVE_TRANSPORT_EXISTS:'运输中不能收回箱体',INVALID_TRANSPORT_ACCESS:'编号或查看凭据无效或已过期，请重新验证',ACCESS_RATE_LIMITED:'尝试次数过多，请15分钟后再试'}[error.code] ?? error.message) : '连接暂不可用，请重试';
+export const errorText = (error: unknown) => error instanceof ApiError ? ({BOX_OFFLINE:'箱体必需节点不在线，请等待设备上线后重试',RISK_CONFIRMATION_REQUIRED:'存在活动告警或告警判定未知，需要确认后开始',BOX_IN_USE:'箱体已有进行中的运输',BOX_ALREADY_ACTIVE:'箱体已有进行中的运输',ACTIVE_TRANSPORT_EXISTS:'运输中不能收回箱体',INVALID_TASK_STATE:'当前任务状态不允许该操作',TRANSPORT_NO_CONFLICT:'运输编号冲突，请重试',VALIDATION_ERROR:'填写内容不符合要求，请检查后重试',NOT_FOUND:'任务、箱体或数据不存在，或无权访问',INVALID_TRANSPORT_ACCESS:'编号或查看凭据无效或已过期，请重新验证',ACCESS_RATE_LIMITED:'尝试次数过多，请15分钟后再试'}[error.code] ?? error.message) : '连接暂不可用，请重试';
 export const sourceName = (source?: string) => source==='OWNED'?'个人拥有':source==='ASSIGNED'?'企业分配':'归属信息未提供';
 export function environmentTitle(env: Monitoring['environment']) {
  if(env.data_state==='READY')return '运输尚未开始';
@@ -15,10 +15,10 @@ export function environmentTitle(env: Monitoring['environment']) {
  if(env.data_state==='INSUFFICIENT'||env.time_quality!=='SNTP')return '暂无可确认的环境数据';
  return '环境结论暂无法确认';
 }
-export function usePolling(read: (signal: AbortSignal)=>Promise<void>, clear: ()=>void = ()=>{}) {
+export function usePolling(read: (signal: AbortSignal)=>Promise<void>, clear: ()=>void = ()=>{}, interval=10000) {
  const error=ref(''),loading=ref(true);let disposed=false;
  const reader=new SerialRead(async signal=>{try{await read(signal);if(!disposed)error.value='';}catch(e){if(!signal.aborted&&!disposed){if(e instanceof ApiError&&[403,404].includes(e.status))clear();error.value=errorText(e);}}finally{if(!disposed)loading.value=false;}},200);
- const timer=setInterval(()=>reader.trigger(),10000);reader.trigger();
+ const timer=setInterval(()=>reader.trigger(),interval);reader.trigger();
  onUnmounted(()=>{disposed=true;clearInterval(timer);reader.stop();});
  return {error,loading,refresh:()=>reader.trigger()};
 }

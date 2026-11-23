@@ -1,0 +1,123 @@
+{
+  "enterprises": [
+    {
+      "name": "演示物流企业",
+      "admin_username": "demo-admin",
+      "box_ids": ["BOX-0001"]
+    }
+  ],
+  "personal_boxes": [],
+  "rider_usernames": [],
+  "simulated_boxes": [
+    {
+      "box_id": "BOX-SIM-01",
+      "display_name": "模拟冷链箱 01",
+      "enterprise_name": "演示物流企业",
+      "env_node_id": "BOX-SIM-01-ENV",
+      "pose_node_id": "BOX-SIM-01-POSE",
+      "env_required": true,
+      "pose_required": true,
+      "scenario": "normal"
+    },
+    {
+      "box_id": "BOX-SIM-02",
+      "display_name": "模拟冷链箱 02 · 高温",
+      "enterprise_name": "演示物流企业",
+      "env_node_id": "BOX-SIM-02-ENV",
+      "pose_node_id": "BOX-SIM-02-POSE",
+      "env_required": true,
+      "pose_required": false,
+      "scenario": "env_high"
+    },
+    {
+      "box_id": "BOX-SIM-03",
+      "display_name": "模拟冷链箱 03 · 离线",
+      "enterprise_name": "演示物流企业",
+      "env_node_id": "BOX-SIM-03-ENV",
+      "pose_node_id": "BOX-SIM-03-POSE",
+      "env_required": true,
+      "pose_required": false,
+      "scenario": "offline"
+    },
+    {
+      "box_id": "BOX-SIM-04",
+      "display_name": "模拟冷链箱 04 · 姿态",
+      "enterprise_name": "演示物流企业",
+      "env_node_id": "BOX-SIM-04-ENV",
+      "pose_node_id": "BOX-SIM-04-POSE",
+      "env_required": true,
+      "pose_required": true,
+      "scenario": "impact"
+    },
+    {
+      "box_id": "BOX-SIM-05",
+      "display_name": "模拟冷链箱 05 · 历史",
+      "enterprise_name": "演示物流企业",
+      "env_node_id": "BOX-SIM-05-ENV",
+      "pose_node_id": "BOX-SIM-05-POSE",
+      "env_required": true,
+      "pose_required": false,
+      "scenario": "completed"
+    }
+  ],
+  "history_tasks": [
+    {
+      "transport_no": "TR-00000000000000000001",
+      "box_id": "BOX-SIM-05",
+      "enterprise_name": "演示物流企业",
+      "item_name": "模拟冷链样本",
+      "item_description": "已完成运输的演示历史，位置为 MOCK。",
+      "route_code": "EAST-02",
+      "started_offset_ms": 7200000,
+      "ended_offset_ms": 3600000
+    },
+    {
+      "transport_no": "TR-00000000000000000002",
+      "box_id": "BOX-SIM-02",
+      "enterprise_name": "演示物流企业",
+      "item_name": "高温观察样本",
+      "item_description": "演示历史，告警事实仍由设备/种子事件产生。",
+      "route_code": "EAST-01",
+      "started_offset_ms": 180000000,
+      "ended_offset_ms": 90000000
+    },
+    {
+      "transport_no": "TR-00000000000000000003",
+      "box_id": "BOX-SIM-03",
+      "enterprise_name": "演示物流企业",
+      "item_name": "离线前最后一程",
+      "item_description": "演示历史，离线状态与位置更新时间独立。",
+      "route_code": "EAST-02",
+      "started_offset_ms": 180000000,
+      "ended_offset_ms": 90000000
+    },
+    {
+      "transport_no": "TR-00000000000000000004",
+      "box_id": "BOX-SIM-04",
+      "enterprise_name": "演示物流企业",
+      "item_name": "姿态冲击样本",
+      "item_description": "演示历史，姿态告警来自服务端种子事件。",
+      "route_code": "NORTH-01",
+      "started_offset_ms": 180000000,
+      "ended_offset_ms": 90000000
+    }
+  ],
+  "demo_alarms": [
+    {
+      "box_id": "BOX-SIM-02",
+      "alarm_key": "ENV_HIGH:temp_c",
+      "type": "ENV_HIGH",
+      "level": "WARNING",
+      "message": "模拟环境温度超过演示上限",
+      "offset_ms": 600000
+    },
+    {
+      "box_id": "BOX-SIM-04",
+      "alarm_key": "IMPACT:pose",
+      "type": "IMPACT",
+      "level": "CRITICAL",
+      "message": "模拟姿态冲击事件",
+      "offset_ms": 300000
+    }
+  ]
+}

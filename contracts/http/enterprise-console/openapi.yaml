@@ -1,0 +1,391 @@
+openapi: 3.1.0
+info:
+  title: SmartBox Enterprise Console API (TASK-015 DEMO)
+  version: 0.1.0
+  description: |
+    Additive enterprise console API. Old /enterprise, /rider and /boxes contracts are unchanged.
+    All positions are normalized MOCK canvas coordinates, never GPS.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+paths:
+  /enterprise/console/overview:
+    get:
+      tags: [console]
+      summary: Enterprise overview
+      responses:
+        '200': { $ref: '#/components/responses/Overview' }
+        '403': { $ref: '#/components/responses/Error' }
+  /enterprise/console/boxes:
+    get:
+      tags: [console]
+      summary: Enterprise box snapshots
+      responses:
+        '200':
+          description: Box list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Box' } }
+                  request_id: { type: string }
+        '403': { $ref: '#/components/responses/Error' }
+  /enterprise/console/boxes/{boxId}:
+    get:
+      tags: [console]
+      summary: Single enterprise box snapshot
+      parameters:
+        - { name: boxId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Box
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Box' }
+                  request_id: { type: string }
+        '404': { $ref: '#/components/responses/Error' }
+  /enterprise/console/routes:
+    get:
+      tags: [console]
+      summary: DEMO MOCK routes
+      responses:
+        '200':
+          description: Route list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Route' } }
+                  request_id: { type: string }
+  /enterprise/console/transports:
+    get:
+      tags: [transports]
+      summary: Enterprise transport list
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Task' } }
+                  request_id: { type: string }
+    post:
+      tags: [transports]
+      summary: Create READY task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateTask' }
+      responses:
+        '200':
+          description: Created task detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskDetailEnvelope' }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /enterprise/console/transports/{id}:
+    get:
+      tags: [transports]
+      summary: Task detail
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }
+      responses:
+        '200':
+          description: Task detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskDetailEnvelope' }
+        '404': { $ref: '#/components/responses/Error' }
+  /enterprise/console/transports/{id}/edit:
+    post:
+      tags: [transports]
+      summary: Edit READY item/route
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EditTask' }
+      responses:
+        '200':
+          description: Updated task detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskDetailEnvelope' }
+        '409': { $ref: '#/components/responses/Error' }
+  /enterprise/console/transports/{id}/start:
+    post:
+      tags: [transports]
+      summary: Start ACTIVE
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirm_risk: { type: boolean }
+      responses:
+        '200':
+          description: Active task detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskDetailEnvelope' }
+        '409': { $ref: '#/components/responses/Error' }
+  /enterprise/console/transports/{id}/finish:
+    post:
+      tags: [transports]
+      summary: Finish ACTIVE
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }
+      responses:
+        '200':
+          description: Completed task detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskDetailEnvelope' }
+        '409': { $ref: '#/components/responses/Error' }
+  /enterprise/console/alarms:
+    get:
+      tags: [alarms]
+      summary: Read-only enterprise alarms
+      responses:
+        '200':
+          description: Alarm list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      assessment_unknown_boxes: { type: integer }
+                      rows: { type: array, items: { $ref: '#/components/schemas/Alarm' } }
+                  request_id: { type: string }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  responses:
+    Error:
+      description: Error envelope
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code: { type: string }
+                  message: { type: string }
+              request_id: { type: string }
+    Overview:
+      description: Overview envelope
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data: { $ref: '#/components/schemas/Overview' }
+              request_id: { type: string }
+  schemas:
+    Point:
+      type: object
+      required: [x, y, place]
+      properties:
+        x: { type: number, minimum: 0, maximum: 100 }
+        y: { type: number, minimum: 0, maximum: 100 }
+        place: { type: string }
+    Route:
+      type: object
+      required: [code, name, from, to, duration_ms, points]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        from: { type: string }
+        to: { type: string }
+        duration_ms: { type: integer, minimum: 1 }
+        points: { type: array, items: { $ref: '#/components/schemas/Point' } }
+    Position:
+      type: object
+      properties:
+        x: { type: number }
+        y: { type: number }
+        place: { type: string }
+        route_code: { type: string }
+        route_name: { type: string }
+        progress: { type: number, minimum: 0, maximum: 1 }
+        position_at: { type: integer }
+        stale: { type: boolean }
+        finished: { type: boolean }
+        source: { const: MOCK }
+    Environment:
+      type: object
+      properties:
+        assessment: { type: string }
+        level: { type: [string, 'null'] }
+        temperature: { type: [number, 'null'] }
+        humidity: { type: [number, 'null'] }
+        lux: { type: [number, 'null'] }
+        observed_at: { type: [integer, 'null'] }
+        time_quality: { type: string }
+        data_state: { type: string }
+        received_at: { type: [integer, 'null'] }
+    AlarmState:
+      type: object
+      properties:
+        assessment: { type: string }
+        active: { type: [boolean, 'null'] }
+        level: { type: [string, 'null'] }
+        active_count: { type: integer }
+    Node:
+      type: object
+      properties:
+        node_id: { type: string }
+        role: { type: string }
+        caps: { type: integer }
+        required: { type: boolean }
+        online: { type: boolean }
+        last_seen_at: { type: [integer, 'null'] }
+        last_received_at: { type: [integer, 'null'] }
+    TaskSummary:
+      type: object
+      properties:
+        task_id: { type: integer }
+        transport_no: { type: string }
+        status: { type: string }
+        item_name: { type: [string, 'null'] }
+        box_id: { type: string }
+        box_display_name: { type: string }
+        started_at: { type: [integer, 'null'] }
+        ended_at: { type: [integer, 'null'] }
+    Box:
+      type: object
+      properties:
+        box_id: { type: string }
+        display_name: { type: string }
+        asset_source: { enum: [REAL, SIMULATED] }
+        connectivity: { enum: [ONLINE, PARTIAL, OFFLINE, UNKNOWN] }
+        data_state: { type: string }
+        environment: { $ref: '#/components/schemas/Environment' }
+        alarm: { $ref: '#/components/schemas/AlarmState' }
+        current_transport: { anyOf: [{ $ref: '#/components/schemas/TaskSummary' }, { type: 'null' }] }
+        last_completed_transport: { anyOf: [{ $ref: '#/components/schemas/TaskSummary' }, { type: 'null' }] }
+        position: { anyOf: [{ $ref: '#/components/schemas/Position' }, { type: 'null' }] }
+        last_seen_at: { type: [integer, 'null'] }
+        nodes: { type: array, items: { $ref: '#/components/schemas/Node' } }
+    StartCheck:
+      type: object
+      properties:
+        online: { type: boolean }
+        risk: { type: boolean }
+        blockers: { type: array, items: { type: string } }
+    Task:
+      type: object
+      properties:
+        task_id: { type: integer }
+        transport_no: { type: string }
+        box_id: { type: string }
+        box_display_name: { type: string }
+        status: { enum: [READY, ACTIVE, COMPLETED] }
+        item_name: { type: [string, 'null'] }
+        item_description: { type: [string, 'null'] }
+        operator_username: { type: [string, 'null'] }
+        created_at: { type: integer }
+        started_at: { type: [integer, 'null'] }
+        ended_at: { type: [integer, 'null'] }
+        route: { anyOf: [{ $ref: '#/components/schemas/Route' }, { type: 'null' }] }
+        position: { anyOf: [{ $ref: '#/components/schemas/Position' }, { type: 'null' }] }
+        start_check: { $ref: '#/components/schemas/StartCheck' }
+    Kpis:
+      type: object
+      properties:
+        box_total: { type: integer }
+        online: { type: integer }
+        partial: { type: integer }
+        offline: { type: integer }
+        unknown: { type: integer }
+        active_transports: { type: integer }
+        active_alarm_boxes: { type: integer }
+        unknown_alarm_boxes: { type: integer }
+        completed_today: { type: integer }
+    Activity:
+      type: object
+      properties:
+        at: { type: integer }
+        type: { type: string }
+        box_id: { type: string }
+        box_display_name: { type: string }
+        task_id: { type: [integer, 'null'] }
+        title: { type: string }
+        source: { type: string }
+    Overview:
+      type: object
+      properties:
+        enterprise_id: { type: integer }
+        enterprise_name: { type: string }
+        refreshed_at: { type: integer }
+        kpis: { $ref: '#/components/schemas/Kpis' }
+        boxes: { type: array, items: { $ref: '#/components/schemas/Box' } }
+        tasks: { type: array, items: { $ref: '#/components/schemas/Task' } }
+        recent_activity: { type: array, items: { $ref: '#/components/schemas/Activity' } }
+    TaskDetail:
+      type: object
+      properties:
+        task: { $ref: '#/components/schemas/Task' }
+        box: { $ref: '#/components/schemas/Box' }
+        route: { anyOf: [{ $ref: '#/components/schemas/Route' }, { type: 'null' }] }
+        position: { anyOf: [{ $ref: '#/components/schemas/Position' }, { type: 'null' }] }
+        environment: { $ref: '#/components/schemas/Environment' }
+        samples: { type: array, items: { type: object } }
+        events: { type: array, items: { type: object } }
+    Alarm:
+      type: object
+      properties:
+        box_id: { type: string }
+        box_display_name: { type: string }
+        alarm_key: { type: string }
+        active: { type: boolean }
+        level: { type: string }
+        started_at: { type: integer }
+        updated_at: { type: integer }
+        recovered_at: { type: [integer, 'null'] }
+        source_event_type: { type: [string, 'null'] }
+        source_event_at: { type: [integer, 'null'] }
+        details: { type: string }
+    CreateTask:
+      type: object
+      required: [box_id, item_name, route_code]
+      additionalProperties: false
+      properties:
+        box_id: { type: string }
+        item_name: { type: string, minLength: 1, maxLength: 50 }
+        item_description: { type: [string, 'null'], maxLength: 200 }
+        route_code: { type: string }
+    EditTask:
+      type: object
+      required: [item_name, route_code]
+      additionalProperties: false
+      properties:
+        item_name: { type: string, minLength: 1, maxLength: 50 }
+        item_description: { type: [string, 'null'], maxLength: 200 }
+        route_code: { type: string }
+    TaskDetailEnvelope:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/TaskDetail' }
+        request_id: { type: string }

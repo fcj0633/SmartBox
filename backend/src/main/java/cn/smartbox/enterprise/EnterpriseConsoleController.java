@@ -1,0 +1,111 @@
+package cn.smartbox.enterprise;
+
+import java.util.Set;
+import cn.smartbox.auth.CurrentUser;
+import cn.smartbox.common.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+/** Additive enterprise console API. Old /enterprise, /rider and /boxes endpoints are untouched. */
+@RestController
+@RequestMapping("/api/v1/enterprise/console")
+public class EnterpriseConsoleController {
+    private final EnterpriseReadService read;
+    private final EnterpriseTransportService transports;
+
+    public EnterpriseConsoleController(EnterpriseReadService read, EnterpriseTransportService transports) {
+        this.read = read; this.transports = transports;
+    }
+
+    @GetMapping("/overview")
+    public Object overview(@AuthenticationPrincipal CurrentUser user) { return ApiEnvelope.success(read.overview(user)); }
+
+    @GetMapping("/boxes")
+    public Object boxes(@AuthenticationPrincipal CurrentUser user) { return ApiEnvelope.success(read.boxes(user)); }
+
+    @GetMapping("/boxes/{boxId}")
+    public Object box(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
+        return ApiEnvelope.success(read.box(user, boxId));
+    }
+
+    @GetMapping("/routes")
+    public Object routes(@AuthenticationPrincipal CurrentUser user) {
+        read.context(user);
+        return ApiEnvelope.success(read.routes());
+    }
+
+    @GetMapping("/transports")
+    public Object tasks(@AuthenticationPrincipal CurrentUser user) { return ApiEnvelope.success(read.tasks(user)); }
+
+    @GetMapping("/transports/{id}")
+    public Object task(@AuthenticationPrincipal CurrentUser user, @PathVariable String id) {
+        return ApiEnvelope.success(read.taskDetail(user, id(id)));
+    }
+
+    @PostMapping("/transports")
+    public Object create(@AuthenticationPrincipal CurrentUser user, @RequestBody(required = false) JsonNode body) {
+        Fields fields = fields(body, true);
+        return ApiEnvelope.success(transports.create(user, fields.boxId(), fields.itemName(), fields.itemDescription(), fields.routeCode()));
+    }
+
+    @PostMapping("/transports/{id}/edit")
+    public Object edit(@AuthenticationPrincipal CurrentUser user, @PathVariable String id, @RequestBody(required = false) JsonNode body) {
+        Fields fields = fields(body, false);
+        return ApiEnvelope.success(transports.edit(user, id(id), fields.itemName(), fields.itemDescription(), fields.routeCode()));
+    }
+
+    @PostMapping("/transports/{id}/start")
+    public Object start(@AuthenticationPrincipal CurrentUser user, @PathVariable String id, @RequestBody(required = false) JsonNode body) {
+        boolean confirm = false;
+        if (body != null && !body.isNull()) {
+            if (!body.isObject()) throw ApiException.invalid();
+            onlyFields(body, Set.of("confirm_risk"));
+            JsonNode value = body.get("confirm_risk");
+            if (value != null) {
+                if (!value.isBoolean()) throw ApiException.invalid();
+                confirm = value.asBoolean();
+            }
+        }
+        return ApiEnvelope.success(transports.start(user, id(id), confirm));
+    }
+
+    @PostMapping("/transports/{id}/finish")
+    public Object finish(@AuthenticationPrincipal CurrentUser user, @PathVariable String id) {
+        return ApiEnvelope.success(transports.finish(user, id(id)));
+    }
+
+    @GetMapping("/alarms")
+    public Object alarms(@AuthenticationPrincipal CurrentUser user) { return ApiEnvelope.success(read.alarms(user)); }
+
+    private record Fields(String boxId, String itemName, String itemDescription, String routeCode) {}
+
+    private static Fields fields(JsonNode body, boolean requireBox) {
+        if (body == null || !body.isObject()) throw ApiException.invalid();
+        onlyFields(body, Set.of("box_id", "item_name", "item_description", "route_code"));
+        JsonNode box = body.get("box_id"), item = body.get("item_name"), route = body.get("route_code");
+        if ((requireBox && (box == null || !box.isTextual())) || (box != null && !box.isNull() && !box.isTextual())
+            || item == null || !item.isTextual() || route == null || !route.isTextual())
+            throw ApiException.invalid();
+        JsonNode description = body.get("item_description");
+        if (description != null && !description.isNull() && !description.isTextual()) throw ApiException.invalid();
+        return new Fields(box == null || box.isNull() ? null : box.asText(), item.asText(),
+            description == null || description.isNull() ? null : description.asText(), route.asText());
+    }
+
+    private static void onlyFields(JsonNode body, Set<String> allowed) {
+        for (var names = body.fieldNames(); names.hasNext(); ) {
+            if (!allowed.contains(names.next())) throw ApiException.invalid();
+        }
+    }
+
+    private static long id(String raw) {
+        try {
+            long value = Long.parseLong(raw);
+            if (value <= 0) throw ApiException.invalid();
+            return value;
+        } catch (NumberFormatException error) {
+            throw ApiException.invalid();
+        }
+    }
+}
