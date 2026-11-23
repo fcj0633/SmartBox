@@ -3,11 +3,16 @@ import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useSession } from '../stores/session';
 
+const USERNAME_KEY = 'smartbox.login.username';
 const session = useSession();
 const router = useRouter();
 const route = useRoute();
-const username = ref(import.meta.env.VITE_DEFAULT_LOGIN_USERNAME || 'admin');
+const username = ref(readRememberedUsername() || import.meta.env.VITE_DEFAULT_LOGIN_USERNAME || 'admin');
 const password = ref(import.meta.env.VITE_DEFAULT_LOGIN_PASSWORD || 'admin');
+
+function readRememberedUsername() {
+  try { return localStorage.getItem(USERNAME_KEY) || ''; } catch { return ''; }
+}
 
 async function login() {
   if (!username.value || !password.value || session.busy) return;
@@ -18,6 +23,7 @@ async function login() {
     session.logout('企业控制台仅支持物流运营账号');
     return;
   }
+  try { localStorage.setItem(USERNAME_KEY, username.value); } catch { /* local storage is optional */ }
   session.businessHome = '/enterprise';
   const next = typeof route.query.next === 'string' ? route.query.next : '';
   const target = next.startsWith('/') && !next.startsWith('//') ? router.resolve(next) : null;

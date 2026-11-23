@@ -5,7 +5,9 @@ import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.springframework.core.annotation.Order;
 @Component
+@Order(1)
 @ConditionalOnProperty(name="smartbox.bootstrap",havingValue="true")
 public class BootstrapRunner implements ApplicationRunner {
     private final BootstrapService service;private final Environment env;private final ObjectMapper json;

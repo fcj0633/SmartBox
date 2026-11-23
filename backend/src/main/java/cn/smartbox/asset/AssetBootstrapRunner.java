@@ -2,8 +2,10 @@ package cn.smartbox.asset;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.core.annotation.Order;
 
 @Component
+@Order(2)
 @ConditionalOnProperty(name="smartbox.assets.bootstrap",havingValue="true")
 public class AssetBootstrapRunner implements ApplicationRunner {
     private final AssetBootstrapService service;private final DemoAssetConfig config;

@@ -78,7 +78,7 @@ POST 分配 → 服务端核验 → MySQL 保存
 
 ## 4. MySQL 数据设计：只增加三张表
 
-本节保留实施设计依据，实际迁移见 [V13](../../backend/src/main/resources/db/migration/V13__demo_asset_ownership.sql)，已在项目测试库与开发库应用。沿用现有 `users.id BIGINT`、`boxes.box_id VARCHAR(48) CHARACTER SET ascii COLLATE ascii_bin`、InnoDB 与毫秒 UTC 时间戳。本次新增 `V13__demo_asset_ownership.sql`，未修改已部署 V1～V12。
+本节保留实施设计依据，实际迁移见 V13，已在项目测试库与开发库应用。沿用现有 `users.id BIGINT`、`boxes.box_id VARCHAR(48) CHARACTER SET ascii COLLATE ascii_bin`、InnoDB 与毫秒 UTC 时间戳。本次新增 `V13__demo_asset_ownership.sql`，未修改已部署 V1～V12。
 
 ### 4.1 `enterprises`：演示企业
 

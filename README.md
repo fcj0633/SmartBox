@@ -14,10 +14,13 @@ SmartBox 是一个面向企业物流运营的前后端演示项目：
 
 ```powershell
 # 1. 创建 MySQL 数据库和账号（见文档）
-# 2. 启动后端
-mvn -f backend/pom.xml spring-boot:run "-Dspring-boot.run.arguments=--server.port=8080 --smartbox.bootstrap=true --smartbox.assets.bootstrap=true --smartbox.demo.fleet=true"
+# 2. 首次初始化数据库：账号和演示数据（单次执行后退出）
+mvn -f backend/pom.xml spring-boot:run "-Dspring-boot.run.arguments=--smartbox.bootstrap=true --smartbox.assets.bootstrap=true"
 
-# 3. 启动前端
+# 3. 启动 Web 后端
+mvn -f backend/pom.xml spring-boot:run "-Dspring-boot.run.arguments=--server.port=8080 --smartbox.demo.fleet=true"
+
+# 4. 启动前端
 cd frontend
 npm ci
 npm run dev
@@ -38,7 +41,6 @@ backend/       Spring Boot 后端
 frontend/      Vue 前端
 firmware/      固件源码参考（不提供构建/烧录工具）
 deploy/demo/   演示账号与模拟数据示例
-contracts/     后端运行时 effective schema
 docs/          需求、设计、任务、启动说明和项目演进
 ```
 
@@ -62,5 +64,5 @@ docs/          需求、设计、任务、启动说明和项目演进
 - 没有 `tools/`、`tests/`，也不提供自动化测试、模拟器、硬件烧录或真实板联调。
 - 主程序只保留企业端页面和 `/api/v1/enterprise/console/**`；旧骑手、访客、`/boxes` 设备工作台及其 API 已移除。
 - 后端 MQTT 可选；本地演示默认关闭，使用 `DemoFleetService` 生成模拟数据。
-- 真实设备、生产安全、长期可靠性和完整协议验证不在本仓库范围。
+- 真实设备、生产安全、长期可靠性和完整协议验证不在本仓库范围；前后端不会直接连接开发板。
 - 不提交密码、JWT、数据库连接或本地 secrets。
