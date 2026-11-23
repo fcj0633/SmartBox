@@ -12,7 +12,7 @@
 | 找真实代码/接口 | [后端](../backend/README.md) · [前端](../frontend/README.md) · [有效契约](../contracts/effective/README.md) | 旧接口仍需兼容；新需求尚待实现 |
 | 查任务和实际进度 | [任务索引](development/tasks/README.md) · [当前进度](management/当前进度.md) | 已交付、待做、跳过测试分开阅读 |
 | 看企业端首切片设计/实现 | [TASK-015 企业端运营控制台首切片](development/tasks/TASK-015-企业端运营控制台首切片.md) | 运营总览/运输/模拟地图/只读资产与告警；设计、代码与未验证边界同页 |
-| 看资产/场景与箱体详情 | [TASK-016 企业模拟资产与场景管理](development/tasks/TASK-016-企业模拟资产与场景管理.md) / [TASK-017 企业箱体详情八分区](development/tasks/TASK-017-企业箱体详情八分区.md) | TASK-016 资产/场景；TASK-017 八分区只读；控制提交/ACK、真实设备/生产未验收 |
+| 看资产/场景、箱体详情与控制 | [TASK-016 企业模拟资产与场景管理](development/tasks/TASK-016-企业模拟资产与场景管理.md) / [TASK-017 企业箱体详情八分区](development/tasks/TASK-017-企业箱体详情八分区.md) / [TASK-018 企业控制中心](development/tasks/TASK-018-企业控制中心.md) | TASK-016 资产/场景；TASK-017 八分区；TASK-018 控制提交/回执；真实设备 ACK/生产未验收 |
 
 ## 按专项定位，不从旧草案开始
 
