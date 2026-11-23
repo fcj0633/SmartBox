@@ -1,5 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://smartbox.invalid/contracts/http/ws/error.schema.json",
-  "$ref": "../../common/v1.schema.json#/$defs/WsError"
-}

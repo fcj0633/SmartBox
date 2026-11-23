@@ -7,7 +7,7 @@
 | 状态 | **首切片实现完成（DEMO），2026-11-24；真实板/生产未验收** |
 | 依赖 | TASK-011～014 的既有企业/运输/设备代码；V1～V15 迁移；现有 MQTT 与模拟器 |
 | 产品依据 | [企业端物流运营控制台 V2.0 需求规格](../requirements/V2-企业端物流运营控制台需求规格.md)、[CR-007](../changes/CR-007-企业端优先与物流运营控制台.md) |
-| 视觉依据 | [`frontend/design-exploration` 的 `direction=route`](../../frontend/design-exploration/README.md) |
+| 视觉依据 | `frontend/design-exploration` 的 `direction=route` |
 | 范围 | 运营总览、运输任务、位置与设备（MOCK 地图）；资产/告警/箱体总览只读支撑 |
 | 不做 | 资产 CRUD/场景切换、八分区详情、告警人工处置、CSV、轨迹回放、真实 GPS、骑手/客户/访客新增功能 |
 
@@ -179,7 +179,7 @@ ALTER TABLE transport_tasks
 
 - 所有端点要求 `LOGISTICS_OPERATOR` 且存在企业；无企业 403，跨企业/不存在 404。
 - 错误码沿用现有 `ApiException`：`VALIDATION_ERROR`、`NOT_FOUND`、`INVALID_TASK_STATE`、`BOX_OFFLINE`、`BOX_IN_USE`、`RISK_CONFIRMATION_REQUIRED`。
-- 新契约目录：[`contracts/http/enterprise-console/`](../../contracts/http/enterprise-console/README.md)（OpenAPI + README），旧契约不改。
+- 新契约目录：`contracts/http/enterprise-console/`（OpenAPI + README），旧契约不改。
 - 旧接口继续保留：`/enterprise/boxes`、`/enterprise/transports`、`/enterprise/transports/{id}/monitoring`、`/rider/**`。
 
 ## 8. 关键流程与事务
@@ -325,7 +325,7 @@ frontend/src/business/
 - Java 21.0.10、Maven、MySQL 8、Node.js 24、Vue 3.5/Vite 8.3.6；仅使用隔离 `smartbox_test` 和本任务自己的 18080/15173 进程。
 - 未停止或替换原有 8080/5173/5186 服务；未改开发库 `smartbox_dev`。
 - 演示种子：1 个实物 `BOX-0001`（本轮未接真实板，保持离线）＋5 个 `SIMULATED` 箱体 `BOX-SIM-01～05`。模拟在线/温湿度/姿态由 `DemoFleetService`（显式 `smartbox.demo.fleet=true`）产生，明确标 SIMULATED/DEMO；真实 MQTT 入库存量链路未改。
-- 交付：V16、`/api/v1/enterprise/console/**`、前端六页/二级页、`deploy/demo/enterprise-v2.seed.example.json`、[console 契约](../../contracts/http/enterprise-console/README.md)。
+- 交付：V16、`/api/v1/enterprise/console/**`、前端六页/二级页、`deploy/demo/enterprise-v2.seed.example.json`、console 契约。
 
 ### 15.2 V16 迁移
 
@@ -353,8 +353,8 @@ frontend/src/business/
 
 ### 15.6 文档与契约
 
-- 新增 [console 契约](../../contracts/http/enterprise-console/README.md) 与 OpenAPI；旧 `/rider/**`、`/enterprise/**`、`/boxes/**` 未改。
-- 任务索引、[当前进度](../project/当前进度.md)、[文档入口](../README.md)、[追踪矩阵](../project/需求追踪矩阵.md) 已同步；E2 需求仍未正式 REQ 化。
+- 新增 console 契约 与 OpenAPI；旧 `/rider/**`、`/enterprise/**`、`/boxes/**` 未改。
+- 任务索引、[当前进度](../project/当前进度.md)、[文档入口](../README.md)、追踪矩阵 已同步；E2 需求仍未正式 REQ 化。
 - `python tools/check_docs.py`：通过，`modules=7, requirements=59, trace_rows=62, migration_rules=64, links=3487, markdown=152`。该检查只覆盖文档/迁移/样例，不代表应用或硬件验收。
 
 ### 15.7 未验证/明确跳过

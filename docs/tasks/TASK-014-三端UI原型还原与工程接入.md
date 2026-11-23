@@ -37,11 +37,11 @@
 
 | 分类 | 现有文件 | 可复用/必须纠正 |
 |---|---|---|
-| 企业原型 | [design-exploration/src/App.vue](../../frontend/design-exploration/src/App.vue)、[styles.css](../../frontend/design-exploration/src/styles.css)、[responsive-fixes.css](../../frontend/design-exploration/src/responsive-fixes.css) | `direction='route'` 的侧栏、`route-dashboard-layout`、`route-map-panel`、`route-task-panel`、`MapScene` 视觉结构；**不要**使用 `command/industrial` 作为替代方向 |
-| 企业原型数据 | [design-exploration/src/data.ts](../../frontend/design-exploration/src/data.ts) | `SBX-24018` 等、城市、KPI、路线、时序均为 Mock，不能作为真实运输数据 |
-| 骑手原型 | [role-design-exploration/src/RiderHome.vue](../../frontend/role-design-exploration/src/RiderHome.vue)、[PrepareFlow.vue](../../frontend/role-design-exploration/src/PrepareFlow.vue) | 当前运输环境嵌入主区、我的箱体/辅助入口、三步进度条，需还原 |
-| 运输/访客原型 | [TransportOverview.vue](../../frontend/role-design-exploration/src/TransportOverview.vue)、[Environment.vue](../../frontend/role-design-exploration/src/Environment.vue)、[Journey.vue](../../frontend/role-design-exploration/src/Journey.vue)、[Trend.vue](../../frontend/role-design-exploration/src/Trend.vue) | 身份→环境→详情→进度的结构、历史展示与缺口；`Trend.vue` 生成的六点模拟曲线**不能进入生产数据层** |
-| 原型外框和视觉规则 | [role-design-exploration/src/App.vue](../../frontend/role-design-exploration/src/App.vue)、[style.css](../../frontend/role-design-exploration/src/style.css)、[README](../../frontend/role-design-exploration/README.md)、[UX-REVIEW](../../frontend/role-design-exploration/UX-REVIEW.md) | 骑手四导航、访客无底栏、响应式布局及优化依据；`usePreview.ts` 仅模拟状态/动作，不可移植为生产 Store |
+| 企业原型 | design-exploration/src/App.vue、styles.css、responsive-fixes.css | `direction='route'` 的侧栏、`route-dashboard-layout`、`route-map-panel`、`route-task-panel`、`MapScene` 视觉结构；**不要**使用 `command/industrial` 作为替代方向 |
+| 企业原型数据 | design-exploration/src/data.ts | `SBX-24018` 等、城市、KPI、路线、时序均为 Mock，不能作为真实运输数据 |
+| 骑手原型 | role-design-exploration/src/RiderHome.vue、PrepareFlow.vue | 当前运输环境嵌入主区、我的箱体/辅助入口、三步进度条，需还原 |
+| 运输/访客原型 | TransportOverview.vue、Environment.vue、Journey.vue、Trend.vue | 身份→环境→详情→进度的结构、历史展示与缺口；`Trend.vue` 生成的六点模拟曲线**不能进入生产数据层** |
+| 原型外框和视觉规则 | role-design-exploration/src/App.vue、style.css、README、UX-REVIEW | 骑手四导航、访客无底栏、响应式布局及优化依据；`usePreview.ts` 仅模拟状态/动作，不可移植为生产 Store |
 | 正式企业页面 | [frontend/src/business/Enterprise.vue](../../frontend/src/business/Enterprise.vue) | 已请求企业箱体、任务、演示骑手并可分配/收回，但只是通用卡片列表，缺原型侧栏和地图/任务联动 |
 | 正式骑手/详情 | [Rider.vue](../../frontend/src/business/Rider.vue)、[TransportDetail.vue](../../frontend/src/business/TransportDetail.vue) | 已完成创建/绑定/开始/结束/分享验证码请求，缺导航与三步结构；现有详情把物品编辑和开始混在一块 |
 | 正式访客/监测 | [Track.vue](../../frontend/src/business/Track.vue)、[MonitoringPanel.vue](../../frontend/src/business/MonitoringPanel.vue) | 访客短期 token、失效清理、轮询和任务字段是对的；需改变页面顺序、样式与二级查看体验 |
@@ -138,7 +138,7 @@ function safeReading(value: number | null): string {
 
 ## 5. 企业端：direction=route 的具体还原设计
 
-**视觉权威**：[企业原型 App.vue](../../frontend/design-exploration/src/App.vue) 查询参数 `direction=route&page=dashboard`（同一原型还有 `boxes/detail/alarms/operations`）；正式权威：[Enterprise.vue](../../frontend/src/business/Enterprise.vue) 与现有企业 API。
+**视觉权威**：企业原型 App.vue 查询参数 `direction=route&page=dashboard`（同一原型还有 `boxes/detail/alarms/operations`）；正式权威：[Enterprise.vue](../../frontend/src/business/Enterprise.vue) 与现有企业 API。
 
 ### 5.1 布局层次与交互
 
@@ -183,7 +183,7 @@ P0 必须恢复原型的**侧边栏＋顶部工作区＋地图/运输双栏主�
 
 ## 6. 骑手端：任务优先工作台、四导航和三步准备
 
-**视觉权威**：[RiderHome.vue](../../frontend/role-design-exploration/src/RiderHome.vue)、[PrepareFlow.vue](../../frontend/role-design-exploration/src/PrepareFlow.vue)、[原型 App.vue](../../frontend/role-design-exploration/src/App.vue)。正式现状：[Rider.vue](../../frontend/src/business/Rider.vue)、[TransportDetail.vue](../../frontend/src/business/TransportDetail.vue)。
+**视觉权威**：RiderHome.vue、PrepareFlow.vue、原型 App.vue。正式现状：[Rider.vue](../../frontend/src/business/Rider.vue)、[TransportDetail.vue](../../frontend/src/business/TransportDetail.vue)。
 
 ### 6.1 首页必须恢复的构图
 
@@ -218,7 +218,7 @@ P0 必须恢复原型的**侧边栏＋顶部工作区＋地图/运输双栏主�
 
 ## 7. 普通用户端：访客原型的运输身份＋环境主次顺序
 
-**视觉权威**：[原型 TransportOverview](../../frontend/role-design-exploration/src/TransportOverview.vue) 与 [原型 App](../../frontend/role-design-exploration/src/App.vue)。正式现状：[Track.vue](../../frontend/src/business/Track.vue)。
+**视觉权威**：原型 TransportOverview 与 原型 App。正式现状：[Track.vue](../../frontend/src/business/Track.vue)。
 
 ### 7.1 未验证时：独立验证布局
 
@@ -285,7 +285,7 @@ P0 必须恢复原型的**侧边栏＋顶部工作区＋地图/运输双栏主�
 | 骑手 | `GET /rider/transports/{id}/monitoring`、`POST .../{id}/access-code` | 当前任务环境、分享 |
 | 访客 | `POST /public/transport-access/verify`、`GET /public/transport-view`（专用 header） | 验证和单任务只读页 |
 
-正式接口与数据字段以 [transport-view 增量契约](../../contracts/http/transport-view/README.md) 及真实源码为准，本文不批准任何新的后端 URL。`session.request` 通过 `lossless-json` 编码大整数；保留 `Enterprise.vue` 当前 `rider_user_id` 的请求处理方式，不在视觉还原时改成不支持 `BigInt` 的裸 `JSON.stringify`。
+正式接口与数据字段以 transport-view 增量契约 及真实源码为准，本文不批准任何新的后端 URL。`session.request` 通过 `lossless-json` 编码大整数；保留 `Enterprise.vue` 当前 `rider_user_id` 的请求处理方式，不在视觉还原时改成不支持 `BigInt` 的裸 `JSON.stringify`。
 
 ## 9. 路由、轮询、加载与授权的兼容设计
 

@@ -8,7 +8,7 @@
 | 依赖 | [TASK-015 首切片](TASK-015-企业端运营控制台首切片.md)、V16、现有 `/enterprise/console/**`、`DemoFleetService`、`AssetsPage` |
 | 产品依据 | [企业端 V2.0 需求](../requirements/V2-企业端物流运营控制台需求规格.md)、[CR-007](../changes/CR-007-企业端优先与物流运营控制台.md) |
 | 需求范围 | E2-ASSET-04/05/06/07 |
-| 视觉依据 | [`frontend/design-exploration` 的 `direction=route`](../../frontend/design-exploration/README.md) |
+| 视觉依据 | `frontend/design-exploration` 的 `direction=route` |
 | 明确不做 | 八分区详情、告警人工处置、CSV、真实 GPS、真实 MQTT 新身份、真实箱体删除、客户/骑手/访客新增功能 |
 
 > **状态口径：**设计已经按本文实施，实际结果见第 16 节。V17、API、前端交互和场景事实生成已在隔离 `smartbox_test` 执行最小验证；真实设备、MQTT 模拟身份、开发库迁移和生产环境仍未验收。本文不改变 TASK-015 的已完成范围，也不把模拟箱体说成真实 MQTT 设备。
@@ -216,7 +216,7 @@ ALTER TABLE boxes ADD CONSTRAINT chk_demo_scenario CHECK (
 - 所有端点要求 `LOGISTICS_OPERATOR`＋企业范围；跨企业 404。
 - 错误码：`VALIDATION_ERROR`、`NOT_FOUND`、`ASSET_NOT_SIMULATED`、`INVALID_SCENARIO`、`BOX_IN_USE`。
 - 不修改旧 `/enterprise/boxes`、`/rider/**`、`/boxes/**`；新字段为增量。
-- 新契约在实施时追加到现有 [console 契约](../../contracts/http/enterprise-console/README.md)；本设计批准前不改契约文件。
+- 新契约在实施时追加到现有 console 契约；本设计批准前不改契约文件。
 
 ## 9. 后端实现边界
 

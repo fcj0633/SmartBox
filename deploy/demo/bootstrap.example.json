@@ -1,0 +1,15 @@
+{
+  "boxes": [
+    "BOX-0001"
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "password": "admin",
+      "role": "LOGISTICS_OPERATOR",
+      "box_ids": [
+        "BOX-0001"
+      ]
+    }
+  ]
+}

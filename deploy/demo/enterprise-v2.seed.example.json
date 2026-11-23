@@ -2,8 +2,10 @@
   "enterprises": [
     {
       "name": "演示物流企业",
-      "admin_username": "demo-admin",
-      "box_ids": ["BOX-0001"]
+      "admin_username": "admin",
+      "box_ids": [
+        "BOX-0001"
+      ]
     }
   ],
   "personal_boxes": [],
