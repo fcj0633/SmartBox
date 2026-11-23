@@ -4,14 +4,14 @@
 
 固件新增[sb_tls.c](services/sb_tls.c)与[sb_tls.h](include/sb_tls.h)，由网络线程独占，提供握手、加密读写及资源释放；[sb_network_real.c](services/sb_network_real.c)负责DNS/TCP与MQTT调度。云端使用域名/SNI、TLS1.2、服务器CA、每角色账号，证书链/域名/日期均验证；SDK未启用自动日期检查，适配层逐张核验有效期，未校时先继续本地采集并等待SNTP。local构建仍支持原1883路径，不自动降级。
 
-云端配置需[hardware.py](../tools/hardware.py)显式prepare，生成忽略头文件并预留启动区间；随后分别编译烧录。电脑IP变化不再要求改Broker域名，但Wi-Fi、CA、账号或域名变化仍需更新固件。实际证据及未验范围见[云端迁移报告](../docs/testing/reports/EMQX云端迁移验证报告.md)，操作见[云端指南](../docs/delivery/deployment/EMQX云端部署与迁移.md)。
+云端配置需[hardware.py](../tools/hardware.py)显式prepare，生成忽略头文件并预留启动区间；随后分别编译烧录。电脑IP变化不再要求改Broker域名，但Wi-Fi、CA、账号或域名变化仍需更新固件。实际证据及未验范围见云端迁移报告，操作见[云端指南](../docs/operations/EMQX云端部署与迁移.md)。
 
 
-新电脑获取 SDK、SSH 构建及烧录的完整步骤见[部署指南](../docs/delivery/deployment/开发者完整部署指南.md)。SDK 独立交付，`tools/project.py firmware-build` 通过 SSH 受控同步，不强制要求映射盘；传统映射构建入口继续保留。
+新电脑获取 SDK、SSH 构建及烧录的完整步骤见[部署指南](../docs/operations/开发者完整部署指南.md)。SDK 独立交付，`tools/project.py firmware-build` 通过 SSH 受控同步，不强制要求映射盘；传统映射构建入口继续保留。
 
 这个目录保存运行在 **BearPi-HM Nano** 上的 SmartBox 固件源码，使用 **C、CMSIS-RTOS2 和既有 OpenHarmony SDK**。它负责板端采集、样本快照、Wi-Fi/MQTT、时间质量以及真实输出控制；后端、数据库和网页属于仓库其他工程。
 
-**当前状态：TASK-007 已完成基础真实双板链路验证。** IA1/SC2真实数据已经过Broker、Spring Boot、MySQL到网页，补光灯、风扇及指示灯的10秒输出与自动关闭已获用户实物确认；双板310秒、断电及90秒静默/Broker恢复有实际证据。完整业务算法、Flash事件可靠性、资源峰值与长期稳定性尚未验收。历史TASK-002的Mock/未验板范围不能当作当前固件状态。证据见[任务7验证报告](../docs/testing/reports/TASK-007-双板接入验证报告.md)。
+**当前状态：TASK-007 已完成基础真实双板链路验证。** IA1/SC2真实数据已经过Broker、Spring Boot、MySQL到网页，补光灯、风扇及指示灯的10秒输出与自动关闭已获用户实物确认；双板310秒、断电及90秒静默/Broker恢复有实际证据。完整业务算法、Flash事件可靠性、资源峰值与长期稳定性尚未验收。历史TASK-002的Mock/未验板范围不能当作当前固件状态。证据见任务7验证报告。
 
 ## 1. ENV 与 POSE 为什么共用这个目录
 
@@ -219,7 +219,7 @@ flowchart LR
 - 完整构建按“检查配置→只读预览同步→受控应用→备份SDK入口/旧输出/厂商树→Ubuntu分别构建ENV和POSE→立即独立归档→恢复旧环境”执行。第二次构建可能覆盖输出，不能将同一个bin改名当两个角色。
 - 烧录先核对角色、节点、manifest和SHA256，用户逐板操作并退出HiBurn释放串口后再看日志；每次重新枚举COM，不把历史端口当永久绑定。
 
-具体参数与操作步骤集中在[编译烧录与联调指南](../docs/development/guides/编译烧录与联调流程.md)和[工具说明](../tools/README.md)，本README不维护第二份完整烧录手册。
+具体参数与操作步骤集中在[编译烧录与联调指南](../docs/operations/编译烧录与联调流程.md)和[工具说明](../tools/README.md)，本README不维护第二份完整烧录手册。
 
 ## 8. 推荐阅读与修改入口
 
@@ -252,17 +252,17 @@ flowchart LR
 
 ### 设计与验收资料
 
-- [TASK-002骨架设计](../docs/development/tasks/TASK-002-双角色固件骨架.md)：线程、接口、失败收敛及受控构建设计的起点。
-- [TASK-007实际接入](../docs/development/tasks/TASK-007-双板实际采集与输出接入.md)：真实驱动、网络、身份和用户物理操作的详细边界。
-- [固件总体设计](../docs/design/firmware/固件架构与SDK接入.md)：架构职责与其他设计入口。
-- [硬件及演示动作](../docs/design/hardware/节点与演示动作.md)：器件、引脚核对及模拟边界。
-- [双板验证报告](../docs/testing/reports/TASK-007-双板接入验证报告.md)：实际镜像指纹、失败修复、310秒运行和恢复结果；POSE启动1次无效读取、31次错过周期及最大570ms间隔保留，稳定窗口约50Hz不等于全程无丢周期。
+- [TASK-002骨架设计](../docs/tasks/TASK-002-双角色固件骨架.md)：线程、接口、失败收敛及受控构建设计的起点。
+- [TASK-007实际接入](../docs/tasks/TASK-007-双板实际采集与输出接入.md)：真实驱动、网络、身份和用户物理操作的详细边界。
+- [固件总体设计](../docs/design/固件架构与SDK接入.md)：架构职责与其他设计入口。
+- [硬件及演示动作](../docs/design/节点与演示动作.md)：器件、引脚核对及模拟边界。
+- 双板验证报告：实际镜像指纹、失败修复、310秒运行和恢复结果；POSE启动1次无效读取、31次错过周期及最大570ms间隔保留，稳定窗口约50Hz不等于全程无丢周期。
 
 本页是代码阅读与开发入口，不新增需求或验收结论。完整环境/姿态/冲击/门融合/哨兵规则、Flash可靠事件存储以及长期稳定性仍按后续任务推进。
 
 ### TASK-008规则实现与并发阅读入口
 
-2026-11-23已补充规则边界和线程所有权，当前仍待匹配镜像的板端验证。前文“真实固件只验证output”保留TASK-007实测边界；新增代码不自动成为硬件通过记录。最新结果见[TASK-008报告](../docs/testing/reports/TASK-008-核心规则与业务视图实施报告.md)。
+2026-11-23已补充规则边界和线程所有权，当前仍待匹配镜像的板端验证。前文“真实固件只验证output”保留TASK-007实测边界；新增代码不自动成为硬件通过记录。最新结果见TASK-008报告。
 
 | 入口 | 作用与调用关系 | 修改和验证要点 |
 |---|---|---|

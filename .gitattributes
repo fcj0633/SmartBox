@@ -7,4 +7,4 @@
 *.sh text eol=lf
 *.ps1 text eol=crlf
 # Immutable input: preserve original CRLF bytes and exclude archival formatting from lint.
-docs/requirements/baseline/* -text -whitespace
+docs/requirements/项目原始需求-v1.0.md -text -whitespace

@@ -33,7 +33,7 @@ def export(args,c):
             r=remote_command(c,['cat',destination+'/'+name],stdout=f,stderr=subprocess.PIPE)
         if r.returncode:raise ValueError('Bundle download failed; partial output retained')
     verify(args.bundle)
-    (args.bundle/'START-HERE.md').write_text('# SmartBox 开发交付包\n\n先核对 bundle.json 的哈希，再阅读源码中的 docs/delivery/deployment/开发者完整部署指南.md。\n\nSDK 与工具链来自已验证的本地快照，不宣称对应上游某个 Git 提交。保留全部组件许可证。当前交付供本地开发交接；公开再分发前须核对厂商二进制、工具链对应源码及各组件条款。不得认为 SDK 根目录 Apache 许可证覆盖所有组件。\n\nWindows Java、MySQL、Mosquitto、Python、Node 需单独安装，Maven/npm/pip 依赖首次联网解析；本包不是整机离线镜像。\n',encoding='utf-8')
+    (args.bundle/'START-HERE.md').write_text('# SmartBox 开发交付包\n\n先核对 bundle.json 的哈希，再阅读源码中的 docs/operations/开发者完整部署指南.md。\n\nSDK 与工具链来自已验证的本地快照，不宣称对应上游某个 Git 提交。保留全部组件许可证。当前交付供本地开发交接；公开再分发前须核对厂商二进制、工具链对应源码及各组件条款。不得认为 SDK 根目录 Apache 许可证覆盖所有组件。\n\nWindows Java、MySQL、Mosquitto、Python、Node 需单独安装，Maven/npm/pip 依赖首次联网解析；本包不是整机离线镜像。\n',encoding='utf-8')
     print(json.dumps(result,indent=2));return 0
 
 def install(args,c):

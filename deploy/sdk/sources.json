@@ -2,7 +2,7 @@
   "format": 1,
   "checked_on": "2026-11-10",
   "purpose": "公开的SDK获取入口与项目验证边界；不是自动安装锁文件",
-  "guide": "docs/development/guides/SDK官网下载与接入.md",
+  "guide": "docs/operations/SDK官网下载与接入.md",
   "official": {
     "board": "https://www.bearpi.cn/dev_board/bearpi/hm/nano/",
     "quick_start": "https://bearpi.cn/dev_board/bearpi/hm/nano/software_OpenHarmony/BearPi-HM_Nano十分钟上手.html",
@@ -26,7 +26,7 @@
     "sdk_archive_sha256": "e2106be2ab7e37debcbc241b86f7d9ea9a0df592991ff20ff67ae2a282f6c255",
     "toolchain_archive_sha256": "0a21c35ae43a1c819ec5e63cbddb372acc460b027e2730b20dcc63deecf50765",
     "manifest_sha256": "93e0c823b1c11a3b5757cd36e43132ea584c32722fc2f736b1ae1bf47b8bc2a8",
-    "report": "docs/testing/reports/开发部署与SDK交付验证报告.md",
+    "report": "docs/tasks/TASK-002-双角色固件骨架.md",
     "note": "上述哈希属于项目重新打包的本地交付，不是官网下载原归档的哈希；二进制未随本记录发布"
   }
 }

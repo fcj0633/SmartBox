@@ -2,7 +2,7 @@
 
 ## 适用范围
 
-此目录保留显式local模式及故障回归。日常默认已切换为[EMQX云端](../emqx/README.md)，cloud不启动本机Mosquitto；下面的回环/LAN监听和原Windows服务约束继续适用于local。云端TLS与授权配置见[迁移指南](../../docs/delivery/deployment/EMQX云端部署与迁移.md)。
+此目录保留显式local模式及故障回归。日常默认已切换为[EMQX云端](../emqx/README.md)，cloud不启动本机Mosquitto；下面的回环/LAN监听和原Windows服务约束继续适用于local。云端TLS与授权配置见[迁移指南](../../docs/operations/EMQX云端部署与迁移.md)。
 
 
 Broker是节点与后端之间的MQTT中转，不做业务保存或JSON权限判断。当前使用现有Windows Mosquitto独立项目进程，不启动旧Windows服务、不覆盖全局配置。端口1883占用时拒绝，不停止其他项目。
@@ -44,7 +44,7 @@ prepare首次创建账号/配置/身份，重复只校验不重置；Broker监�
 
 ## 4. 启动硬件模式
 
-前提是私有Wi-Fi、Broker网卡及角色固件已经按[烧录联调指南](../../docs/development/guides/编译烧录与联调流程.md)准备，电脑与板可互访，原模拟Broker及同身份模拟节点停止。复用已生成配置：
+前提是私有Wi-Fi、Broker网卡及角色固件已经按[烧录联调指南](../../docs/operations/编译烧录与联调流程.md)准备，电脑与板可互访，原模拟Broker及同身份模拟节点停止。复用已生成配置：
 
 ```powershell
 .venv/Scripts/python tools/hardware.py check

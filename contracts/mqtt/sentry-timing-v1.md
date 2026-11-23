@@ -1,6 +1,6 @@
 # MQTT v1 布防有效期限行为补充
 
-状态：用户确认规则，依据[CR-003](../../docs/management/changes/CR-003-布防有效期限计时起点.md)。仅补充既有sentry命令行为，不更改v1字段、Topic、QoS或已冻结文件。
+状态：用户确认规则，依据[CR-003](../../docs/changes/CR-003-布防有效期限计时起点.md)。仅补充既有sentry命令行为，不更改v1字段、Topic、QoS或已冻结文件。
 
 接受布防后按既有规则进入3秒缓冲。实际进入ARMED后，以该单调时刻作为duration_s起点；duration_s>0时到期撤防，duration_s=0时不自动到期。有效防护时长不包含3秒缓冲。完成回执仍须等实际模拟/设备ARMED，不能接受命令即返回完成。
 

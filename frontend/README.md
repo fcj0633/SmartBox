@@ -2,14 +2,14 @@
 
 ## 云端Broker对网页的影响
 
-网页接口和路由保持现状，仍通过后端REST/WS读写，不新增MQTT连接或保存设备账号。Broker选择由后端启动配置决定，见[云端部署指南](../docs/delivery/deployment/EMQX云端部署与迁移.md)。公网中断、后端断连、节点离线与数据过期仍分别表达；不因云实例Running就把数据展示为实时。
+网页接口和路由保持现状，仍通过后端REST/WS读写，不新增MQTT连接或保存设备账号。Broker选择由后端启动配置决定，见[云端部署指南](../docs/operations/EMQX云端部署与迁移.md)。公网中断、后端断连、节点离线与数据过期仍分别表达；不因云实例Running就把数据展示为实时。
 
 
-新开发者从[完整部署指南](../docs/delivery/deployment/开发者完整部署指南.md)准备依赖和账号，再使用 `tools/project.py start --mode simulator` 启动整套开发服务；网页只消费 REST/WS，不直接连接数据库或 Broker。
+新开发者从[完整部署指南](../docs/operations/开发者完整部署指南.md)准备依赖和账号，再使用 `tools/project.py start --mode simulator` 启动整套开发服务；网页只消费 REST/WS，不直接连接数据库或 Broker。
 
 前端为授权用户展示箱体实时情况，把用户确认的操作提交给后端并追踪真实执行结果。已有登录、箱体列表、详情、质量状态、五类授权控制表单及操作结果；完整历史筛选、轨迹和CSV页面仍留后续，不要求手机布局。
 
-网页已通过真实服务＋双模拟器闭环，并用于TASK-007真实双板基础验证。**五类表单不意味着真实板支持五类动作：当前真实固件只执行output，模拟器支持五类模拟命令。** GPS保留MOCK，无判断器时门/告警显示未知。证据见[网页报告](../docs/testing/reports/TASK-006-网页与首轮闭环验证报告.md)、[双板报告](../docs/testing/reports/TASK-007-双板接入验证报告.md)。
+网页已通过真实服务＋双模拟器闭环，并用于TASK-007真实双板基础验证。**五类表单不意味着真实板支持五类动作：当前真实固件只执行output，模拟器支持五类模拟命令。** GPS保留MOCK，无判断器时门/告警显示未知。证据见网页报告、双板报告。
 
 ## 1. 页面与角色
 
@@ -20,7 +20,7 @@
 | `/boxes/:boxId` | 环境、允许的姿态/节点、MOCK定位、门/告警/哨兵状态与质量 |
 | 详情控制与结果 | 表单校验→确认→受理→整体/逐节点结果；模拟与实物范围有提示 |
 
-物流操作者可提交五类允许操作，骑手仅布撤防，物流寄收件人无控制；外卖用户省略姿态、证据、节点诊断、哨兵和命令明细。入口隐藏只是交互策略，最终授权仍在服务端；直接改URL或请求参数不能扩大权限。规范见[角色权限](../docs/requirements/product/角色与权限.md)。
+物流操作者可提交五类允许操作，骑手仅布撤防，物流寄收件人无控制；外卖用户省略姿态、证据、节点诊断、哨兵和命令明细。入口隐藏只是交互策略，最终授权仍在服务端；直接改URL或请求参数不能扩大权限。规范见[角色权限](../docs/requirements/角色与权限.md)。
 
 ## 2. 实际目录与核心文件
 
@@ -97,14 +97,14 @@ WS断开不等于设备离线，设备在线不等于采样新鲜。样本有效
 
 ## 6. 安装、启动与测试
 
-版本以[package.json](package.json)、[锁文件](package-lock.json)及[版本矩阵](../docs/development/environment/工具与依赖版本矩阵.md)为准，不在本页重复完整版本列表。仓库根目录运行：
+版本以[package.json](package.json)、[锁文件](package-lock.json)及[版本矩阵](../docs/operations/工具与依赖版本矩阵.md)为准，不在本页重复完整版本列表。仓库根目录运行：
 
 ```powershell
 .venv/Scripts/python tools/frontend.py install
 .venv/Scripts/python tools/frontend.py dev
 ```
 
-install执行锁定安装并将匹配Chromium准备到忽略的artifacts；dev固定127.0.0.1:5173，端口占用不改号。实际数据先按[启动指南](../docs/development/guides/网页启动与首轮验收.md)启动Broker、后端和选择的输入。真实板模式见[固件联调指南](../docs/development/guides/编译烧录与联调流程.md)。[Vite配置](vite.config.ts)代理API/WS到回环8080，保留Origin；网页不直连MQTT或MySQL，不接收设备/数据库密码。
+install执行锁定安装并将匹配Chromium准备到忽略的artifacts；dev固定127.0.0.1:5173，端口占用不改号。实际数据先按[启动指南](../docs/history/网页启动与首轮验收.md)启动Broker、后端和选择的输入。真实板模式见[固件联调指南](../docs/operations/编译烧录与联调流程.md)。[Vite配置](vite.config.ts)代理API/WS到回环8080，保留Origin；网页不直连MQTT或MySQL，不接收设备/数据库密码。
 
 ```powershell
 .venv/Scripts/python tools/frontend.py check
@@ -132,7 +132,7 @@ check为类型和[单元/组件](tests/unit/core.test.ts)，build生成dist；br
 
 公开track在Router和App同时绕过登录约束；访客令牌独立于JWT，仅内存，刷新失效。任务请求复用无损JSON和业务错误码，10秒串行轮询，卸载取消，403/404清除资源。旧boxes保持独立权限。
 
-[真实浏览器脚本](tests/transport-live.cjs)不拦截最终API，[单元检查](tests/unit/business.test.ts)覆盖公开路由、UNKNOWN与错误码。运行见[指南](../docs/development/guides/三端运输业务启动与验收.md)，来源和限制见[报告](../docs/testing/reports/TASK-013-三端运输业务联调报告.md)。实体手机、实板和公网未验收。
+[真实浏览器脚本](tests/transport-live.cjs)不拦截最终API，[单元检查](tests/unit/business.test.ts)覆盖公开路由、UNKNOWN与错误码。运行见[指南](../docs/history/三端运输业务启动与验收.md)，来源和限制见报告。实体手机、实板和公网未验收。
 
 
 ## TASK-014 三端原型还原
@@ -141,4 +141,4 @@ check为类型和[单元/组件](tests/unit/core.test.ts)，build生成dist；br
 
 准备草稿通过服务端任务 ID 恢复，更换箱体需确认另建，结果不明不自动重试；登录只恢复同角色内部业务地址。访客维持独立内存授权，二级页面不扩展请求范围。旧设备页与控制保持原路径及权限。
 
-[受控检查](tests/task014-ui.cjs)覆盖三尺寸和错误路径；在独立前端 15174 与现有 Chromium 缓存下运行 `node frontend/tests/task014-ui.cjs`。真实流程沿用[原联调工具](../tools/transport_view.py)，仅明确授权的专用 smartbox_test 可清理，运行方法见[指南](../docs/development/guides/三端运输业务启动与验收.md)。21 项单元/组件、12 项旧设备浏览器、三端受控与真实软件验证及视觉差异见[实施报告](../docs/testing/reports/TASK-014-三端UI原型还原与接入报告.md)。实板、真实 GPS 和生产安全不在本次验收范围。
+[受控检查](tests/task014-ui.cjs)覆盖三尺寸和错误路径；在独立前端 15174 与现有 Chromium 缓存下运行 `node frontend/tests/task014-ui.cjs`。真实流程沿用[原联调工具](../tools/transport_view.py)，仅明确授权的专用 smartbox_test 可清理，运行方法见[指南](../docs/history/三端运输业务启动与验收.md)。21 项单元/组件、12 项旧设备浏览器、三端受控与真实软件验证及视觉差异见实施报告。实板、真实 GPS 和生产安全不在本次验收范围。

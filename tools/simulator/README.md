@@ -4,7 +4,7 @@
 
 Node同时支持原local和显式cloud profile，cloud使用指定CA的Python TLS上下文，强制证书及域名校验，无明文回退。运行器从配置读取host/port，Topic、状态机、重连、精确确认及内存队列边界沿用原实现。
 
-云端与真实板共享节点身份，必须二选一；使用[云端准备/预留工具](../cloud_mqtt.py)管理独立状态，不能把boot清零或与真实板同时运行。云端ACL与隔离集成入口见[部署指南](../../docs/delivery/deployment/EMQX云端部署与迁移.md)，原本地故障测试仍按下面流程执行。
+云端与真实板共享节点身份，必须二选一；使用[云端准备/预留工具](../cloud_mqtt.py)管理独立状态，不能把boot清零或与真实板同时运行。云端ACL与隔离集成入口见[部署指南](../../docs/operations/EMQX云端部署与迁移.md)，原本地故障测试仍按下面流程执行。
 
 
 模拟器让没有接板的开发者也能运行ENV/POSE输入，复用与真实板相同的身份、Topic和契约，通过真实Broker验证服务端链路。Mock表示输入或动作来自主机程序，不表示后端、Broker和数据库也是假实现。
@@ -55,7 +55,7 @@ flowchart LR
 | calibrate | 模拟校准完成，不验证真实器件校准精度 |
 | sentry | 检查修订号，模拟3秒缓冲后ARMED，从ARMED起算duration_s；0不自动到期 |
 
-哨兵计时按[CR-003](../../docs/management/changes/CR-003-布防有效期限计时起点.md)，时间/新鲜度等按[有效契约](../../contracts/effective/README.md)。主机只保存身份/修订元数据，重启不宣称恢复未确认的防护期限，按现有降级状态表达。
+哨兵计时按[CR-003](../../docs/changes/CR-003-布防有效期限计时起点.md)，时间/新鲜度等按[有效契约](../../contracts/effective/README.md)。主机只保存身份/修订元数据，重启不宣称恢复未确认的防护期限，按现有降级状态表达。
 
 `Model.event()`生成测试事件并放入64条内存待确认队列；批次最多4条且受字节容量约束。重传保持原身份/内容/观测时间，外层传输时间和重传标记可变；PUBACK不能清理，只有匹配节点/boot的精确event_ack集合才能清除对应事件。满容量覆盖最旧，累计损失计数/区间。**进程退出即失去待确认事件，storage=DEGRADED，主机身份文件不等于设备Flash事件可靠性。**
 
@@ -63,7 +63,7 @@ box_state只检查和接收，不凭空实现未决抑制TTL。正常软件闭�
 
 ## 4. 安装与手动运行
 
-新环境先按[环境与版本](../../docs/development/environment/工具与依赖版本矩阵.md)准备项目`.venv`和现有Mosquitto，仓库根目录执行：
+新环境先按[环境与版本](../../docs/operations/工具与依赖版本矩阵.md)准备项目`.venv`和现有Mosquitto，仓库根目录执行：
 
 ```powershell
 .venv/Scripts/python -m pip install -r tools/requirements-contracts.txt -r tools/requirements-simulator.txt
@@ -79,7 +79,7 @@ prepare默认生成/校验忽略的`secrets/mqtt.local.json`、账号/ACL及身�
 .venv/Scripts/python tools/mqtt.py node --role POSE
 ```
 
-`--config`指定项目私有配置；`--run-dir`指定证据目录；`--scenario normal/invalid/unsynced`、`--seed`和`--events`控制输入。各终端Ctrl+C正常退出，Broker和节点由各自入口管理。后端和网页另按[软件闭环指南](../../docs/development/guides/网页启动与首轮验收.md)启动，模拟器本身不直接操作MySQL。
+`--config`指定项目私有配置；`--run-dir`指定证据目录；`--scenario normal/invalid/unsynced`、`--seed`和`--events`控制输入。各终端Ctrl+C正常退出，Broker和节点由各自入口管理。后端和网页另按[软件闭环指南](../../docs/history/网页启动与首轮验收.md)启动，模拟器本身不直接操作MySQL。
 
 默认运行器只连接回环Broker；真实板由显式硬件模式接入，不把模拟器改为任意远程客户端。开发库已记录真实板较高boot时，旧模拟代次不会覆盖实时状态；应选择隔离test联调，不降低代次或删除开发历史。
 
@@ -94,7 +94,7 @@ unit执行[状态/协议测试](../../tests/simulator/test_model.py)，使用临
 
 扩展输入时先在Model实现确定序列及质量标记，注入时钟覆盖边界；涉及字段或命令先核对需求/契约。扩展故障场景在Scenarios组合正常节点与独立测试端，不能为了注入错误放宽正常Protocol检查。真实retained命令应先保存、再订阅获得保留投递，不把普通在线投递当成该场景。
 
-回归需覆盖输入复现、拒绝不改状态、重复/冲突、精确确认与覆盖、断线重订阅及代次。运行目录保存脱敏状态/证据；日志、密码及散列不入Git，人工操作与真实板验收另行记录。原结果见[MQTT报告](../../docs/testing/reports/TASK-004-MQTT与模拟节点验证报告.md)，后续软件/硬件状态看当前根README。
+回归需覆盖输入复现、拒绝不改状态、重复/冲突、精确确认与覆盖、断线重订阅及代次。运行目录保存脱敏状态/证据；日志、密码及散列不入Git，人工操作与真实板验收另行记录。原结果见MQTT报告，后续软件/硬件状态看当前根README。
 
 ## 6. TASK-008采样驱动规则与预设事件的区别
 

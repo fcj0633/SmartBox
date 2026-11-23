@@ -2,14 +2,14 @@
 
 ## 云端连接配置
 
-MQTT支持显式cloud/local profile：cloud要求 `ssl://部署域名:8883`、指定服务器CA和域名验证；local保持原回环TCP。`MqttTransport`负责端点与信任锚，`MqttGateway`仍负责有界接收和订阅。异常只记录DNS/TLS/认证/连接类别，不打印凭据。配置由[统一工具](../tools/project.py)注入，见[云端指南](../docs/delivery/deployment/EMQX云端部署与迁移.md)；HTTP与数据库仍在本机，业务事务/确认不交给Broker。
+MQTT支持显式cloud/local profile：cloud要求 `ssl://部署域名:8883`、指定服务器CA和域名验证；local保持原回环TCP。`MqttTransport`负责端点与信任锚，`MqttGateway`仍负责有界接收和订阅。异常只记录DNS/TLS/认证/连接类别，不打印凭据。配置由[统一工具](../tools/project.py)注入，见[云端指南](../docs/operations/EMQX云端部署与迁移.md)；HTTP与数据库仍在本机，业务事务/确认不交给Broker。
 
 
-首次建库和新电脑配置见[完整部署指南](../docs/delivery/deployment/开发者完整部署指南.md)。`tools/project.py db-init` 显式初始化项目库/受限账号；Flyway 与业务初始化仍由后端执行。默认 MySQL 3306，允许显式本机端口用于独立部署演练，库名、账号和测试清理保护不放宽。
+首次建库和新电脑配置见[完整部署指南](../docs/operations/开发者完整部署指南.md)。`tools/project.py db-init` 显式初始化项目库/受限账号；Flyway 与业务初始化仍由后端执行。默认 MySQL 3306，允许显式本机端口用于独立部署演练，库名、账号和测试清理保护不放宽。
 
 这是运行在开发电脑上的单Maven Spring Boot应用。它不直接读取传感器，而是从MQTT接收节点消息，核对注册身份与契约，把事实保存到MySQL，再为网页提供授权REST/WS视图和命令操作结果。当前已有服务端/模拟闭环和基础真实双板接入证据；不是只有早期认证骨架。
 
-软件结果见[服务端报告](../docs/testing/reports/TASK-005-服务端闭环验证报告.md)，真实输入与三项output结果见[双板报告](../docs/testing/reports/TASK-007-双板接入验证报告.md)。完整融合/告警算法仍未接入；实时门与告警保持未知，不能用“无结论”表示正常。
+软件结果见服务端报告，真实输入与三项output结果见双板报告。完整融合/告警算法仍未接入；实时门与告警保持未知，不能用“无结论”表示正常。
 
 ## 1. 实际结构与阅读地图
 
@@ -139,7 +139,7 @@ MQTT订阅消息不携带发布者认证用户名，接入身份建立在Broker 
 
 新增结构追加新版本，不修改已应用V1～V15，不自动clean/repair或用自动建表替代迁移。`smartbox_dev`与`smartbox_test`独立，迁移账号与运行账号权限分离，应用不使用root；测试清理只在显式配置和校验通过时执行。
 
-[application.yml](src/main/resources/application.yml)是受控配置入口，真实账号/密码/JWT密钥及演示初始化文件在忽略的`secrets/`，新机器需按[初始化指南](../docs/development/guides/后端数据库初始化与启动.md)准备。开发账号与授权不是通用DDL迁移的一部分，重复初始化不重置密码或覆盖已有授权。版本见[pom.xml](pom.xml)和[版本矩阵](../docs/development/environment/工具与依赖版本矩阵.md)。
+[application.yml](src/main/resources/application.yml)是受控配置入口，真实账号/密码/JWT密钥及演示初始化文件在忽略的`secrets/`，新机器需按[初始化指南](../docs/operations/后端数据库初始化与启动.md)准备。开发账号与授权不是通用DDL迁移的一部分，重复初始化不重置密码或覆盖已有授权。版本见[pom.xml](pom.xml)和[版本矩阵](../docs/operations/工具与依赖版本矩阵.md)。
 
 ## 8. 运行、测试与开发入口
 
@@ -152,7 +152,7 @@ MQTT订阅消息不携带发布者认证用户名，接入身份建立在Broker 
 .venv/Scripts/python tools/backend.py run --profile dev --mqtt-config secrets/mqtt.local.json
 ```
 
-MQTT配置需要已有项目Broker；真实板使用显式`--mqtt-config secrets/hardware/mqtt.local.json --hardware-mqtt`，后端仍监听127.0.0.1:8080。健康地址`/actuator/health`，业务前缀`/api/v1`。完整启动见[服务端指南](../docs/development/guides/服务端闭环启动与验收.md)，不能把只启动无MQTT的JAR当成完整链路。
+MQTT配置需要已有项目Broker；真实板使用显式`--mqtt-config secrets/hardware/mqtt.local.json --hardware-mqtt`，后端仍监听127.0.0.1:8080。健康地址`/actuator/health`，业务前缀`/api/v1`。完整启动见[服务端指南](../docs/operations/服务端闭环启动与验收.md)，不能把只启动无MQTT的JAR当成完整链路。
 
 真实MySQL集成入口为`tools/backend.py test --profile test --allow-test-reset`；跨端联调见[测试导读](../tests/README.md)与[工具](../tools/README.md)。它可能清理项目测试数据，不能与其他测试并行操作smartbox_test，不用H2/SQLite代替真MySQL。单元与IT文件在[后端测试](src/test/java/cn/smartbox)。
 
@@ -175,16 +175,16 @@ MQTT配置需要已有项目Broker；真实板使用显式`--mqtt-config secrets
 
 四个接口及返回结构见[资产增量契约](../contracts/http/assets/README.md)。资产元数据不含传感快照，`OWNED/ASSIGNED`与旧 `user_box_access` 分离；收回不吊销旧人工设备授权。TASK-012的运输开始会在自身事务内重新锁读资格，并在收回时增加 ACTIVE 守卫。
 
-构建后可用 `python tools/assets.py prepare --profile dev` 准备忽略配置，再显式 `bootstrap` 初始化，`run` 在18080启动MQTT关闭的资产后端。配置、真实集成和复验步骤见[初始化指南](../docs/development/guides/后端数据库初始化与启动.md)，结果见[报告](../docs/testing/reports/TASK-011-企业资产分配后端验证报告.md)。已有8080不会被工具自动停止或更新；本轮没有新增页面。
+构建后可用 `python tools/assets.py prepare --profile dev` 准备忽略配置，再显式 `bootstrap` 初始化，`run` 在18080启动MQTT关闭的资产后端。配置、真实集成和复验步骤见[初始化指南](../docs/operations/后端数据库初始化与启动.md)，结果见报告。已有8080不会被工具自动停止或更新；本轮没有新增页面。
 
 ## 骑手运输任务后端（TASK-012）
 
 [TransportController](src/main/java/cn/smartbox/transport/TransportController.java)提供6个JWT骑手接口；[TransportService](src/main/java/cn/smartbox/transport/TransportService.java)在事务中锁 `box_ownerships`、重验当前使用权、锁任务并做READY→ACTIVE→COMPLETED转换；[TransportMapper](src/main/resources/mapper/TransportMapper.xml)用生成列唯一索引保证同箱最多一个ACTIVE。开始前检查必需节点现有90秒在线窗口和 `alarm_state` 风险确认；结束允许设备离线；`unassign` 在持有同一权属锁时拒绝ACTIVE。
 
-V14新增 `transport_tasks`；`TransportIT` 使用真实MySQL/HTTP覆盖主流程、同箱排他、并发启动、收回守卫、离线、风险、越权和物品边界。在线/告警测试夹具不是真实设备证据；开发库节点过期时开始返回 `BOX_OFFLINE`，不伪造。页面、访客和任务历史归TASK-013。接口见[运输增量契约](../contracts/http/transport/README.md)，结果见[报告](../docs/testing/reports/TASK-012-运输任务事务后端验证报告.md)。
+V14新增 `transport_tasks`；`TransportIT` 使用真实MySQL/HTTP覆盖主流程、同箱排他、并发启动、收回守卫、离线、风险、越权和物品边界。在线/告警测试夹具不是真实设备证据；开发库节点过期时开始返回 `BOX_OFFLINE`，不伪造。页面、访客和任务历史归TASK-013。接口见[运输增量契约](../contracts/http/transport/README.md)，结果见报告。
 
 ## 任务范围监测与访客访问（TASK-013）
 
 V15新增单任务访客访问表，当前29张业务表，历史表另计。[监测服务](src/main/java/cn/smartbox/transport/TransportMonitoringService.java)共用可信任务时间投影，[访客服务](src/main/java/cn/smartbox/transport/GuestAccessService.java)处理码散列、会话和内存限流，[Mapper](src/main/resources/mapper/TransportMonitoringMapper.xml)执行范围查询。企业/骑手先JWT授权，访客由专用令牌固定任务，不构造虚假账号或箱体权限。
 
-[8接口契约](../contracts/http/transport-view/README.md)与冻结接口分开；只有两个public入口精确放行，设备权限不变。运行见[三端指南](../docs/development/guides/三端运输业务启动与验收.md)，实测见[报告](../docs/testing/reports/TASK-013-三端运输业务联调报告.md)。V1～V14不改写。
+[8接口契约](../contracts/http/transport-view/README.md)与冻结接口分开；只有两个public入口精确放行，设备权限不变。运行见[三端指南](../docs/history/三端运输业务启动与验收.md)，实测见报告。V1～V14不改写。

@@ -1,6 +1,6 @@
 # 测试体系：从静态检查到真实双板
 
-开发部署新增[工具回归](test_deployment.py)、[独立实例演练](../tools/deployment_rehearsal.py)和[统一运行检查](../tools/deployment_smoke.py)，结果见[部署报告](../docs/testing/reports/开发部署与SDK交付验证报告.md)。演练仅使用新私有目录及13306实例，显式恢复可只复验失败层；不停止共享MySQL，不以部署通过升级业务需求或板端验收。
+开发部署新增[工具回归](test_deployment.py)、[独立实例演练](../tools/deployment_rehearsal.py)和[统一运行检查](../tools/deployment_smoke.py)，结果见部署报告。演练仅使用新私有目录及13306实例，显式恢复可只复验失败层；不停止共享MySQL，不以部署通过升级业务需求或板端验收。
 
 本目录已有文档/契约工具回归、固件宿主组件、模拟器和工具安全测试。Java测试随backend、网页测试随frontend放置。人工TC描述业务场景和通过标准；可执行测试、实际报告与原始证据分别承担不同职责，**工具通过不自动验收整条REQ或整份TC**。
 
@@ -21,8 +21,8 @@
 | 前端单元/组件 | [core.test](../frontend/tests/unit/core.test.ts)，`tools/frontend.py check` | 角色、状态、JSON精度、刷新和交互；不替代浏览器真实链路 |
 | 隔离浏览器 | [ui.spec](../frontend/tests/browser/ui.spec.ts)，`tools/frontend.py browser` | 桌面尺寸、错误/乱序/会话等受控响应；不是后端真实授权 |
 | 全系统浏览器 | [closed-loop.spec](../frontend/tests/live/closed-loop.spec.ts)，`tools/frontend.py integration` | 真网页/服务/MySQL/Broker/双模拟进程，五类模拟控制；不能证明真实物理动作 |
-| 真实双板 | [双板报告](../docs/testing/reports/TASK-007-双板接入验证报告.md)及[操作指南](../docs/development/guides/编译烧录与联调流程.md) | 真实采集/三项输出/310秒/恢复及用户实物确认；未完成全部算法/长期可靠性 |
-| 可靠性与长期 | [TC-011](../docs/testing/cases/TC-011-断网掉电与稳定性.md)、[TASK-009](../docs/development/tasks/TASK-009-持久化补传与可靠性.md) | 10次掉电、30分钟断网、24小时等仍需适用后续实测，不把短测算作通过 |
+| 真实双板 | 双板报告及[操作指南](../docs/operations/编译烧录与联调流程.md) | 真实采集/三项输出/310秒/恢复及用户实物确认；未完成全部算法/长期可靠性 |
+| 可靠性与长期 | 历史验证、[TASK-009](../docs/tasks/TASK-009-持久化补传与可靠性.md) | 10次掉电、30分钟断网、24小时等仍需适用后续实测，不把短测算作通过 |
 
 ## 2. 常用只读检查与工具回归
 
@@ -53,8 +53,8 @@
 
 ## 4. 报告、证据与判定
 
-[TC索引](../docs/testing/cases/README.md)定义应测业务，报告在[reports](../docs/testing/reports)记录实际版本、命令、场景、结果与限制，原始日志/镜像/脱敏截图在[artifacts](../artifacts/README.md)。同一TC可被多个任务分层覆盖，必须保留“仅软件/仅模拟/实际板端/未执行”的区分。
+TC索引定义应测业务，报告在reports记录实际版本、命令、场景、结果与限制，原始日志/镜像/脱敏截图在[artifacts](../artifacts/README.md)。同一TC可被多个任务分层覆盖，必须保留“仅软件/仅模拟/实际板端/未执行”的区分。
 
 真实输出需要操作号、匹配回执及用户实物确认；在线、观测有效、校时、新鲜度和业务判断分别核验。LWT离线与真实90秒静默分开，受控时钟边界不冒充实际等待。TASK-007已完成基础真实双板，不再说整个项目从未接板；仍没有全量Flash掉电、完整告警/门融合和最终系统验收。
 
-不得保存密码、JWT、ticket、设备凭据或完整原始浏览器HAR/trace。失败证据保留，不修改历史报告或已应用迁移来制造成功。受控报告的结论必须能追溯到[证据规则](../docs/testing/evidence/README.md)。
+不得保存密码、JWT、ticket、设备凭据或完整原始浏览器HAR/trace。失败证据保留，不修改历史报告或已应用迁移来制造成功。受控报告的结论必须能追溯到证据规则。

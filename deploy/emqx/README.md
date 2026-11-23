@@ -2,7 +2,7 @@
 
 日常运行默认连接云端，显式 `--broker-profile local` 仍使用原本地 Mosquitto。云端与输入来源分别选择：`--mode server` 只开后端/网页，`hardware` 等待真实板，`simulator` 启动双模拟节点。浏览器通过后端 REST/WS 获取数据，不持有 MQTT 账号。
 
-完整步骤见[云端部署指南](../../docs/delivery/deployment/EMQX云端部署与迁移.md)，配置结构见[示例](mqtt.cloud.example.json)，检查工具见[cloud_mqtt.py](../../tools/cloud_mqtt.py)。服务器根 CA [emqxsl-ca.crt](emqxsl-ca.crt)为公开证书，来源为 EMQX 官方 https://assets.emqx.com/data/emqxsl-ca.crt ，2026-11-23取得；不是客户端私钥。正式接入时应与自己部署 Overview 下载的 CA 核对，轮换时重新检查有效期与链，再同步本地配置及固件。
+完整步骤见[云端部署指南](../../docs/operations/EMQX云端部署与迁移.md)，配置结构见[示例](mqtt.cloud.example.json)，检查工具见[cloud_mqtt.py](../../tools/cloud_mqtt.py)。服务器根 CA [emqxsl-ca.crt](emqxsl-ca.crt)为公开证书，来源为 EMQX 官方 https://assets.emqx.com/data/emqxsl-ca.crt ，2026-11-23取得；不是客户端私钥。正式接入时应与自己部署 Overview 下载的 CA 核对，轮换时重新检查有效期与链，再同步本地配置及固件。
 
 ## 启动与检查
 

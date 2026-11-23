@@ -2,7 +2,7 @@
 
 > **当前开发方向已更新（2026-11-24）**：下一阶段集中完善**企业物流运营控制台 V2.0**，基于既有 `route` UI，实现运营总览、资产管理、企业直接创建/开始/结束运输、动态 MOCK 地图、一个实物＋多个模拟箱体、八分区详情、告警处置。**骑手/客户/访客端暂停新开发**，原相关代码与报告保留。
 >
-> **先读**：[V2.0 需求规格](docs/requirements/product/企业端物流运营控制台-V2.0-需求规格.md) · [文档入口](docs/README.md) · [CR-007 产品转向](docs/management/changes/CR-007-企业端优先与物流运营控制台.md) · [当前进度](docs/management/当前进度.md)。
+> **先读**：[V2.0 需求规格](docs/requirements/V2-企业端物流运营控制台需求规格.md) · [文档入口](docs/README.md) · [CR-007 产品转向](docs/changes/CR-007-企业端优先与物流运营控制台.md) · [当前进度](docs/project/当前进度.md)。
 >
 > 下文现有项目介绍、历史四角色与旧任务顺序用于理解**已存在的硬件、接口和工程能力**，不是要求继续按三端路线开发；新增企业 V2 需求尚待实施和验收。
 
@@ -10,9 +10,9 @@
 
 ## 默认云端 Broker（2026-11-23）
 
-日常启动默认使用 EMQX Cloud Serverless、TLS8883、独立账号认证，本地 Mosquitto 保留为显式备用。首次使用先按[云端部署与迁移](docs/delivery/deployment/EMQX云端部署与迁移.md)创建实例、配置账号/ACL及本地忽略文件，再执行 `.venv\Scripts\python.exe tools/project.py start --mode server`。网页仍是本机5173；server不要求板在线，hardware等待真实板，simulator需独立代次准备。旧本地模拟启动请显式加 `--broker-profile local`。
+日常启动默认使用 EMQX Cloud Serverless、TLS8883、独立账号认证，本地 Mosquitto 保留为显式备用。首次使用先按[云端部署与迁移](docs/operations/EMQX云端部署与迁移.md)创建实例、配置账号/ACL及本地忽略文件，再执行 `.venv\Scripts\python.exe tools/project.py start --mode server`。网页仍是本机5173；server不要求板在线，hardware等待真实板，simulator需独立代次准备。旧本地模拟启动请显式加 `--broker-profile local`。
 
-当前云端软件、固件与板端验证分别记录于[迁移报告](docs/testing/reports/EMQX云端迁移验证报告.md)。公网TLS由后端、模拟器和固件实现，浏览器不直连MQTT；这不升级完整业务算法或长期可靠性验收。下文原本机/LAN拓扑作为local模式阅读。
+当前云端软件、固件与板端验证分别记录于迁移报告。公网TLS由后端、模拟器和固件实现，浏览器不直连MQTT；这不升级完整业务算法或长期可靠性验收。下文原本机/LAN拓扑作为local模式阅读。
 
 
 SmartBox 是一个基于 **两块 BearPi-HM Nano、Java 后端、MySQL、Vue 和 MQTT** 的物流箱状态监测与控制原型。项目把环境、姿态等设备观测汇总到服务端，再向不同角色展示授权信息，并提供远程输出控制。
@@ -22,9 +22,9 @@ SmartBox 是一个基于 **两块 BearPi-HM Nano、Java 后端、MySQL、Vue 和
 > **当前状态：**软件与模拟闭环已完成，基础真实双板采集和输出闭环已验证；完整业务算法、设备侧 Flash 事件可靠性和最终系统验收仍在后续阶段。项目目前是可演示、可继续开发的原型，不是可直接投入真实物流运营的产品。
 
 - 仓库：[fcj0633/SmartBox](https://github.com/fcj0633/SmartBox)
-- 第一次部署：[开发者完整部署指南](docs/delivery/deployment/开发者完整部署指南.md)
-- 开发板 SDK：[SDK 官网下载与 SmartBox 接入](docs/development/guides/SDK官网下载与接入.md)
-- 当前进度：[项目进度](docs/management/当前进度.md) · [路线图](docs/management/路线图.md)
+- 第一次部署：[开发者完整部署指南](docs/operations/开发者完整部署指南.md)
+- 开发板 SDK：[SDK 官网下载与 SmartBox 接入](docs/operations/SDK官网下载与接入.md)
+- 当前进度：[项目进度](docs/project/当前进度.md) · [路线图](docs/project/路线图.md)
 
 ---
 
@@ -85,7 +85,7 @@ POSE 的采样调度目标为 20ms，即目标频率约 50Hz。这个值是调�
 | ENV | BOX-0001-ENV | 温湿度、光照 | 补光灯、风扇 |
 | POSE | BOX-0001-POSE | 加速度、基础倾角、GPS Mock | 指示灯 |
 
-两块板的身份、能力和采样周期由固件角色配置决定。更多硬件接线、驱动和调用关系见[固件导读](firmware/README.md)及[硬件节点说明](docs/design/hardware/节点与演示动作.md)。
+两块板的身份、能力和采样周期由固件角色配置决定。更多硬件接线、驱动和调用关系见[固件导读](firmware/README.md)及[硬件节点说明](docs/design/节点与演示动作.md)。
 
 ## 3. 系统整体如何工作？
 
@@ -149,7 +149,7 @@ TASK-007 已完成基础实物联调，验证范围包括：
 - 三项真实输出均完成限时动作和自动关闭确认。
 - 双板共同运行约 310 秒，并验证了节点断电、离线判断和 Broker 恢复后的重新连接。
 
-这代表基础真实设备链路已经跑通，不代表全部需求、全部测试用例或长期可靠性已经验收。详细环境、操作、数据和限制见[TASK-007 双板验证报告](docs/testing/reports/TASK-007-双板接入验证报告.md)。
+这代表基础真实设备链路已经跑通，不代表全部需求、全部测试用例或长期可靠性已经验收。详细环境、操作、数据和限制见TASK-007 双板验证报告。
 
 ### 4.2 当前明确尚未完成的内容
 
@@ -161,7 +161,7 @@ TASK-007 已完成基础实物联调，验证范围包括：
 6. **长期可靠性：**资源峰值、长时间运行、反复掉电和断网恢复等系统级验收。
 7. **生产部署：**TLS、证书轮换、生产秘密管理、数据库备份、监控和服务托管等。
 
-这些内容分别进入后续 TASK-008、TASK-009 和 TASK-010，具体以[任务索引](docs/development/tasks/README.md)和[路线图](docs/management/路线图.md)为准。
+这些内容分别进入后续 TASK-008、TASK-009 和 TASK-010，具体以[任务索引](docs/tasks/README.md)和[路线图](docs/project/路线图.md)为准。
 
 ## 5. 一条观测和一条控制命令是怎样流转的？
 
@@ -226,7 +226,7 @@ flowchart TD
 
 权限在服务端检查，不是简单地把网页按钮隐藏起来。外卖用户不会因为修改 URL 或请求参数就获得姿态原始数据、设备诊断或其他角色的控制权限。
 
-完整角色与字段规则见[角色与权限说明](docs/requirements/product/角色与权限.md)。
+完整角色与字段规则见[角色与权限说明](docs/requirements/角色与权限.md)。
 
 ## 7. 技术栈
 
@@ -240,17 +240,17 @@ flowchart TD
 | 模拟器和工具 | Python 3、Paho MQTT | 模拟节点、环境检查、构建、联调和验证 |
 | 接口规范 | JSON Schema、OpenAPI | 约束跨端消息和 HTTP 接口格式 |
 
-具体版本以[工具与依赖版本矩阵](docs/development/environment/工具与依赖版本矩阵.md)、各工程依赖文件和锁文件为准，不建议仅凭本文中的主版本号升级环境。
+具体版本以[工具与依赖版本矩阵](docs/operations/工具与依赖版本矩阵.md)、各工程依赖文件和锁文件为准，不建议仅凭本文中的主版本号升级环境。
 
 ## 8. 快速开始：先运行软件模拟环境
 
 **如果你只是想了解项目、启动网页、查看数据和体验模拟控制，不需要开发板，也不需要先下载 BearPi SDK。**
 
-下面是 Windows + PowerShell 的简化流程。第一次部署需要 MySQL、Mosquitto 和相应开发工具。完整前置条件、安装来源和错误处理见[开发者完整部署指南](docs/delivery/deployment/开发者完整部署指南.md)。
+下面是 Windows + PowerShell 的简化流程。第一次部署需要 MySQL、Mosquitto 和相应开发工具。完整前置条件、安装来源和错误处理见[开发者完整部署指南](docs/operations/开发者完整部署指南.md)。
 
 ### 8.1 准备基础环境
 
-当前已验证的开发环境基线如下，实际使用前请对照[环境清单](docs/development/environment/环境清单.md)和[版本矩阵](docs/development/environment/工具与依赖版本矩阵.md)。
+当前已验证的开发环境基线如下，实际使用前请对照[环境清单](docs/operations/环境清单.md)和[版本矩阵](docs/operations/工具与依赖版本矩阵.md)。
 
 | 工具 | 已验证版本 | 用途 |
 |---|---:|---|
@@ -339,7 +339,7 @@ python -m venv .venv
 
 也可以在启动窗口按 Ctrl+C 正常退出。启动器只管理本轮由它创建的项目进程；如果端口被其他程序占用，会先报错，不会擅自结束其他进程。
 
-如果电脑异常退出，先核对进程和端口，再按[完整部署指南](docs/delivery/deployment/开发者完整部署指南.md)中的恢复步骤处理，不要直接按旧 PID 杀进程。
+如果电脑异常退出，先核对进程和端口，再按[完整部署指南](docs/operations/开发者完整部署指南.md)中的恢复步骤处理，不要直接按旧 PID 杀进程。
 
 ## 9. 真实双板开发与部署
 
@@ -360,15 +360,15 @@ python -m venv .venv
 
 SDK 需要单独获取。官方来源、版本差异、工具链准备、SSH 接入和兼容性检查见：
 
-- [SDK 官网下载与 SmartBox 接入指南](docs/development/guides/SDK官网下载与接入.md)
+- [SDK 官网下载与 SmartBox 接入指南](docs/operations/SDK官网下载与接入.md)
 - [公开依赖来源记录](deploy/sdk/sources.json)
-- [开发者完整部署指南](docs/delivery/deployment/开发者完整部署指南.md)
+- [开发者完整部署指南](docs/operations/开发者完整部署指南.md)
 
 不要默认认为官方仓库最新 master 一定与当前项目兼容。官网获取的新版本必须经过目录检查、双角色构建和链接验证，才能登记为本项目已验证的 SDK 版本。
 
 ### 9.2 配置并构建两个角色固件
 
-完成 SDK、Ubuntu 和 SSH 准备后，在本地填写忽略的硬件配置文件。具体字段、网络要求和安全注意事项见[编译烧录与联调流程](docs/development/guides/编译烧录与联调流程.md)。
+完成 SDK、Ubuntu 和 SSH 准备后，在本地填写忽略的硬件配置文件。具体字段、网络要求和安全注意事项见[编译烧录与联调流程](docs/operations/编译烧录与联调流程.md)。
 
 首次准备真实硬件配置时，需要检查并生成本地配置及启动代次预留：
 
@@ -389,7 +389,7 @@ SDK 需要单独获取。官方来源、版本差异、工具链准备、SSH 接
 
 ### 9.3 烧录并启动真实双板
 
-分别选择 ENV 和 POSE 对应的固件镜像，按照[烧录与联调指南](docs/development/guides/编译烧录与联调流程.md)完成串口识别、烧录、复位和启动检查。
+分别选择 ENV 和 POSE 对应的固件镜像，按照[烧录与联调指南](docs/operations/编译烧录与联调流程.md)完成串口识别、烧录、复位和启动检查。
 
 停止同身份的模拟节点后，启动真实硬件模式：
 
@@ -414,7 +414,7 @@ SmartBox/
 ├── contracts/                # MQTT、HTTP、WebSocket 契约及有效定义
 ├── deploy/                   # 开发拓扑、Mosquitto 模板和 SDK 来源记录
 ├── tests/                    # 跨端、固件组件及工具测试
-├── docs/                     # 需求、设计、任务、部署、验收和报告
+├── docs/                     # 需求、设计、任务、运维、变更与项目演进
 ├── artifacts/                # 本地构建产物、日志和证据；默认忽略
 └── secrets/                  # 本机密码、私钥和配置；不提交 Git
 ~~~
@@ -440,22 +440,22 @@ SmartBox/
 | 顺序 | 阅读内容 | 需要理解的问题 |
 |---|---|---|
 | 1 | 本 README | 项目目标、硬件分工、系统结构和当前边界 |
-| 2 | [产品范围与场景](docs/requirements/product/产品范围与场景.md) | 系统服务什么场景，明确不做什么 |
-| 3 | [角色与权限](docs/requirements/product/角色与权限.md) | 不同用户能查看什么、能操作什么 |
-| 4 | [系统总体设计](docs/design/architecture/系统总体设计.md) | 设备、Broker、后端、数据库和网页如何协作 |
-| 5 | [模块边界与数据流](docs/design/architecture/模块边界与数据流.md) | 一条数据经过哪些模块，模块之间如何分工 |
+| 2 | [产品范围与场景](docs/requirements/产品范围与场景.md) | 系统服务什么场景，明确不做什么 |
+| 3 | [角色与权限](docs/requirements/角色与权限.md) | 不同用户能查看什么、能操作什么 |
+| 4 | [系统总体设计](docs/design/系统总体设计.md) | 设备、Broker、后端、数据库和网页如何协作 |
+| 5 | [模块边界与数据流](docs/design/模块边界与数据流.md) | 一条数据经过哪些模块，模块之间如何分工 |
 | 6 | 对应工程 README | 进入固件、后端或前端，理解核心调用关系 |
 | 7 | [当前有效契约](contracts/effective/README.md) | 核对跨端消息和接口的实际字段要求 |
-| 8 | [任务索引](docs/development/tasks/README.md) | 了解已完成和待开发的工作，不重复做已完成任务 |
-| 9 | [测试体系](tests/README.md) 和测试报告 | 了解如何验证，以及哪些结论有真实证据 |
+| 8 | [任务索引](docs/tasks/README.md) | 了解已完成和待开发的工作，不重复做已完成任务 |
+| 9 | [测试体系](tests/README.md) | 了解代码如何验证；历史测试文档不再单独维护 |
 
 项目的需求、设计、开发和测试不是同一类文档：
 
 - **需求（REQ）：**规定系统应该具备什么行为。
 - **设计（Design）：**解释准备怎样实现。
 - **任务（TASK）：**说明某一阶段实际要交付的工作。
-- **测试用例（TC）：**规定具体场景和通过标准。
-- **测试报告：**记录某次执行的环境、结果、失败和限制。
+- **代码测试：**保留在 tests/ 与各工程中，执行实际验证。
+- **验证摘要：**写在对应 TASK 和当前进度中，不另建测试文档目录。
 
 一个 TASK 完成，不代表整个业务模块或全部需求已经验收。涉及协议字段时以当前有效契约为准；涉及业务规则变更时按项目的 CR 流程处理，不要只修改 README 来改变规则。
 
@@ -504,7 +504,7 @@ git diff --check
 | P4：持久化与可靠性 | 待开发 | 完成设备侧 Flash 事件存储、补传、掉电恢复和资源验证 |
 | P5：完整交付 | 待开发 | 完善历史/轨迹/导出页面，完成系统级回归和交付 |
 
-详细进度和依赖关系以[当前进度](docs/management/当前进度.md)、[路线图](docs/management/路线图.md)及[任务索引](docs/development/tasks/README.md)为准。
+详细进度和依赖关系以[当前进度](docs/project/当前进度.md)、[路线图](docs/project/路线图.md)及[任务索引](docs/tasks/README.md)为准。
 
 ---
 
@@ -512,15 +512,14 @@ git diff --check
 
 - [BearPi-HM Nano 官方开发板介绍](https://www.bearpi.cn/dev_board/bearpi/hm/nano/)
 - [BearPi-HM Nano 官方源码仓库](https://gitee.com/bearpi/bearpi-hm_nano)
-- [开发者完整部署指南](docs/delivery/deployment/开发者完整部署指南.md)
-- [SDK 官网下载与接入](docs/development/guides/SDK官网下载与接入.md)
-- [编译、烧录与联调流程](docs/development/guides/编译烧录与联调流程.md)
-- [测试报告目录](docs/testing/reports)
-- [需求追踪矩阵](docs/management/需求追踪矩阵.md)
+- [开发者完整部署指南](docs/operations/开发者完整部署指南.md)
+- [SDK 官网下载与接入](docs/operations/SDK官网下载与接入.md)
+- [编译、烧录与联调流程](docs/operations/编译烧录与联调流程.md)
+- [需求追踪矩阵](docs/project/需求追踪矩阵.md)
 
 
-TASK-008最新结果见[实施报告](docs/testing/reports/TASK-008-核心规则与业务视图实施报告.md)：软件和已执行板端通过，用户跳过余项后本轮交付完成（跳过项未验收）；TASK-009后续另行准备，不把跳过项写为已验证。
+TASK-008最新结果见实施报告：软件和已执行板端通过，用户跳过余项后本轮交付完成（跳过项未验收）；TASK-009后续另行准备，不把跳过项写为已验证。
 
 ## 企业、骑手与访客运输DEMO
 
-TASK-011/012/013已交付资产分配、运输事务及三端API页面。登录后登记管理员进入企业页，骑手进入工作台；普通查看者通过公开track输入运输编号和验证码，只读单任务可信数据。实际三端链路使用独立模拟节点验证，真实板运输、Flash补传与生产安全另验。见[三端运行指南](docs/development/guides/三端运输业务启动与验收.md)及[实际报告](docs/testing/reports/TASK-013-三端运输业务联调报告.md)。
+TASK-011/012/013已交付资产分配、运输事务及三端API页面。登录后登记管理员进入企业页，骑手进入工作台；普通查看者通过公开track输入运输编号和验证码，只读单任务可信数据。实际三端链路使用独立模拟节点验证，真实板运输、Flash补传与生产安全另验。见[三端运行指南](docs/history/三端运输业务启动与验收.md)及实际报告。

@@ -23,8 +23,7 @@ class DocumentationChecks(unittest.TestCase):
         # Copy only the documentation fixture and its required directories, never Git or secrets.
         cls.seed.mkdir()
         for directory in checker.REQUIRED_DIRS:(cls.seed/directory).mkdir(parents=True,exist_ok=True)
-        for p in ROOT.rglob("*.md"):
-            if any(x in p.relative_to(ROOT).parts for x in (".git","artifacts","node_modules","target",".venv")):continue
+        for p in checker.markdown_files(ROOT):
             q=cls.seed/p.relative_to(ROOT);q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
         shutil.copytree(ROOT/"backend/src",cls.seed/"backend/src",dirs_exist_ok=True)
         shutil.copy2(ROOT/"backend/pom.xml",cls.seed/"backend/pom.xml")
@@ -168,14 +167,9 @@ class DocumentationChecks(unittest.TestCase):
         self.fail_with("Orphan trace")
 
     def test_reverse_task_association_missing(self):
-        p=next((self.root/"docs/development/tasks").glob("TASK-007-*.md")).relative_to(self.root).as_posix()
+        p=next((self.root/"docs/tasks").glob("TASK-007-*.md")).relative_to(self.root).as_posix()
         self.write(p,re.sub(r"^\| 需求 \|.*$","| 需求 | |",self.text(p),flags=re.M))
         self.fail_with("Reverse TASK")
-
-    def test_reverse_test_association_missing(self):
-        p=next((self.root/"docs/testing/cases").glob("TC-001-*.md")).relative_to(self.root).as_posix()
-        self.write(p,re.sub(r"^\| 需求 \|.*$","| 需求 | |",self.text(p),flags=re.M))
-        self.fail_with("Reverse TC")
 
     def test_duplicate_index_entry(self):
         p=checker.INDEX;line=next(x for x in self.text(p).splitlines() if x.startswith("| MOD-01 |"))
@@ -192,8 +186,8 @@ class DocumentationChecks(unittest.TestCase):
         self.fail_with("Legacy reference")
 
     def test_current_file_cannot_hide_in_history_directory(self):
-        p="docs/testing/reports/new-report.md"
-        self.write(p,"# Current report\n\nREQ-"+"001\n")
+        p="docs/history/new-note.md"
+        self.write(p,"# Current note\n\nREQ-"+"001\n")
         self.fail_with("Legacy reference")
 
     def test_immutable_history_bytes(self):

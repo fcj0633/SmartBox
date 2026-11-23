@@ -4,12 +4,12 @@
 
 [project.py](project.py)默认 `--broker-profile cloud --mode server`，仅启动后端/网页；hardware和simulator选择输入来源，local需显式指定。云端模式不启动/停止Mosquitto、不要求本机1883空闲。
 
-[broker_profiles.py](broker_profiles.py)统一云端配置、TLS信任与后端环境；[cloud_mqtt.py](cloud_mqtt.py)支持prepare、reserve-state、check及有明确同意参数的ACL smoke；[cloud_integration.py](cloud_integration.py)在smartbox_test与18080/15173验证真实云闭环，可加 `--browser`。两种云端主动探测前必须停同身份业务客户端；工具不管理/删除云实例。详细权限、写入、状态预留、配置和回退见[云端指南](../docs/delivery/deployment/EMQX云端部署与迁移.md)。
+[broker_profiles.py](broker_profiles.py)统一云端配置、TLS信任与后端环境；[cloud_mqtt.py](cloud_mqtt.py)支持prepare、reserve-state、check及有明确同意参数的ACL smoke；[cloud_integration.py](cloud_integration.py)在smartbox_test与18080/15173验证真实云闭环，可加 `--browser`。两种云端主动探测前必须停同身份业务客户端；工具不管理/删除云实例。详细权限、写入、状态预留、配置和回退见[云端指南](../docs/operations/EMQX云端部署与迁移.md)。
 
 
 ## 新环境与完整部署
 
-先读[完整部署指南](../docs/delivery/deployment/开发者完整部署指南.md)。以下为新增可复用入口；真实密码不使用命令行参数。
+先读[完整部署指南](../docs/operations/开发者完整部署指南.md)。以下为新增可复用入口；真实密码不使用命令行参数。
 
 | 入口 | 作用 | 写入与限制 |
 |---|---|---|
@@ -67,7 +67,7 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 
 大写为占位符，先按本地连接说明替换；映射可读不等于可执行Ubuntu命令。预览不创建目录/锁/状态，应用时使用受控清单和三方指纹；SDK人工改动、未知同名目录、路径链接或并发占用需先定位。同步恢复入口使用`--restore-entry --apply`，同步中断恢复用`--recover-sync --apply`，不是删除整个SDK。
 
-官方脚本会清空产品输出并改写厂商子树，不能绕过完整工具直接执行再假称环境未变。每角色立即保存源码快照、工具版本、日志、应用符号和镜像SHA256；恢复按字节及Unix权限核对。详见[固件导读](../firmware/README.md)、[编译烧录指南](../docs/development/guides/编译烧录与联调流程.md)。
+官方脚本会清空产品输出并改写厂商子树，不能绕过完整工具直接执行再假称环境未变。每角色立即保存源码快照、工具版本、日志、应用符号和镜像SHA256；恢复按字节及Unix权限核对。详见[固件导读](../firmware/README.md)、[编译烧录指南](../docs/operations/编译烧录与联调流程.md)。
 
 ## 3. MQTT模拟器与专用Broker
 
@@ -77,7 +77,7 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 
 ## 4. 后端构建、初始化与启动
 
-[backend.py](backend.py)提供以下操作，详情见[后端导读](../backend/README.md)与[初始化指南](../docs/development/guides/后端数据库初始化与启动.md)：
+[backend.py](backend.py)提供以下操作，详情见[后端导读](../backend/README.md)与[初始化指南](../docs/operations/后端数据库初始化与启动.md)：
 
 | 操作 | 作用与副作用 |
 |---|---|
@@ -99,11 +99,11 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 .venv/Scripts/python tools/live_integration.py --allow-test-reset --run-dir artifacts/server/NEW-RUN
 ```
 
-按[服务端指南](../docs/development/guides/服务端闭环启动与验收.md)准备test配置；此入口只操作校验过的smartbox_test及自身进程，需新目录和空闲端口。可用`--scenario dispatch-recovery`定向复验，但不替代完整主场景。故障屏障由受限测试配置启用，不新增测试HTTP接口，不停共享MySQL。
+按[服务端指南](../docs/operations/服务端闭环启动与验收.md)准备test配置；此入口只操作校验过的smartbox_test及自身进程，需新目录和空闲端口。可用`--scenario dispatch-recovery`定向复验，但不替代完整主场景。故障屏障由受限测试配置启用，不新增测试HTTP接口，不停共享MySQL。
 
 ## 6. 网页与浏览器
 
-[frontend.py](frontend.py)统一处理Windows兼容的Node/npm入口和前端环境隔离，避免本地秘密变成公开VITE变量。详见[前端导读](../frontend/README.md)及[网页指南](../docs/development/guides/网页启动与首轮验收.md)。
+[frontend.py](frontend.py)统一处理Windows兼容的Node/npm入口和前端环境隔离，避免本地秘密变成公开VITE变量。详见[前端导读](../frontend/README.md)及[网页指南](../docs/history/网页启动与首轮验收.md)。
 
 | 操作 | 作用／会写入或启动什么 |
 |---|---|
@@ -121,11 +121,11 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 
 [capture_serial.ps1](capture_serial.ps1)以115200只读指定COM，要求新artifacts输出和限定时长，不发送数据/自动复位；烧录工具需先退出释放端口。每次插拔重新识别目标，不能把COM号当角色身份。硬件模式显式使用一个LAN IPv4和回环监听，原本机安全限制保留，不自动关闭防火墙。
 
-工具代码可验证协议和组件，但HiBurn选择文件、复位、断电接板、倾斜及实物观察仍需用户按[固件指南](../docs/development/guides/编译烧录与联调流程.md)完成，编译/烧录成功不等于实际动作已确认。
+工具代码可验证协议和组件，但HiBurn选择文件、复位、断电接板、倾斜及实物观察仍需用户按[固件指南](../docs/operations/编译烧录与联调流程.md)完成，编译/烧录成功不等于实际动作已确认。
 
 ## 8. 结果与退出约定
 
-证据写入新的[artifacts运行目录](../artifacts/README.md)，受控[报告](../docs/testing/reports)保存脱敏摘要和索引；成功返回0、失败非零，缺必需依赖不静默跳过。配置、身份状态、密码散列及日志不入Git。自动入口只终止自己持有的子进程，异常或中断后先核对PID/路径/端口和恢复清单，不按端口号随意杀进程或删除备份。
+证据写入新的[artifacts运行目录](../artifacts/README.md)，受控报告保存脱敏摘要和索引；成功返回0、失败非零，缺必需依赖不静默跳过。配置、身份状态、密码散列及日志不入Git。自动入口只终止自己持有的子进程，异常或中断后先核对PID/路径/端口和恢复清单，不按端口号随意杀进程或删除备份。
 
 ## 9. TASK-008规则检查与隔离联调
 
@@ -139,16 +139,16 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 
 `test --profile test --allow-test-reset`会清理显式项目测试库，执行Maven真实集成；不接受开发库清理。`smoke --profile dev|test --run-dir artifacts/新的目录`启动自有实例，执行真实分配和收回，保留账号及旧授权，最后收回本轮自己的分配、停止自有进程。遇到既有分配则拒绝覆盖，失败需检查摘要；不保证清理未知并发改动。
 
-[check_assets_contracts.py](check_assets_contracts.py)只读检查四个增量接口、JSON Schema、局部引用和正反样例，与原冻结11接口校验分开执行。详细前提、配置和命令见[后端初始化指南](../docs/development/guides/后端数据库初始化与启动.md)。
+[check_assets_contracts.py](check_assets_contracts.py)只读检查四个增量接口、JSON Schema、局部引用和正反样例，与原冻结11接口校验分开执行。详细前提、配置和命令见[后端初始化指南](../docs/operations/后端数据库初始化与启动.md)。
 
 ## 骑手运输接口（TASK-012）
 
 [check_transport_contracts.py](check_transport_contracts.py)只读检查6个骑手运输增量接口、JSON Schema、局部引用和正反样例；[契约说明](../contracts/http/transport/README.md)与[回归测试](../tests/test_transport_contracts.py)分开维护。原冻结11接口仍由`check_contracts.py`检查。
 
-运输真实集成复用`assets.py test --profile test --allow-test-reset`（Maven `TransportIT`），迁移/运行复用`assets.py bootstrap/run --profile dev`；开始运输需要真实必需节点在线，测试夹具只在 `TransportIT` 中使用，开发库不得伪造在线。完整结果见[TASK-012报告](../docs/testing/reports/TASK-012-运输任务事务后端验证报告.md)。
+运输真实集成复用`assets.py test --profile test --allow-test-reset`（Maven `TransportIT`），迁移/运行复用`assets.py bootstrap/run --profile dev`；开始运输需要真实必需节点在线，测试夹具只在 `TransportIT` 中使用，开发库不得伪造在线。完整结果见TASK-012报告。
 
 ## 三端运输联调工具
 
-[transport_view.py](transport_view.py)要求显式test、清理同意和新的artifacts目录，使用1883/18080/15173，启动并清理自有Broker、后端、双模拟节点、网页与浏览器；保留8080/5173及共享MySQL。它会重置smartbox_test，拒绝开发库；模拟事件经真实MQTT输入，不冒充固件可靠事件。见[指南](../docs/development/guides/三端运输业务启动与验收.md)。
+[transport_view.py](transport_view.py)要求显式test、清理同意和新的artifacts目录，使用1883/18080/15173，启动并清理自有Broker、后端、双模拟节点、网页与浏览器；保留8080/5173及共享MySQL。它会重置smartbox_test，拒绝开发库；模拟事件经真实MQTT输入，不冒充固件可靠事件。见[指南](../docs/history/三端运输业务启动与验收.md)。
 
 [check_transport_view_contracts.py](check_transport_view_contracts.py)只读校验8接口、本地Schema/OpenAPI、认证边界和样例，原冻结/资产/运输契约各自保留检查入口。

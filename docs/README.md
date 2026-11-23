@@ -1,41 +1,39 @@
 # SmartBox 文档入口
 
-> **当前开发方向：企业端物流运营控制台 V2.0。** 骑手端、客户/访客端暂不作为新阶段目标；TASK-011～014 的已实现代码和验证资料保留供兼容与参考。**需求目标不等于已实现**。
+> **当前方向：企业端物流运营控制台 V2.0。** 需求目标不等于已实现；真实设备、模拟器和历史文档必须区分。
 
-## 从这里开始（只需这 5 个入口）
+## 1. 当前在做什么
 
-| 你想做什么 | 首先阅读 | 说明 |
-|---|---|---|
-| **理解下一版要开发什么** | [企业端 V2.0 需求规格](requirements/product/企业端物流运营控制台-V2.0-需求规格.md) | **当前产品主入口**：五个主页面、八分区详情、企业运输、模拟地图、1＋5 箱体、告警 |
-| 理解本次为什么改方向 | [CR-007 产品转向](management/changes/CR-007-企业端优先与物流运营控制台.md) | 旧三端范围如何暂停，哪些技术/历史仍保留 |
-| 启动项目 | [开发者完整部署指南](delivery/deployment/开发者完整部署指南.md) | 环境、MySQL、服务端、前端、真实板与模拟节点 |
-| 找真实代码/接口 | [后端](../backend/README.md) · [前端](../frontend/README.md) · [有效契约](../contracts/effective/README.md) | 旧接口仍需兼容；新需求尚待实现 |
-| 查任务和实际进度 | [任务索引](development/tasks/README.md) · [当前进度](management/当前进度.md) | 已交付、待做、跳过测试分开阅读 |
-| 看企业端首切片设计/实现 | [TASK-015 企业端运营控制台首切片](development/tasks/TASK-015-企业端运营控制台首切片.md) | 运营总览/运输/模拟地图/只读资产与告警；设计、代码与未验证边界同页 |
-| 看资产/场景、箱体详情与控制 | [TASK-016 企业模拟资产与场景管理](development/tasks/TASK-016-企业模拟资产与场景管理.md) / [TASK-017 企业箱体详情八分区](development/tasks/TASK-017-企业箱体详情八分区.md) / [TASK-018 企业控制中心](development/tasks/TASK-018-企业控制中心.md) | TASK-016 资产/场景；TASK-017 八分区；TASK-018 控制提交/回执；真实设备 ACK/生产未验收 |
-
-## 按专项定位，不从旧草案开始
-
-| 专题 | 入口 |
+| 想知道 | 打开 |
 |---|---|
-| 物流地图 UI 原型 | [企业 route 原型](../frontend/design-exploration/README.md) · [原型源码](../frontend/design-exploration/src/App.vue) |
-| 监测/设备/控制现有规则 | [模块需求](requirements/README.md) · [总体架构](design/architecture/系统总体设计.md) |
-| 核心 MQTT/HTTP/WS 契约 | [effective 契约](../contracts/effective/README.md) · [HTTP 契约](../contracts/http/v1.md) |
-| 模拟器与实物验证 | [模拟器](../tools/simulator/README.md) · [固件](../firmware/README.md) · [设备报告](testing/reports/TASK-007-双板接入验证报告.md) |
-| 数据库/技术设计 | [后端数据模型](design/backend/后端模块与数据模型.md) · [服务端初始化](development/guides/后端数据库初始化与启动.md) |
-| 测试与事实 | [TC 目录](testing/cases/README.md) · [测试策略](testing/测试策略.md) · [测试报告](testing/reports/) |
-| 开发约定 | [AGENTS](../AGENTS.md) · [文档协作指南](development/guides/开发与文档协作.md) |
+| 当前产品范围与功能 | [企业端 V2.0 需求规格](requirements/V2-企业端物流运营控制台需求规格.md) |
+| 为什么转向企业端 | [CR-007 产品转向](changes/CR-007-企业端优先与物流运营控制台.md) |
+| 现在做到哪里 | [当前进度](project/当前进度.md) · [任务索引](tasks/README.md) |
 
-## 历史文档怎么读
+## 2. 它怎么变成现在这样
 
-- [原始需求](requirements/baseline/项目原始需求-v1.0.md)、[BL-002 需求索引](requirements/README.md) 与[需求追踪矩阵](management/需求追踪矩阵.md)：**保留的正式设备与历史需求追踪**，不要假定其三端业务仍是 V2 的产品交付重点。
-- [CR-006](management/changes/CR-006-多角色物流箱与运输任务平台.md)、[多角色 V1.1 说明](requirements/SmartBox多角色物流箱管理平台需求变更说明.md)、[TASK-011～014](development/tasks/README.md)：上一阶段三端设计及实际开发证据，**不是本轮实施清单**。
-- [旧路线图](management/路线图.md)、[历史发布](delivery/releases/)、[实测报告](testing/reports/)：用于追踪项目演进，旧报告只反映当时版本，不被 V2 文档修改。
-- [设计 ADR](management/decisions/)、[变更 CR](management/changes/) 与[详细测试](testing/)：需要定位某项历史决策、协议或故障时再读，不作为新人的强制阅读顺序。
+| 想知道 | 打开 |
+|---|---|
+| 需求/实现变化时间线 | [项目演进](project/项目演进.md) |
+| 历史/当前实现对照 | [项目演进](project/项目演进.md#历史与当前实现对照) |
+| 历史需求、旧三端、旧发布 | [历史资料索引](history/README.md) |
+| 需求追踪 | [需求追踪矩阵](project/需求追踪矩阵.md) |
+
+## 3. 按类型查文档
+
+| 类型 | 入口 |
+|---|---|
+| 需求 | [需求索引](requirements/README.md) · 系统总纲、七个模块、NFR、V2 |
+| 设计 | [设计索引](design/README.md) |
+| 任务 | [任务索引](tasks/README.md) |
+| 启动/部署/环境/排障 | [运维索引](operations/README.md) |
+| CR/ADR | [变更与决策索引](changes/README.md) |
+| 代码/契约 | [后端](../backend/README.md) · [前端](../frontend/README.md) · [有效契约](../contracts/effective/README.md) |
 
 ## 文档维护原则
 
-1. **产品需求只在 V2 文档描述本轮范围**；实施细节留给后续设计和 TASK，README 不复制完整需求。
-2. 旧编号和历史报告不可随意删除或挪路径，避免破坏追踪与冻结证据；不重要的旧草案退出主导航，而非伪装成现行。
-3. 文档链接、现行与历史标识要准确；修改后运行 `python tools/check_docs.py`。本 README 只导航，不代表已执行检查或完成业务。
-4. 未实现的新能力标“待开发”；真实硬件、模拟器和地图 MOCK 必须严格区分。
+1. 当前文档放在 `requirements/design/tasks/operations/changes/project`；历史资料只放 `history/`。
+2. 目录最多两级，二级目录不再建子目录；文件名用 `MOD-`、`NFR-`、`TASK-`、`CR-`、`ADR-` 前缀识别。
+3. 历史不重写；变更过程统一记录在 [项目演进](project/项目演进.md)，当前状态看 [当前进度](project/当前进度.md)。
+4. 测试用例/报告不再作为独立文档维护；代码测试保留，验证结论保留在 TASK 和当前进度中。
+5. 修改后运行 `python tools/check_docs.py`；文档通过不代表硬件或业务验收通过。

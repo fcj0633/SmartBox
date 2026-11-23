@@ -1,0 +1,65 @@
+# 固件架构与 SDK 接入
+
+关联 REQ-M01-001、REQ-M01-002、REQ-M01-003、REQ-M01-004、REQ-M01-005、REQ-M01-006、REQ-M01-007、REQ-M01-008、REQ-M01-009、REQ-M01-010、REQ-M01-011、REQ-M02-001、REQ-M02-002、REQ-M02-003、REQ-M02-004、REQ-M02-005、REQ-M02-006、REQ-M03-006、REQ-M01-012、REQ-M01-013、REQ-M01-014、REQ-M04-001、REQ-M04-002、REQ-M04-003、REQ-M04-004、REQ-M04-005、REQ-M04-006、REQ-M04-007、REQ-M04-008、REQ-M03-001、REQ-M03-002、REQ-M03-003、REQ-M03-004、REQ-M03-005、REQ-M03-006、REQ-M03-007、REQ-M03-008；TASK-002、007～009。
+
+app 装配任务和角色，domain承接规则入口并在后续阶段实现纯规则，drivers先提供Mock后接真实板件，services包含事件/网络/配置/GPS，include定义公共类型，build存GN接入。
+
+SensorFrame 内部包含有效位、单位、boot_id、uptime 和可空 UTC；事件身份完整。gps_get_fix 隔离 Mock 和未来真实驱动，不让 SDK 全局变量穿透到业务层。
+
+采集/规则按周期执行，有界事件送存储任务，网络只发送已承诺持久事件。队列满报告背压和损失，不阻塞姿态采样。输出默认关闭并使用单调时间定时关闭。
+
+P1 先实现角色骨架、模拟 HAL 和接口，不承诺 KV 持久可靠。TASK-009 依据 KV 容量、擦写和掉电实测，经 ADR 确定布局与恢复方案，禁止使用未知 Flash 地址。
+
+SDK sample 下新增 logistics_box；一次只构建一个角色，构建后立即归档角色产物。保留当前 study_kernel_01_thread 选择和恢复方式，不删除旧实验。P0 不改入口。
+
+软件规则可用模拟采样验证；旧 CMSIS 接口需实际链接，不以头文件声明作为可用证据。
+
+## 业务模块与需求映射
+
+六模块是跨端业务边界，不改变本文既有技术层次、包划分、部署或数据模型。节点在线归MOD-03，箱体综合状态归MOD-05；防护业务归MOD-02，通用通信归MOD-03，事件可靠性归MOD-04，授权归MOD-06。
+
+| MOD | 需求 |
+|---|---|
+| MOD-01 | [REQ-M01-001](../requirements/MOD-01-物流箱运行监测.md#req-m01-001) |
+| MOD-01 | [REQ-M01-002](../requirements/MOD-01-物流箱运行监测.md#req-m01-002) |
+| MOD-01 | [REQ-M01-003](../requirements/MOD-01-物流箱运行监测.md#req-m01-003) |
+| MOD-01 | [REQ-M01-004](../requirements/MOD-01-物流箱运行监测.md#req-m01-004) |
+| MOD-01 | [REQ-M01-005](../requirements/MOD-01-物流箱运行监测.md#req-m01-005) |
+| MOD-01 | [REQ-M01-006](../requirements/MOD-01-物流箱运行监测.md#req-m01-006) |
+| MOD-01 | [REQ-M01-007](../requirements/MOD-01-物流箱运行监测.md#req-m01-007) |
+| MOD-01 | [REQ-M01-008](../requirements/MOD-01-物流箱运行监测.md#req-m01-008) |
+| MOD-01 | [REQ-M01-009](../requirements/MOD-01-物流箱运行监测.md#req-m01-009) |
+| MOD-01 | [REQ-M01-012](../requirements/MOD-01-物流箱运行监测.md#req-m01-012) |
+| MOD-01 | [REQ-M01-013](../requirements/MOD-01-物流箱运行监测.md#req-m01-013) |
+| MOD-01 | [REQ-M01-014](../requirements/MOD-01-物流箱运行监测.md#req-m01-014) |
+| MOD-02 | [REQ-M02-001](../requirements/MOD-02-安全防护与哨兵.md#req-m02-001) |
+| MOD-02 | [REQ-M02-003](../requirements/MOD-02-安全防护与哨兵.md#req-m02-003) |
+| MOD-02 | [REQ-M02-004](../requirements/MOD-02-安全防护与哨兵.md#req-m02-004) |
+| MOD-02 | [REQ-M02-005](../requirements/MOD-02-安全防护与哨兵.md#req-m02-005) |
+| MOD-02 | [REQ-M02-006](../requirements/MOD-02-安全防护与哨兵.md#req-m02-006) |
+| MOD-03 | [REQ-M03-002](../requirements/MOD-03-设备接入与控制.md#req-m03-002) |
+| MOD-03 | [REQ-M03-003](../requirements/MOD-03-设备接入与控制.md#req-m03-003) |
+| MOD-03 | [REQ-M03-004](../requirements/MOD-03-设备接入与控制.md#req-m03-004) |
+| MOD-03 | [REQ-M03-005](../requirements/MOD-03-设备接入与控制.md#req-m03-005) |
+| MOD-03 | [REQ-M03-006](../requirements/MOD-03-设备接入与控制.md#req-m03-006) |
+| MOD-03 | [REQ-M03-007](../requirements/MOD-03-设备接入与控制.md#req-m03-007) |
+| MOD-03 | [REQ-M03-008](../requirements/MOD-03-设备接入与控制.md#req-m03-008) |
+| MOD-04 | [REQ-M04-001](../requirements/MOD-04-事件管理与可靠性.md#req-m04-001) |
+| MOD-04 | [REQ-M04-002](../requirements/MOD-04-事件管理与可靠性.md#req-m04-002) |
+| MOD-04 | [REQ-M04-005](../requirements/MOD-04-事件管理与可靠性.md#req-m04-005) |
+| MOD-04 | [REQ-M04-006](../requirements/MOD-04-事件管理与可靠性.md#req-m04-006) |
+| MOD-04 | [REQ-M04-007](../requirements/MOD-04-事件管理与可靠性.md#req-m04-007) |
+
+全局质量：[NFR-001](../requirements/NFR-001-性能与资源约束.md)、[NFR-002](../requirements/NFR-002-可靠性与数据完整性.md)。
+
+## TASK-002详细设计入口
+
+骨架目录、公共接口、三线程/工作队列、启动失败处理、互斥角色GN、默认预览同步、构建归档及入口恢复统一维护在[TASK-002](../tasks/TASK-002-双角色固件骨架.md)，本文不重复详细参数。当前由用户独立开发；当前已交付源码及双角色实际SDK编译链接与环境恢复证据，见报告；未执行板端运行。P1骨架使用Mock及禁用网络桩，不声称已有持久事件或真实MQTT发送；前文持久化后发送为后续目标。
+
+## TASK-007真实端口与网络接入
+
+双板驱动、时间质量、网络线程持有MQTT、有界缓冲、输出回执和SDK核验门槛统一见[TASK-007](../tasks/TASK-007-双板实际采集与输出接入.md)。沿用现有分层与受控构建，真实/Mock来源分别表达；原始读数不代表业务规则已实现。完整算法归TASK-008，Flash可靠性归TASK-009。当前已按该设计完成基础真实驱动、网络与output板端闭环；实际结果见任务7报告。完整业务算法与事件Flash可靠性仍待后续，TASK-002的Mock边界保留为其当时交付事实。
+
+## TASK-008规则实现入口
+
+[TASK-008](../tasks/TASK-008-核心规则与业务视图.md)集中维护环境/姿态/门证据/围栏/哨兵规则、事件候选生成、`box_state`抑制窗口及profile/gps_mode/calibrate/sentry命令处理。计划在`firmware/domain/sb_rules.c`集中规则状态，扩展`sb_types.h`、`sb_wire`、`sb_event_buffer`；规则只依赖时钟/配置/快照，可宿主测试，不阻塞采样。事件候选在TASK-008仍是易失、`storage=DEGRADED`，**真实板`event`发布不在本任务**；Flash持久、发送/确认、跨重启补传和掉电一致性归TASK-009。当前固件仍只执行`output`，本文入口不代表其他命令或事件发送已实现。
