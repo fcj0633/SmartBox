@@ -1,5 +1,13 @@
 # SmartBox：物流箱监测与控制原型
 
+> **当前开发方向已更新（2026-11-24）**：下一阶段集中完善**企业物流运营控制台 V2.0**，基于既有 `route` UI，实现运营总览、资产管理、企业直接创建/开始/结束运输、动态 MOCK 地图、一个实物＋多个模拟箱体、八分区详情、告警处置。**骑手/客户/访客端暂停新开发**，原相关代码与报告保留。
+>
+> **先读**：[V2.0 需求规格](docs/requirements/product/企业端物流运营控制台-V2.0-需求规格.md) · [文档入口](docs/README.md) · [CR-007 产品转向](docs/management/changes/CR-007-企业端优先与物流运营控制台.md) · [当前进度](docs/management/当前进度.md)。
+>
+> 下文现有项目介绍、历史四角色与旧任务顺序用于理解**已存在的硬件、接口和工程能力**，不是要求继续按三端路线开发；新增企业 V2 需求尚待实施和验收。
+
+---
+
 ## 默认云端 Broker（2026-11-23）
 
 日常启动默认使用 EMQX Cloud Serverless、TLS8883、独立账号认证，本地 Mosquitto 保留为显式备用。首次使用先按[云端部署与迁移](docs/delivery/deployment/EMQX云端部署与迁移.md)创建实例、配置账号/ACL及本地忽略文件，再执行 `.venv\Scripts\python.exe tools/project.py start --mode server`。网页仍是本机5173；server不要求板在线，hardware等待真实板，simulator需独立代次准备。旧本地模拟启动请显式加 `--broker-profile local`。
