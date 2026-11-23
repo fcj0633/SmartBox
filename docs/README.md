@@ -11,6 +11,7 @@
 | 启动项目 | [开发者完整部署指南](delivery/deployment/开发者完整部署指南.md) | 环境、MySQL、服务端、前端、真实板与模拟节点 |
 | 找真实代码/接口 | [后端](../backend/README.md) · [前端](../frontend/README.md) · [有效契约](../contracts/effective/README.md) | 旧接口仍需兼容；新需求尚待实现 |
 | 查任务和实际进度 | [任务索引](development/tasks/README.md) · [当前进度](management/当前进度.md) | 已交付、待做、跳过测试分开阅读 |
+| 看企业端首切片设计/实现 | [TASK-015 企业端运营控制台首切片](development/tasks/TASK-015-企业端运营控制台首切片.md) | 运营总览/运输/模拟地图/只读资产与告警；设计、代码与未验证边界同页 |
 
 ## 按专项定位，不从旧草案开始
 
