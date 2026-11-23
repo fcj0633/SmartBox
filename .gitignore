@@ -23,7 +23,6 @@ frontend/artifacts/
 *.swp
 # Local artifacts and evidence
 artifacts/*
-!artifacts/README.md
 *.log
 # OS
 .DS_Store

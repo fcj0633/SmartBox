@@ -19,5 +19,5 @@
 
 - 后端使用 MySQL 与 Spring Boot，前端使用 Vue/Vite。
 - 仓库保留 `firmware/` 源码作为参考，但不提供硬件构建、烧录、测试或联调工具。
-- `contracts/effective/` 是后端运行时契约；其他协议夹具不随本仓库维护。
+- 后端运行时 schema 位于 `backend/src/main/resources/contracts/effective/`。
 - 没有 `tools/`、`tests/` 或自动化文档校验；验证以构建和手工启动为准。

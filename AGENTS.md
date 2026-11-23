@@ -18,6 +18,6 @@
 
 - 需求、设计、任务变化同步更新 `docs/requirements`、`docs/design`、`docs/tasks` 和[项目演进](docs/project/项目演进.md)。
 - 数据库变更必须使用版本化 Flyway 迁移。
-- 不修改 `contracts/effective/common.schema.json` 而不同时更新后端校验逻辑；该文件是运行时契约。
+- 不修改 `backend/src/main/resources/contracts/effective/common.schema.json` 而不同时更新后端校验逻辑；该文件是运行时契约。
 - 不伪造真实设备、MQTT 或生产验证结论。
 - 每次完成有文件改动的工作并验证后提交本地 Git；提交标题和正文使用中文。

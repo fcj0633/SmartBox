@@ -31,5 +31,5 @@ mvn -f backend/pom.xml spring-boot:run "-Dspring-boot.run.arguments=--server.por
 
 - 数据库、JWT、演示种子通过环境变量提供，不提交真实密码。
 - `SMARTBOX_MQTT_ENABLED=false` 时不需要 MQTT Broker；本地演示由 `DemoFleetService` 产生模拟数据。
-- 后端启动时读取 `contracts/effective/common.schema.json`；不要删除该文件。
+- 后端启动时读取 `src/main/resources/contracts/effective/common.schema.json`；不要删除该文件。
 - 本仓库不包含后端测试、测试夹具或开发工具。
