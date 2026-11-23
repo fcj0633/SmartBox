@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.smartbox.asset.AssetMapper">
+  <select id="enterprise" resultType="map">SELECT id,name FROM enterprises WHERE admin_user_id=#{userId}</select>
+  <select id="enterpriseBoxes" resultType="map">
+    SELECT b.box_id,b.display_name,a.rider_user_id,u.username AS rider_username,a.assigned_at
+    FROM box_ownerships o JOIN boxes b ON b.box_id=o.box_id
+    LEFT JOIN box_assignments a ON a.box_id=o.box_id LEFT JOIN users u ON u.id=a.rider_user_id
+    WHERE o.owner_type='ENTERPRISE' AND o.enterprise_id=#{enterpriseId} ORDER BY b.box_id
+  </select>
+  <select id="lockOwnership" resultType="map">SELECT box_id,owner_type,enterprise_id,owner_user_id FROM box_ownerships WHERE box_id=#{boxId} FOR UPDATE</select>
+  <!-- Current read after waiting for the ownership lock; avoid the earlier RR snapshot. -->
+  <select id="assignment" resultType="map">SELECT box_id,rider_user_id,assigned_at FROM box_assignments WHERE box_id=#{boxId} FOR UPDATE</select>
+  <insert id="assign">INSERT INTO box_assignments(box_id,rider_user_id,assigned_by,assigned_at) VALUES(#{boxId},#{riderId},#{actorId},#{now})</insert>
+  <delete id="unassign">DELETE FROM box_assignments WHERE box_id=#{boxId}</delete>
+  <select id="riderBoxes" resultType="map">
+    SELECT b.box_id,b.display_name,'OWNED' AS source,NULL AS enterprise_name
+    FROM box_ownerships o JOIN boxes b ON b.box_id=o.box_id WHERE o.owner_type='PERSONAL' AND o.owner_user_id=#{userId}
+    UNION ALL
+    SELECT b.box_id,b.display_name,'ASSIGNED' AS source,e.name AS enterprise_name
+    FROM box_assignments a JOIN box_ownerships o ON o.box_id=a.box_id AND o.owner_type='ENTERPRISE'
+    JOIN boxes b ON b.box_id=a.box_id JOIN enterprises e ON e.id=o.enterprise_id
+    WHERE a.rider_user_id=#{userId} ORDER BY box_id
+  </select>
+  <select id="canUse" resultType="int">
+    SELECT COUNT(*) FROM box_ownerships o LEFT JOIN box_assignments a ON a.box_id=o.box_id
+    WHERE o.box_id=#{boxId} AND ((o.owner_type='PERSONAL' AND o.owner_user_id=#{userId})
+      OR (o.owner_type='ENTERPRISE' AND a.rider_user_id=#{userId}))
+  </select>
+</mapper>

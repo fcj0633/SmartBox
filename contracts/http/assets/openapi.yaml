@@ -1,0 +1,199 @@
+openapi: 3.1.1
+info:
+  title: SmartBox TASK-011 资产接口增量
+  version: 0.1.0
+servers:
+- url: /api/v1
+paths:
+  /enterprise/boxes:
+    get:
+      operationId: enterpriseBoxes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/EnterpriseResponse
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '401':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '403':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '409':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '503':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+  /enterprise/boxes/{boxId}/assign:
+    post:
+      operationId: assignBox
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/AssignmentResponse
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '401':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '403':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '409':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '503':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+      parameters:
+      - name: boxId
+        in: path
+        required: true
+        schema: &id001
+          type: string
+          pattern: ^[A-Za-z0-9_-]{1,48}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: responses.schema.json#/$defs/AssignRequest
+  /enterprise/boxes/{boxId}/unassign:
+    post:
+      operationId: unassignBox
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/UnassignResponse
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '401':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '403':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '409':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '503':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+      parameters:
+      - name: boxId
+        in: path
+        required: true
+        schema: *id001
+  /rider/boxes:
+    get:
+      operationId: riderBoxes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/RiderResponse
+        '400':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '401':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '403':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '409':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+        '503':
+          description: 请求失败
+          content:
+            application/json:
+              schema:
+                $ref: responses.schema.json#/$defs/ErrorResponse
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

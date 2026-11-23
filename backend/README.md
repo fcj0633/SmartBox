@@ -20,6 +20,7 @@ backend/
 │  ├─ SmartBoxApplication.java
 │  ├─ auth/              # 登录、JWT、当前身份、账号Mapper及基础HTTP入口
 │  ├─ authorization/     # 操作/箱体授权与基础投影类型
+│  ├─ asset/             # TASK-011企业权属、当前分配及独立受控种子
 │  ├─ audit/             # 独立脱敏审计
 │  ├─ common/            # 响应、异常、request_id、输入与uint64适配
 │  ├─ config/            # Security、配置、时钟、受控初始化
@@ -28,7 +29,7 @@ backend/
 ├─ src/main/resources/
 │  ├─ application.yml
 │  ├─ mapper/            # AuthMapper.xml、NodeMapper.xml
-│  └─ db/migration/      # V1～V9，只追加新迁移
+│  └─ db/migration/      # V1～V13，只追加新迁移
 └─ src/test/java/cn/smartbox/  # 单元、MySQL、HTTP/WS及故障测试
 ```
 
@@ -119,7 +120,7 @@ MQTT订阅消息不携带发布者认证用户名，接入身份建立在Broker 
 
 ## 7. 数据库迁移与本地配置
 
-迁移文件在[Flyway目录](src/main/resources/db/migration)，当前18张业务表；Flyway自己的历史表另计。
+迁移文件在[Flyway目录](src/main/resources/db/migration)，当前27张业务表；Flyway自己的历史表另计。
 
 | 版本组 | 实际用途 |
 |---|---|
@@ -130,8 +131,10 @@ MQTT订阅消息不携带发布者认证用户名，接入身份建立在Broker 
 | V7 | 命令发布恢复与原始执行回执 |
 | V8 | 同毫秒操作也可区分先后的operation_order |
 | V9 | 运行态、位置和回执数据约束 |
+| V10～V12 | 门证据/结论、告警记录、业务视图与状态 |
+| V13 | 演示企业、箱体所有权、当前骑手分配 |
 
-新增结构追加新版本，不修改已应用V1～V9，不自动clean/repair或用自动建表替代迁移。`smartbox_dev`与`smartbox_test`独立，迁移账号与运行账号权限分离，应用不使用root；测试清理只在显式配置和校验通过时执行。
+新增结构追加新版本，不修改已应用V1～V13，不自动clean/repair或用自动建表替代迁移。`smartbox_dev`与`smartbox_test`独立，迁移账号与运行账号权限分离，应用不使用root；测试清理只在显式配置和校验通过时执行。
 
 [application.yml](src/main/resources/application.yml)是受控配置入口，真实账号/密码/JWT密钥及演示初始化文件在忽略的`secrets/`，新机器需按[初始化指南](../docs/development/guides/后端数据库初始化与启动.md)准备。开发账号与授权不是通用DDL迁移的一部分，重复初始化不重置密码或覆盖已有授权。版本见[pom.xml](pom.xml)和[版本矩阵](../docs/development/environment/工具与依赖版本矩阵.md)。
 
@@ -160,3 +163,13 @@ MQTT配置需要已有项目Broker；真实板使用显式`--mqtt-config secrets
 | 新表或字段 | 新Flyway迁移、LiveStore或专用Mapper；验证空库升级、唯一/外键与精确数值边界 |
 
 [TestFaults](src/main/java/cn/smartbox/live/TestFaults.java)和[IntegrationReset](src/main/java/cn/smartbox/live/IntegrationReset.java)是受限测试设施，不是管理API或普通开发启动步骤。排错用request_id和脱敏证据，不打印密码、ticket、JWT、SQL或原始配置。完整监测/融合/告警、设备事件Flash和长期稳定性仍待后续。
+
+## 企业资产与分配后端（TASK-011）
+
+[AssetController](src/main/java/cn/smartbox/asset/AssetController.java)接收四个JWT资产请求，[AssetService](src/main/java/cn/smartbox/asset/AssetService.java)验证当前启用账号、企业管理员与受控骑手，再通过[AssetMapper](src/main/resources/mapper/AssetMapper.xml)读写三表。写入先锁箱体权属行，再当前读分配记录；同骑手重复分配保留原时间，其他骑手冲突409。收回删除当前分配，提交后独立尽力审计。
+
+[AssetBootstrapService](src/main/java/cn/smartbox/asset/AssetBootstrapService.java)是独立非Web种子入口，通过用户名解析账号，不改旧Bootstrap格式或密码。V13新增企业、所有权和当前分配；完整结构目前为27张业务表（Flyway历史表另计）。原V1～V12不可改写。
+
+四个接口及返回结构见[资产增量契约](../contracts/http/assets/README.md)。资产元数据不含传感快照，`OWNED/ASSIGNED`与旧 `user_box_access` 分离；收回不吊销旧人工设备授权。TASK-012使用 `requireRiderUse` 时须在其状态转换事务内重新校验，并补运输ACTIVE限制。
+
+构建后可用 `python tools/assets.py prepare --profile dev` 准备忽略配置，再显式 `bootstrap` 初始化，`run` 在18080启动MQTT关闭的资产后端。配置、真实集成和复验步骤见[初始化指南](../docs/development/guides/后端数据库初始化与启动.md)，结果见[报告](../docs/testing/reports/TASK-011-企业资产分配后端验证报告.md)。已有8080不会被工具自动停止或更新；本轮没有新增页面。

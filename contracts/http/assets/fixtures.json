@@ -1,0 +1,92 @@
+[
+  {
+    "id": "assign-positive",
+    "definition": "AssignRequest",
+    "valid": true,
+    "value": {
+      "rider_user_id": 1
+    }
+  },
+  {
+    "id": "assign-invalid-id",
+    "definition": "AssignRequest",
+    "valid": false,
+    "value": {
+      "rider_user_id": 0
+    }
+  },
+  {
+    "id": "assign-forged-admin",
+    "definition": "AssignRequest",
+    "valid": false,
+    "value": {
+      "rider_user_id": 1,
+      "admin_user_id": 1
+    }
+  },
+  {
+    "id": "assignment-positive",
+    "definition": "AssignmentResponse",
+    "valid": true,
+    "value": {
+      "data": {
+        "box_id": "BOX-0001",
+        "rider_user_id": 1,
+        "assigned_at": 0
+      },
+      "request_id": "fixture"
+    }
+  },
+  {
+    "id": "unassign-positive",
+    "definition": "UnassignResponse",
+    "valid": true,
+    "value": {
+      "data": {
+        "box_id": "BOX-0001",
+        "assigned": false
+      },
+      "request_id": "fixture"
+    }
+  },
+  {
+    "id": "unassign-wrong-state",
+    "definition": "UnassignResponse",
+    "valid": false,
+    "value": {
+      "data": {
+        "box_id": "BOX-0001",
+        "assigned": true
+      },
+      "request_id": "fixture"
+    }
+  },
+  {
+    "id": "error-positive",
+    "definition": "ErrorResponse",
+    "valid": true,
+    "value": {
+      "error": {
+        "code": "FORBIDDEN",
+        "message": "无权访问"
+      },
+      "request_id": "fixture"
+    }
+  },
+  {
+    "id": "rider-invalid-source",
+    "definition": "RiderResponse",
+    "valid": false,
+    "value": {
+      "data": [
+        {
+          "box_id": "BOX-0001",
+          "display_name": "fixture",
+          "source": "CLAIMED",
+          "enterprise_name": null
+        }
+      ],
+      "request_id": "fixture"
+    }
+  }
+]

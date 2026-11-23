@@ -132,3 +132,11 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 - [check_rules.py](check_rules.py)：使用现有SSH连接参数及`--report artifacts/新目录/rules.json`，在Ubuntu临时目录编译并运行ENV/POSE规则；对比C、Python和公开预期，覆盖邮箱边界。只产生测试临时文件和本地证据，不修改SDK，不操作开发板。
 - [task008.py](task008.py)：`software --allow-test-reset --run-dir artifacts/新目录`连接项目测试库，启动自己的本地Broker、后端18080、网页15173、两个采样驱动节点和真实浏览器。`cloud-smoke`使用已配置EMQX且不管理云端部署；会预留新的模拟启动区间，真实板下一次构建前须按硬件流程分配后续区间。缺少配置、端口占用、非项目测试库均失败，不停止已有服务。
 - [规则向量](../tests/firmware/rule-vectors.json)是共享公开输入和独立检查点；[浏览器入口](../frontend/tests/rules-live.cjs)不拦截API，验证四角色、门结论和告警开始/恢复通知。原始日志与截图留忽略目录；工具结束清理自身进程，不停止共享MySQL。
+
+## 企业资产后端工具（TASK-011）
+
+[assets.py](assets.py)复用原后端本地连接配置，支持 `prepare/bootstrap/run/test/smoke`。`prepare`只在忽略目录生成按用户名引用的种子，已有不同内容拒绝覆盖；`bootstrap`启动非Web迁移和资产初始化，修改项目库；`run`仅启动独立18080后端，关闭MQTT，不替换既有8080。
+
+`test --profile test --allow-test-reset`会清理显式项目测试库，执行Maven真实集成；不接受开发库清理。`smoke --profile dev|test --run-dir artifacts/新的目录`启动自有实例，执行真实分配和收回，保留账号及旧授权，最后收回本轮自己的分配、停止自有进程。遇到既有分配则拒绝覆盖，失败需检查摘要；不保证清理未知并发改动。
+
+[check_assets_contracts.py](check_assets_contracts.py)只读检查四个增量接口、JSON Schema、局部引用和正反样例，与原冻结11接口校验分开执行。详细前提、配置和命令见[后端初始化指南](../docs/development/guides/后端数据库初始化与启动.md)。

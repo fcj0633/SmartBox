@@ -114,8 +114,10 @@ class DocumentationChecks(unittest.TestCase):
         self.assertFalse((self.root/".git").exists())
         result=checker.validate(self.root)
         self.assertEqual([],result.errors)
-        self.assertEqual(47,result.stats["requirements"])
-        self.assertEqual(50,result.stats["trace_rows"])
+        # BL-002's 47 requirements plus CR-006's 12 explicitly numbered candidates.
+        # Candidate tracking does not approve the candidate business baseline.
+        self.assertEqual(59,result.stats["requirements"])
+        self.assertEqual(62,result.stats["trace_rows"])
         self.assertEqual(64,result.stats["migration_rules"])
 
     def test_duplicate_requirement_definition(self):

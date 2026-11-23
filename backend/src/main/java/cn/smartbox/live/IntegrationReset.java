@@ -20,7 +20,7 @@ public class IntegrationReset implements ApplicationRunner {
     @Override public void run(ApplicationArguments args){
         if(!"true".equals(env.getProperty("SMARTBOX_TEST_ALLOW_RESET"))||!"none".equals(env.getProperty("spring.main.web-application-type"))||!"smartbox_test".equals(db.one("SELECT DATABASE() AS name").get("name"))||!db.one("SELECT CURRENT_USER() AS name").get("name").toString().startsWith("smartbox_test_app@"))throw new IllegalStateException("Test reset rejected");
         tx.executeWithoutResult(s->{
-            for(String table:List.of("command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","processing_outbox","events","location_samples","node_latest","telemetry","node_runtime"))db.update("DELETE FROM "+table);
+            for(String table:List.of("box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","processing_outbox","events","location_samples","node_latest","telemetry","node_runtime"))db.update("DELETE FROM "+table);
             db.update("UPDATE nodes SET current_boot_id=NULL,last_received_at=NULL");db.update("UPDATE boxes SET sentry_revision=0,profile_config=NULL");
         });
     }

@@ -64,6 +64,8 @@ def main():
                 if args.action=='test':
                     if args.profile!='test' or not args.allow_test_reset:raise ValueError('Integration requires test profile and --allow-test-reset')
                     env['SMARTBOX_TEST_ALLOW_RESET']='true'
+                    from assets import prepare
+                    env['SMARTBOX_ASSET_SEED_FILE']=str(prepare('test',args.config))
                 command=['mvn.cmd' if os.name=='nt' else 'mvn','-B','-ntp','verify']+(['-Pit'] if args.action=='test' else [])
             elif args.action in ['bootstrap','run']:
                 if not JAR.is_file():raise ValueError('Build the application first')
