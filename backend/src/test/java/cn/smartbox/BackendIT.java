@@ -49,7 +49,7 @@ class BackendIT {
     @BeforeAll void seed()throws Exception{
         TestDatabaseGuard.require(System.getenv("SPRING_PROFILES_ACTIVE"),System.getenv("SMARTBOX_DB_URL"),db.queryForObject("SELECT DATABASE()",String.class),db.queryForObject("SELECT CURRENT_USER()",String.class),System.getenv("SMARTBOX_TEST_ALLOW_RESET"));
         new TransactionTemplate(manager).executeWithoutResult(status->{
-            for(String table:List.of("box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","location_samples","node_runtime","audit_logs","idempotency_records","node_commands","command_operations","processing_outbox","events","node_latest","telemetry","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
+            for(String table:List.of("transport_tasks","box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","location_samples","node_runtime","audit_logs","idempotency_records","node_commands","command_operations","processing_outbox","events","node_latest","telemetry","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
         });
         fixture=json.readTree(Files.readString(Path.of(System.getenv("SMARTBOX_BOOTSTRAP_FILE"))));bootstrap.initialize(fixture);
     }
@@ -70,8 +70,8 @@ class BackendIT {
         Reply r=request("POST","/api/v1/auth/login",null,input);assertEquals(200,r.status());return r.body().path("data").path("access_token").asText();
     }
     @Test void foundationAndDomainTablesMigrateWithoutRewritingPriorVersions(){
-        assertEquals(27,db.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name<>'flyway_schema_history'",Integer.class));
-        assertEquals(13,db.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL",Integer.class));
+        assertEquals(28,db.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name<>'flyway_schema_history'",Integer.class));
+        assertEquals(14,db.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL",Integer.class));
         flyway.validate();assertEquals(0,flyway.migrate().migrationsExecuted);
         assertEquals(8,db.queryForObject("SELECT COUNT(*) FROM users",Integer.class));
     }

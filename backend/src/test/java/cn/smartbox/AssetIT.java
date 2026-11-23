@@ -32,10 +32,10 @@ class AssetIT {
     JsonNode fixture;final HttpClient http=HttpClient.newHttpClient();
     @BeforeAll void accounts()throws Exception{
         TestDatabaseGuard.require(System.getenv("SPRING_PROFILES_ACTIVE"),System.getenv("SMARTBOX_DB_URL"),db.queryForObject("SELECT DATABASE()",String.class),db.queryForObject("SELECT CURRENT_USER()",String.class),System.getenv("SMARTBOX_TEST_ALLOW_RESET"));
-        for(String table:List.of("box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","processing_outbox","events","location_samples","node_latest","telemetry","node_runtime","audit_logs","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
+        for(String table:List.of("transport_tasks","box_assignments","box_ownerships","enterprises","command_receipts","command_dispatch","idempotency_records","node_commands","command_operations","box_domain_views","alarm_state","alarms","box_domain_state","door_conclusions","event_evidence","event_views","processing_outbox","events","location_samples","node_latest","telemetry","node_runtime","audit_logs","user_box_access","users","nodes","boxes"))db.update("DELETE FROM "+table);
         fixture=json.readTree(Files.readString(Path.of(System.getenv("SMARTBOX_BOOTSTRAP_FILE"))));bootstrap.initialize(fixture);
     }
-    @BeforeEach void assets(){db.update("DELETE FROM box_assignments");db.update("DELETE FROM box_ownerships");db.update("DELETE FROM enterprises");seed.initialize(config.seed());}
+    @BeforeEach void assets(){db.update("DELETE FROM transport_tasks");db.update("DELETE FROM box_assignments");db.update("DELETE FROM box_ownerships");db.update("DELETE FROM enterprises");seed.initialize(config.seed());}
     JsonNode account(String role,int box){for(JsonNode u:fixture.path("users"))if(u.path("role").asText().equals(role)&&u.path("box_ids").get(0).asText().equals("BOX-000"+box))return u;throw new AssertionError();}
     long id(String role,int box){return users.byUsername(account(role,box).path("username").asText()).id();}
     CurrentUser current(String role,int box){var u=users.byId(id(role,box));return new CurrentUser(u.id(),u.username(),u.roleCode());}

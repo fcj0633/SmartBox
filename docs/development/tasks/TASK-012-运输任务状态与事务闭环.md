@@ -4,7 +4,7 @@
 |---|---|
 | 阶段 | CR-006 / 候选 BL-003 |
 | 负责人 | 用户 |
-| 状态 | 待开始（开发计划已细化；代码、迁移与测试尚未实施） |
+| 状态 | 已完成（DEMO后端运输事务闭环；开发库在线开始未演示；页面/访客待TASK-013） |
 | 依赖 | TASK-011 |
 | MOD | [MOD-07](../../requirements/modules/MOD-07-运输任务与过程管理.md) |
 | 需求 | [REQ-M07-001](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-001)、[REQ-M07-002](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-002)、[REQ-M07-003](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-003)、[REQ-M07-004](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-004)、[REQ-M07-007](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-007) |
@@ -280,3 +280,16 @@ TASK-013 可以直接使用本任务的 `transport_no`、`task_id`、`rider_id`�
 ## 12. 本文与实际进度
 
 本轮只是**编写 TASK-012 开发计划**，未执行 V14、未生成运输业务 Java 代码，也未运行 TASK-012 测试。TASK-011 的已完成记录保持不变；TASK-012 继续标记“待开始”。实际开发后才能基于报告填写已实现、已通过、失败和跳过项，不得将本设计或可点击的原型计为业务验收。
+
+## 13. 实际执行记录（2026-11-23）
+
+本节取代上一节“仅计划”的当时状态；上一节保留为计划阶段记录。
+
+- V14 已实现并应用到 `smartbox_test` 与 `smartbox_dev`；V1～V13 未改写，两个库均为 V14、28 张业务表（Flyway 历史表另计）。
+- 新增 `cn.smartbox.transport` Controller/Service/Mapper/View 与 `TransportMapper.xml`；`AssetService` 增加事务内锁读使用资格、`unassign` 的 ACTIVE 守卫；开始/结束/收回统一 ownership → task 锁顺序。
+- 6 个骑手运输 REST 操作、增量契约 `contracts/http/transport/`、`tools/check_transport_contracts.py` 与 5 项契约工具回归已建立；冻结 11 项接口未修改。
+- 真实结果：34 项后端单元、73 项真实集成（含 9 项 `TransportIT`）通过，0 失败/0 错误/0 跳过；主流程、同箱排他（含 2 并发启动）、ACTIVE 收回 409、结束/重复结束、离线/无节点、风险确认、越权、物品边界和旧资产/设备查询回归通过。
+- `TransportIT` 的在线节点和告警状态是显式测试夹具，不是真实设备在线；开发库没有写入夹具。
+- 开发库独立 18080 HTTP 演示：分配、创建 READY、保存物品、列表/详情通过；因现有节点最近活动已超过 90 秒，开始返回 409 `BOX_OFFLINE`，没有伪造 ACTIVE；READY 草稿已清理、分配已收回。原 8080/5173 未停止或替换。
+- 未覆盖/未宣称：开发库真实在线开始/结束演示、全部页面、访客验证码与任务历史（TASK-013）、创建严格幂等（DEMO 允许同箱多个 READY）、紧急接管、20+ 并发压测、长期稳定性；完整 MOD-07 候选需求、整份 TC-014 和 BL-003 不因本切片自动验收。
+- 实际执行者为当前 AI 编码代理，用户独立开发与验收；详细证据见[实际报告](../../testing/reports/TASK-012-运输任务事务后端验证报告.md)。

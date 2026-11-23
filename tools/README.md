@@ -140,3 +140,9 @@ python tools/build_firmware.py --recover RUN_DIRECTORY --sdk-root SDK_MAPPING --
 `test --profile test --allow-test-reset`会清理显式项目测试库，执行Maven真实集成；不接受开发库清理。`smoke --profile dev|test --run-dir artifacts/新的目录`启动自有实例，执行真实分配和收回，保留账号及旧授权，最后收回本轮自己的分配、停止自有进程。遇到既有分配则拒绝覆盖，失败需检查摘要；不保证清理未知并发改动。
 
 [check_assets_contracts.py](check_assets_contracts.py)只读检查四个增量接口、JSON Schema、局部引用和正反样例，与原冻结11接口校验分开执行。详细前提、配置和命令见[后端初始化指南](../docs/development/guides/后端数据库初始化与启动.md)。
+
+## 骑手运输接口（TASK-012）
+
+[check_transport_contracts.py](check_transport_contracts.py)只读检查6个骑手运输增量接口、JSON Schema、局部引用和正反样例；[契约说明](../contracts/http/transport/README.md)与[回归测试](../tests/test_transport_contracts.py)分开维护。原冻结11接口仍由`check_contracts.py`检查。
+
+运输真实集成复用`assets.py test --profile test --allow-test-reset`（Maven `TransportIT`），迁移/运行复用`assets.py bootstrap/run --profile dev`；开始运输需要真实必需节点在线，测试夹具只在 `TransportIT` 中使用，开发库不得伪造在线。完整结果见[TASK-012报告](../docs/testing/reports/TASK-012-运输任务事务后端验证报告.md)。

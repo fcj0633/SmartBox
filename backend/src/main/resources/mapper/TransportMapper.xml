@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.smartbox.transport.TransportMapper">
+  <insert id="insert">
+    INSERT INTO transport_tasks(transport_no,box_id,rider_id,status,created_at,updated_at)
+    VALUES(#{transportNo},#{boxId},#{riderId},'READY',#{now},#{now})
+  </insert>
+  <select id="byTransportNo" resultType="map">
+    SELECT * FROM transport_tasks WHERE transport_no=#{transportNo}
+  </select>
+  <select id="byId" resultType="map">
+    SELECT * FROM transport_tasks WHERE id=#{id}
+  </select>
+  <select id="byIdForUpdate" resultType="map">
+    SELECT * FROM transport_tasks WHERE id=#{id} FOR UPDATE
+  </select>
+  <select id="byIdForRider" resultType="map">
+    SELECT * FROM transport_tasks WHERE id=#{id} AND rider_id=#{riderId}
+  </select>
+  <select id="listForRider" resultType="map">
+    SELECT * FROM transport_tasks WHERE rider_id=#{riderId} ORDER BY created_at DESC,id DESC LIMIT #{limit}
+  </select>
+  <update id="updateItem">
+    UPDATE transport_tasks SET item_name=#{name},item_description=#{description},updated_at=#{now}
+    WHERE id=#{id} AND rider_id=#{riderId} AND status='READY'
+  </update>
+  <update id="start">
+    UPDATE transport_tasks SET status='ACTIVE',started_at=#{now},updated_at=#{now}
+    WHERE id=#{id} AND rider_id=#{riderId} AND status='READY'
+  </update>
+  <update id="finish">
+    UPDATE transport_tasks SET status='COMPLETED',ended_at=#{now},updated_at=#{now}
+    WHERE id=#{id} AND rider_id=#{riderId} AND status='ACTIVE'
+  </update>
+  <!-- Current read on the generated unique key; ownership lock in the service serializes the same box. -->
+  <select id="activeForUpdate" resultType="map">
+    SELECT id,transport_no FROM transport_tasks WHERE active_box_key=#{boxId} FOR UPDATE
+  </select>
+  <select id="nodeStatus" resultType="map">
+    SELECT COUNT(n.node_id) AS required_count,
+           COALESCE(SUM(CASE WHEN r.online=1 AND r.last_seen&gt;=#{since} THEN 1 ELSE 0 END),0) AS online_count
+    FROM nodes n LEFT JOIN node_runtime r ON r.node_id=n.node_id
+    WHERE n.box_id=#{boxId} AND n.required=1
+  </select>
+  <select id="alarmState" resultType="map">
+    SELECT assessment,active,level FROM alarm_state WHERE box_id=#{boxId}
+  </select>
+</mapper>

@@ -29,7 +29,7 @@ backend/
 ├─ src/main/resources/
 │  ├─ application.yml
 │  ├─ mapper/            # AuthMapper.xml、NodeMapper.xml
-│  └─ db/migration/      # V1～V13，只追加新迁移
+│  └─ db/migration/      # V1～V14，只追加新迁移
 └─ src/test/java/cn/smartbox/  # 单元、MySQL、HTTP/WS及故障测试
 ```
 
@@ -120,7 +120,7 @@ MQTT订阅消息不携带发布者认证用户名，接入身份建立在Broker 
 
 ## 7. 数据库迁移与本地配置
 
-迁移文件在[Flyway目录](src/main/resources/db/migration)，当前27张业务表；Flyway自己的历史表另计。
+迁移文件在[Flyway目录](src/main/resources/db/migration)，当前28张业务表；Flyway自己的历史表另计。
 
 | 版本组 | 实际用途 |
 |---|---|
@@ -133,6 +133,7 @@ MQTT订阅消息不携带发布者认证用户名，接入身份建立在Broker 
 | V9 | 运行态、位置和回执数据约束 |
 | V10～V12 | 门证据/结论、告警记录、业务视图与状态 |
 | V13 | 演示企业、箱体所有权、当前骑手分配 |
+| V14 | 骑手运输任务、生成列同箱唯一 ACTIVE |
 
 新增结构追加新版本，不修改已应用V1～V13，不自动clean/repair或用自动建表替代迁移。`smartbox_dev`与`smartbox_test`独立，迁移账号与运行账号权限分离，应用不使用root；测试清理只在显式配置和校验通过时执行。
 
@@ -168,8 +169,14 @@ MQTT配置需要已有项目Broker；真实板使用显式`--mqtt-config secrets
 
 [AssetController](src/main/java/cn/smartbox/asset/AssetController.java)接收四个JWT资产请求，[AssetService](src/main/java/cn/smartbox/asset/AssetService.java)验证当前启用账号、企业管理员与受控骑手，再通过[AssetMapper](src/main/resources/mapper/AssetMapper.xml)读写三表。写入先锁箱体权属行，再当前读分配记录；同骑手重复分配保留原时间，其他骑手冲突409。收回删除当前分配，提交后独立尽力审计。
 
-[AssetBootstrapService](src/main/java/cn/smartbox/asset/AssetBootstrapService.java)是独立非Web种子入口，通过用户名解析账号，不改旧Bootstrap格式或密码。V13新增企业、所有权和当前分配；完整结构目前为27张业务表（Flyway历史表另计）。原V1～V12不可改写。
+[AssetBootstrapService](src/main/java/cn/smartbox/asset/AssetBootstrapService.java)是独立非Web种子入口，通过用户名解析账号，不改旧Bootstrap格式或密码。V13新增企业、所有权和当前分配；完整结构目前为28张业务表（Flyway历史表另计）。原V1～V12不可改写。
 
-四个接口及返回结构见[资产增量契约](../contracts/http/assets/README.md)。资产元数据不含传感快照，`OWNED/ASSIGNED`与旧 `user_box_access` 分离；收回不吊销旧人工设备授权。TASK-012使用 `requireRiderUse` 时须在其状态转换事务内重新校验，并补运输ACTIVE限制。
+四个接口及返回结构见[资产增量契约](../contracts/http/assets/README.md)。资产元数据不含传感快照，`OWNED/ASSIGNED`与旧 `user_box_access` 分离；收回不吊销旧人工设备授权。TASK-012的运输开始会在自身事务内重新锁读资格，并在收回时增加 ACTIVE 守卫。
 
 构建后可用 `python tools/assets.py prepare --profile dev` 准备忽略配置，再显式 `bootstrap` 初始化，`run` 在18080启动MQTT关闭的资产后端。配置、真实集成和复验步骤见[初始化指南](../docs/development/guides/后端数据库初始化与启动.md)，结果见[报告](../docs/testing/reports/TASK-011-企业资产分配后端验证报告.md)。已有8080不会被工具自动停止或更新；本轮没有新增页面。
+
+## 骑手运输任务后端（TASK-012）
+
+[TransportController](src/main/java/cn/smartbox/transport/TransportController.java)提供6个JWT骑手接口；[TransportService](src/main/java/cn/smartbox/transport/TransportService.java)在事务中锁 `box_ownerships`、重验当前使用权、锁任务并做READY→ACTIVE→COMPLETED转换；[TransportMapper](src/main/resources/mapper/TransportMapper.xml)用生成列唯一索引保证同箱最多一个ACTIVE。开始前检查必需节点现有90秒在线窗口和 `alarm_state` 风险确认；结束允许设备离线；`unassign` 在持有同一权属锁时拒绝ACTIVE。
+
+V14新增 `transport_tasks`；`TransportIT` 使用真实MySQL/HTTP覆盖主流程、同箱排他、并发启动、收回守卫、离线、风险、越权和物品边界。在线/告警测试夹具不是真实设备证据；开发库节点过期时开始返回 `BOX_OFFLINE`，不伪造。页面、访客和任务历史归TASK-013。接口见[运输增量契约](../contracts/http/transport/README.md)，结果见[报告](../docs/testing/reports/TASK-012-运输任务事务后端验证报告.md)。
