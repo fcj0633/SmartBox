@@ -23,7 +23,7 @@ BASELINE:"cc897f8e8b7ad8c101a62a6fffae29345c8179dec39c965f7dd238b57f886694",
 "docs/development/tasks/TASK-000-工程与文档基线.md":"8d65dcd5f9dde07859b9522570af8e789179acc8b896c8d79e4931f216fb94de",
 "docs/delivery/releases/REL-000-P0基线.md":"bbb5680233f30f987c177508c42ad2304aa34aea9a46e2ce1d090562a33d283f",
 "docs/testing/reports/P0-文档基线验收.md":"27af0db55673ac8314ee2f8174dfc517110223fd7566a8035198f6a0f03113a1"}
-MODULE_NAMES = ["物流箱运行监测","安全防护与哨兵","设备接入与控制","事件管理与可靠性","物流箱管理与状态聚合","用户与权限管理"]
+MODULE_NAMES = ["物流箱运行监测","安全防护与哨兵","设备接入与控制","事件管理与可靠性","物流箱管理与状态聚合","用户与权限管理","运输任务与过程管理"]
 MODULE_FILES = {f"MOD-{i:02}": f"docs/requirements/modules/MOD-{i:02}-{name}.md" for i,name in enumerate(MODULE_NAMES,1)}
 INITIAL_IDS = {f"REQ-M{m:02}-{n:03}" for m,count in enumerate((14,6,8,8,5,6),1) for n in range(1,count+1)}
 REQ_RE = r"REQ-M\d{2}-\d{3}"
@@ -99,7 +99,9 @@ def validate(root: Path) -> Result:
     check({x for x in definitions if x.startswith("MOD-")}==set(MODULE_FILES),"Module inventory mismatch")
     req_ids={x for x in definitions if x.startswith("REQ-M")}
     check(INITIAL_IDS<=req_ids,f"Initial requirements missing: {sorted(INITIAL_IDS-req_ids)}")
-    for prefix,start,stop in (("NFR",1,3),("TASK",0,10),("TC",1,12)):
+    candidate_ids = {f"REQ-M05-{n:03}" for n in (6,7)} | {f"REQ-M06-{n:03}" for n in (7,8)} | {f"REQ-M07-{n:03}" for n in range(1,9)}
+    check(req_ids == INITIAL_IDS | candidate_ids,"Unexpected BL-002/CR-006 candidate inventory")
+    for prefix,start,stop in (("NFR",1,3),("TASK",0,13),("TC",1,15)):
         for number in range(start,stop+1):
             key=f"{prefix}-{number:03}";check(key in definitions,f"Document missing: {key}")
     for key in ("ADR-001","CR-001","CR-002","ITER-001","REL-000"):
@@ -166,7 +168,7 @@ def validate(root: Path) -> Result:
             expected_file,expected_anchor=definitions[rid]
             check(any(((root/MATRIX).parent/d.partition("#")[0]).resolve()==root/expected_file and d.partition("#")[2]==expected_anchor for _,d in LINK_RE.findall(link)),f"Trace requirement link mismatch: {rid}")
     check(set(rows)==req_ids|{f"NFR-{i:03}" for i in range(1,4)},"Trace inventory mismatch")
-    for kind,limit in (("TASK",10),("TC",12)):
+    for kind,limit in (("TASK",13),("TC",15)):
         for i in range(1,limit+1):
             key=f"{kind}-{i:03}"
             if key not in definitions:continue

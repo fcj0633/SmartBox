@@ -26,3 +26,12 @@ P1依旧选择后端事务、接入、聚合、权限和已实现安全子项；
 阅读时先找到REQ/NFR和适用TASK，再检查软件静态、真实Broker/数据库、模拟器、浏览器、真实板端及长期验证分别覆盖到哪里。真实采集/输出与模拟动作必须分开，完整验收要求未满足时保留整份状态及未执行项。
 
 当前TASK-007已完成基础真实双板采集、三项output、310秒与恢复；完整规则、Flash事件可靠性、资源峰值和长期场景未验收。详见[双板报告](../reports/TASK-007-双板接入验证报告.md)。各TC原有部分结果和历史标准不因本索引重写而变化，README不能新增验收阈值或制造完成记录。
+
+
+## CR-006 候选测试（尚未执行）
+
+| TC | 对应需求 | 状态 |
+|---|---|---|
+| [TC-013](TC-013-企业资产与权限隔离.md) | [REQ-M05-006](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-006)、[REQ-M05-007](../../requirements/modules/MOD-05-物流箱管理与状态聚合.md#req-m05-007)、[REQ-M06-007](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-007) | 未执行 |
+| [TC-014](TC-014-运输事务与幂等并发.md) | [REQ-M07-001](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-001)、[REQ-M07-002](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-002)、[REQ-M07-003](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-003)、[REQ-M07-004](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-004)、[REQ-M07-007](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-007) | 未执行 |
+| [TC-015](TC-015-任务历史访客安全与页面.md) | [REQ-M06-008](../../requirements/modules/MOD-06-用户与权限管理.md#req-m06-008)、[REQ-M07-005](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-005)、[REQ-M07-006](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-006)、[REQ-M07-008](../../requirements/modules/MOD-07-运输任务与过程管理.md#req-m07-008) | 未执行 |
