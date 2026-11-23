@@ -101,7 +101,7 @@ def validate(root: Path) -> Result:
     check(INITIAL_IDS<=req_ids,f"Initial requirements missing: {sorted(INITIAL_IDS-req_ids)}")
     candidate_ids = {f"REQ-M05-{n:03}" for n in (6,7)} | {f"REQ-M06-{n:03}" for n in (7,8)} | {f"REQ-M07-{n:03}" for n in range(1,9)}
     check(req_ids == INITIAL_IDS | candidate_ids,"Unexpected BL-002/CR-006 candidate inventory")
-    for prefix,start,stop in (("NFR",1,3),("TASK",0,13),("TC",1,15)):
+    for prefix,start,stop in (("NFR",1,3),("TASK",0,14),("TC",1,15)):
         for number in range(start,stop+1):
             key=f"{prefix}-{number:03}";check(key in definitions,f"Document missing: {key}")
     for key in ("ADR-001","CR-001","CR-002","ITER-001","REL-000"):
@@ -168,7 +168,7 @@ def validate(root: Path) -> Result:
             expected_file,expected_anchor=definitions[rid]
             check(any(((root/MATRIX).parent/d.partition("#")[0]).resolve()==root/expected_file and d.partition("#")[2]==expected_anchor for _,d in LINK_RE.findall(link)),f"Trace requirement link mismatch: {rid}")
     check(set(rows)==req_ids|{f"NFR-{i:03}" for i in range(1,4)},"Trace inventory mismatch")
-    for kind,limit in (("TASK",13),("TC",15)):
+    for kind,limit in (("TASK",14),("TC",15)):
         for i in range(1,limit+1):
             key=f"{kind}-{i:03}"
             if key not in definitions:continue

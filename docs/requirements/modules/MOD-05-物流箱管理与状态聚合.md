@@ -296,7 +296,7 @@ V1 默认不开放用户输入箱号取得所有权、不允许在 ACTIVE 时直
 | 状态 | 候选 BL-003：编号已登记，尚未批准、未实现、未验收 |
 | 优先级 | P0（待确认实施阶段） |
 | Design | [CR-006 企业箱体与运输任务数据设计](../../design/backend/CR-006-企业箱体与运输任务数据设计.md) |
-| TASK | [TASK-011](../../development/tasks/TASK-011-企业资产权属与分配底座.md) |
+| TASK | [TASK-011](../../development/tasks/TASK-011-企业资产权属与分配底座.md)、[TASK-014](../../development/tasks/TASK-014-三端UI原型还原与工程接入.md) |
 | TC | [TC-013](../../testing/cases/TC-013-企业资产与权限隔离.md) |
 
 **目标与业务场景：** 有资格的企业人员按资产范围将箱体分配骑手使用并保留审计。

@@ -181,7 +181,7 @@
 | 状态 | 候选 BL-003：编号已登记，尚未批准、未实现、未验收 |
 | 优先级 | P0（待确认实施阶段） |
 | Design | [CR-006 企业箱体与运输任务数据设计](../../design/backend/CR-006-企业箱体与运输任务数据设计.md) |
-| TASK | [TASK-013](../../development/tasks/TASK-013-任务历史访客授权与三端接入.md) |
+| TASK | [TASK-013](../../development/tasks/TASK-013-任务历史访客授权与三端接入.md)、[TASK-014](../../development/tasks/TASK-014-三端UI原型还原与工程接入.md) |
 | TC | [TC-015](../../testing/cases/TC-015-任务历史访客安全与页面.md) |
 
 **目标与业务场景：** 三端接入正式 REST/WS 权威任务/监测状态及字段白名单。
