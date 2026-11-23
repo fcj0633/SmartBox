@@ -4,6 +4,8 @@ import cn.smartbox.asset.AssetBootstrapService;
 import cn.smartbox.asset.DemoAssetConfig;
 import cn.smartbox.auth.AuthMapper;
 import cn.smartbox.config.BootstrapService;
+import cn.smartbox.enterprise.DemoFleetService;
+import cn.smartbox.live.DomainEventWorker;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,13 +22,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "smartbox.workers.enabled=false")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {"smartbox.workers.enabled=false", "smartbox.demo.fleet=true", "smartbox.demo.fleet.tick=false"})
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @org.springframework.test.annotation.DirtiesContext(classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class EnterpriseConsoleIT {
     @Autowired JdbcTemplate db; @Autowired ObjectMapper json; @Autowired BootstrapService bootstrap;
     @Autowired AssetBootstrapService seed; @Autowired DemoAssetConfig config; @Autowired AuthMapper users;
+    @Autowired DemoFleetService demoFleet; @Autowired DomainEventWorker worker;
     @LocalServerPort int port;
     JsonNode fixture; final HttpClient http = HttpClient.newHttpClient();
 
@@ -165,6 +169,127 @@ class EnterpriseConsoleIT {
         assertTrue(overview.body().path("data").path("boxes").toString().contains("BOX-SIM-TEST-01"));
         var alarms = request("GET", "/enterprise/console/alarms", operator, null);
         assertTrue(alarms.body().path("data").path("rows").toString().contains("TEST:env"));
+    }
+
+    private JsonNode createAsset(String operator, String name, String scenario) throws Exception {
+        var body = json.createObjectNode().put("display_name", name).put("purpose", "演示用途").put("notes", "TASK-016 测试");
+        if (scenario != null) body.put("scenario", scenario);
+        var reply = request("POST", "/enterprise/console/boxes", operator, body);
+        assertEquals(200, reply.status());
+        return reply.body().path("data");
+    }
+
+    private void waitAlarm(String boxId, boolean active) throws Exception {
+        for (int i = 0; i < 30; i++) {
+            worker.runBatch();
+            var rows = db.queryForList("SELECT assessment,active FROM alarm_state WHERE box_id=?", boxId);
+            if (!rows.isEmpty()) {
+                Object value = rows.getFirst().get("active");
+                boolean current = Boolean.TRUE.equals(value) || (value instanceof Number number && number.intValue() != 0);
+                if ("EVALUATED".equals(rows.getFirst().get("assessment").toString()) && current == active) return;
+            }
+            Thread.sleep(100);
+        }
+        fail("alarm state did not become " + active + " for " + boxId);
+    }
+
+    @Test void createEditAndScenarioAssets() throws Exception {
+        String operator = login("LOGISTICS_OPERATOR");
+        JsonNode created = createAsset(operator, "TASK-016 模拟箱", "normal");
+        String boxId = created.path("box_id").asText();
+        assertEquals("SIMULATED", created.path("asset_source").asText());
+        assertEquals("normal", created.path("demo_scenario").asText());
+        assertEquals(2, created.path("nodes").size());
+        assertEquals(2, db.queryForObject("SELECT COUNT(*) FROM nodes WHERE box_id=?", Integer.class, boxId));
+
+        var edited = request("POST", "/enterprise/console/boxes/" + boxId + "/edit", operator,
+            json.createObjectNode().put("display_name", "TASK-016 改名").put("purpose", "新用途").put("notes", "新备注"));
+        assertEquals(200, edited.status());
+        assertEquals("TASK-016 改名", edited.body().path("data").path("display_name").asText());
+        assertEquals("新用途", edited.body().path("data").path("purpose").asText());
+
+        var realEdit = request("POST", "/enterprise/console/boxes/BOX-0001/edit", operator,
+            json.createObjectNode().put("display_name", "实物箱改名").put("purpose", "实物用途"));
+        assertEquals(200, realEdit.status());
+        assertEquals("REAL", realEdit.body().path("data").path("asset_source").asText());
+        assertEquals(409, request("POST", "/enterprise/console/boxes/BOX-0001/scenario", operator,
+            json.createObjectNode().put("scenario", "offline")).status());
+
+        var bad = request("POST", "/enterprise/console/boxes/" + boxId + "/scenario", operator,
+            json.createObjectNode().put("scenario", "not-a-scene"));
+        assertEquals(400, bad.status());
+        assertEquals("INVALID_SCENARIO", bad.body().path("error").path("code").asText());
+    }
+
+    @Test void scenarioEnvHighCreatesAlarmAndNormalRecovers() throws Exception {
+        String operator = login("LOGISTICS_OPERATOR");
+        String boxId = createAsset(operator, "TASK-016 高温箱", "normal").path("box_id").asText();
+        demoFleet.refresh(boxId);
+        var high = request("POST", "/enterprise/console/boxes/" + boxId + "/scenario", operator,
+            json.createObjectNode().put("scenario", "env_high"));
+        assertEquals(200, high.status());
+        assertEquals("env_high", high.body().path("data").path("demo_scenario").asText());
+        waitAlarm(boxId, true);
+        var normal = request("POST", "/enterprise/console/boxes/" + boxId + "/scenario", operator,
+            json.createObjectNode().put("scenario", "normal"));
+        assertEquals(200, normal.status());
+        waitAlarm(boxId, false);
+    }
+
+    @Test void impactCreatesEventWithoutAlarm() throws Exception {
+        String operator = login("LOGISTICS_OPERATOR");
+        String boxId = createAsset(operator, "TASK-016 姿态箱", "normal").path("box_id").asText();
+        demoFleet.refresh(boxId);
+        assertEquals(200, request("POST", "/enterprise/console/boxes/" + boxId + "/scenario", operator,
+            json.createObjectNode().put("scenario", "impact")).status());
+        for (int i = 0; i < 10; i++) { worker.runBatch(); Thread.sleep(50); }
+        var events = request("GET", "/enterprise/console/boxes/" + boxId + "/events", operator, null);
+        assertEquals(200, events.status());
+        assertTrue(events.body().path("data").toString().contains("IMPACT"));
+        assertEquals(0, db.queryForObject("SELECT COUNT(*) FROM alarms WHERE box_id=? AND active=1", Integer.class, boxId));
+    }
+
+    @Test void disableBlocksActiveTransportAndOfflineKeepsLastPosition() throws Exception {
+        String operator = login("LOGISTICS_OPERATOR");
+        String boxId = createAsset(operator, "TASK-016 停用箱", "normal").path("box_id").asText();
+        demoFleet.refresh(boxId);
+        var created = request("POST", "/enterprise/console/transports", operator,
+            json.createObjectNode().put("box_id", boxId).put("item_name", "停用测试").put("route_code", "EAST-01"));
+        long taskId = created.body().path("data").path("task").path("task_id").asLong();
+        assertEquals(200, request("POST", "/enterprise/console/transports/" + taskId + "/start", operator,
+            json.createObjectNode().put("confirm_risk", true)).status());
+        var blocked = request("POST", "/enterprise/console/boxes/" + boxId + "/disable", operator, null);
+        assertEquals(409, blocked.status());
+        assertEquals("BOX_IN_USE", blocked.body().path("error").path("code").asText());
+        request("POST", "/enterprise/console/transports/" + taskId + "/finish", operator, null);
+        assertEquals(200, request("POST", "/enterprise/console/boxes/" + boxId + "/disable", operator, null).status());
+        assertEquals(0, db.queryForObject("SELECT demo_enabled FROM boxes WHERE box_id=?", Integer.class, boxId));
+        assertEquals(200, request("POST", "/enterprise/console/boxes/" + boxId + "/scenario", operator,
+            json.createObjectNode().put("scenario", "offline")).status());
+        demoFleet.refresh(boxId);
+        assertEquals(0, db.queryForObject("SELECT COUNT(*) FROM node_runtime WHERE node_id IN " +
+            "(SELECT node_id FROM nodes WHERE box_id=?) AND online=1", Integer.class, boxId));
+    }
+
+    @Test void scenarioStaleStopsLatestAndOfflineStopsRuntime() throws Exception {
+        String operator = login("LOGISTICS_OPERATOR");
+        String boxId = createAsset(operator, "TASK-016 过期箱", "normal").path("box_id").asText();
+        demoFleet.refresh(boxId);
+        Long before = db.queryForObject("SELECT received_at FROM node_latest WHERE box_id=? ORDER BY node_id LIMIT 1", Long.class, boxId);
+        assertEquals(200, request("POST", "/enterprise/console/boxes/" + boxId + "/scenario", operator,
+            json.createObjectNode().put("scenario", "stale")).status());
+        Thread.sleep(30);
+        demoFleet.refresh(boxId);
+        Long after = db.queryForObject("SELECT received_at FROM node_latest WHERE box_id=? ORDER BY node_id LIMIT 1", Long.class, boxId);
+        assertEquals(before, after);
+        assertEquals(2, db.queryForObject("SELECT COUNT(*) FROM node_runtime WHERE node_id IN " +
+            "(SELECT node_id FROM nodes WHERE box_id=?) AND online=1", Integer.class, boxId));
+
+        assertEquals(200, request("POST", "/enterprise/console/boxes/" + boxId + "/scenario", operator,
+            json.createObjectNode().put("scenario", "offline")).status());
+        demoFleet.refresh(boxId);
+        assertEquals(0, db.queryForObject("SELECT COUNT(*) FROM node_runtime WHERE node_id IN " +
+            "(SELECT node_id FROM nodes WHERE box_id=?) AND online=1", Integer.class, boxId));
     }
 
     @Test void editOnlyWhileReadyAndValidation() throws Exception {

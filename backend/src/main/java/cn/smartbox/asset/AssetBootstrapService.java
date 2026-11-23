@@ -76,10 +76,16 @@ public class AssetBootstrapService {
             String boxId=string(box,"box_id",48),display=string(box,"display_name",128),enterpriseName=string(box,"enterprise_name",128);
             Long enterprise=enterprises.get(enterpriseName);
             if(enterprise==null||!Inputs.id(boxId)||!boxes.add(boxId))throw ApiException.invalid();
+            String demoScenario=switch(box.path("scenario").asText("normal")){
+                case "env_high"->"env_high";case "offline"->"offline";case "stale"->"stale";case "impact"->"impact";default->"normal";
+            };
+            String purpose=box.path("purpose").isTextual()?box.path("purpose").asText():null;
+            String notes=box.path("notes").isTextual()?box.path("notes").asText():null;
             var existing=db.queryForList("SELECT asset_source FROM boxes WHERE box_id=?",boxId);
-            if(existing.isEmpty())db.update("INSERT INTO boxes(box_id,display_name,asset_source,created_at,updated_at) VALUES(?,?,'SIMULATED',?,?)",boxId,display,now,now);
+            if(existing.isEmpty())db.update("INSERT INTO boxes(box_id,display_name,asset_source,purpose,notes,demo_scenario,demo_enabled,created_at,updated_at) VALUES(?,?,'SIMULATED',?,?,?,1,?,?)",boxId,display,purpose,notes,demoScenario,now,now);
             else{
                 if(!"SIMULATED".equals(existing.getFirst().get("asset_source")))throw ApiException.conflict();
+                // Re-running the seed must not overwrite operator-maintained purpose/notes/scenario.
                 db.update("UPDATE boxes SET display_name=?,updated_at=? WHERE box_id=?",display,now,boxId);
             }
             ownership(boxId,"ENTERPRISE",enterprise,null,now);

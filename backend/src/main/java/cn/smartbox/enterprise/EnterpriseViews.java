@@ -17,7 +17,8 @@ public final class EnterpriseViews {
                        Long last_seen_at, Long last_received_at) {}
     public record TaskSummary(long task_id, String transport_no, String status, String item_name,
                               String box_id, String box_display_name, Long started_at, Long ended_at) {}
-    public record Box(String box_id, String display_name, String asset_source, String connectivity, String data_state,
+    public record Box(String box_id, String display_name, String asset_source, String purpose, String notes,
+                      String demo_scenario, boolean demo_enabled, String connectivity, String data_state,
                       Environment environment, AlarmState alarm, TaskSummary current_transport,
                       TaskSummary last_completed_transport, Position position, Long last_seen_at, List<Node> nodes) {}
     public record StartCheck(boolean online, boolean risk, List<String> blockers) {}

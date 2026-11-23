@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: SmartBox Enterprise Console API (TASK-015 DEMO)
+  title: SmartBox Enterprise Console API (TASK-015/016 DEMO)
   version: 0.1.0
   description: |
     Additive enterprise console API. Old /enterprise, /rider and /boxes contracts are unchanged.
@@ -32,6 +32,26 @@ paths:
                   data: { type: array, items: { $ref: '#/components/schemas/Box' } }
                   request_id: { type: string }
         '403': { $ref: '#/components/responses/Error' }
+    post:
+      tags: [assets]
+      summary: Create a SIMULATED box
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateAsset' }
+      responses:
+        '200':
+          description: Created box
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Box' }
+                  request_id: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
   /enterprise/console/boxes/{boxId}:
     get:
       tags: [console]
@@ -47,6 +67,86 @@ paths:
                 type: object
                 properties:
                   data: { $ref: '#/components/schemas/Box' }
+                  request_id: { type: string }
+        '404': { $ref: '#/components/responses/Error' }
+  /enterprise/console/boxes/{boxId}/edit:
+    post:
+      tags: [assets]
+      summary: Edit box metadata
+      parameters:
+        - { name: boxId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EditAsset' }
+      responses:
+        '200':
+          description: Updated box
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Box' }
+                  request_id: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+  /enterprise/console/boxes/{boxId}/scenario:
+    post:
+      tags: [assets]
+      summary: Switch a SIMULATED scenario
+      parameters:
+        - { name: boxId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScenarioRequest' }
+      responses:
+        '200':
+          description: Updated box
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Box' }
+                  request_id: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /enterprise/console/boxes/{boxId}/disable:
+    post:
+      tags: [assets]
+      summary: Disable SIMULATED input
+      parameters:
+        - { name: boxId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Updated box }
+        '409': { $ref: '#/components/responses/Error' }
+  /enterprise/console/boxes/{boxId}/enable:
+    post:
+      tags: [assets]
+      summary: Enable SIMULATED input
+      parameters:
+        - { name: boxId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Updated box }
+        '409': { $ref: '#/components/responses/Error' }
+  /enterprise/console/boxes/{boxId}/events:
+    get:
+      tags: [assets]
+      summary: Recent device events for one enterprise box
+      parameters:
+        - { name: boxId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Event list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
                   request_id: { type: string }
         '404': { $ref: '#/components/responses/Error' }
   /enterprise/console/routes:
@@ -279,6 +379,10 @@ components:
         box_id: { type: string }
         display_name: { type: string }
         asset_source: { enum: [REAL, SIMULATED] }
+        purpose: { type: [string, 'null'], maxLength: 120 }
+        notes: { type: [string, 'null'], maxLength: 500 }
+        demo_scenario: { type: [string, 'null'], enum: [normal, env_high, offline, stale, impact, null] }
+        demo_enabled: { type: boolean }
         connectivity: { enum: [ONLINE, PARTIAL, OFFLINE, UNKNOWN] }
         data_state: { type: string }
         environment: { $ref: '#/components/schemas/Environment' }
@@ -389,3 +493,26 @@ components:
       properties:
         data: { $ref: '#/components/schemas/TaskDetail' }
         request_id: { type: string }
+    CreateAsset:
+      type: object
+      required: [display_name]
+      additionalProperties: false
+      properties:
+        display_name: { type: string, minLength: 1, maxLength: 128 }
+        purpose: { type: [string, 'null'], maxLength: 120 }
+        notes: { type: [string, 'null'], maxLength: 500 }
+        scenario: { type: [string, 'null'], enum: [normal, env_high, offline, stale, impact, null] }
+    EditAsset:
+      type: object
+      required: [display_name]
+      additionalProperties: false
+      properties:
+        display_name: { type: string, minLength: 1, maxLength: 128 }
+        purpose: { type: [string, 'null'], maxLength: 120 }
+        notes: { type: [string, 'null'], maxLength: 500 }
+    ScenarioRequest:
+      type: object
+      required: [scenario]
+      additionalProperties: false
+      properties:
+        scenario: { enum: [normal, env_high, offline, stale, impact] }

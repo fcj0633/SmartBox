@@ -153,7 +153,8 @@ public class EnterpriseReadService {
             .or(() -> tasks.stream().filter(t -> "COMPLETED".equals(text(t, "status"))).findFirst()).orElse(null);
         Position position = position(positionTask, connectivity.online(), connectivity.lastSeen(), now);
         Long lastSeen = nodes.stream().map(Node::last_seen_at).filter(Objects::nonNull).max(Long::compareTo).orElse(null);
-        return new Box(boxId, text(row, "display_name"), text(row, "asset_source"), connectivity.connectivity(),
+        return new Box(boxId, text(row, "display_name"), text(row, "asset_source"), text(row, "purpose"),
+            text(row, "notes"), text(row, "demo_scenario"), bool(row, "demo_enabled"), connectivity.connectivity(),
             environment.data_state(), environment, alarm, current, lastCompleted, position, lastSeen, nodes);
     }
 
@@ -255,15 +256,44 @@ public class EnterpriseReadService {
 
     private List<Map<String, Object>> boxRows(long enterpriseId) {
         return db.queryForList(
-            "SELECT b.box_id,b.display_name,b.asset_source FROM box_ownerships o JOIN boxes b ON b.box_id=o.box_id " +
+            "SELECT b.box_id,b.display_name,b.asset_source,b.purpose,b.notes,b.demo_scenario,b.demo_enabled " +
+            "FROM box_ownerships o JOIN boxes b ON b.box_id=o.box_id " +
             "WHERE o.owner_type='ENTERPRISE' AND o.enterprise_id=? ORDER BY b.box_id", enterpriseId);
     }
 
     private Map<String, Object> boxRow(long enterpriseId, String boxId) {
         var rows = db.queryForList(
-            "SELECT b.box_id,b.display_name,b.asset_source FROM box_ownerships o JOIN boxes b ON b.box_id=o.box_id " +
+            "SELECT b.box_id,b.display_name,b.asset_source,b.purpose,b.notes,b.demo_scenario,b.demo_enabled " +
+            "FROM box_ownerships o JOIN boxes b ON b.box_id=o.box_id " +
             "WHERE o.owner_type='ENTERPRISE' AND o.enterprise_id=? AND b.box_id=?", enterpriseId, boxId);
         return rows.isEmpty() ? null : rows.getFirst();
+    }
+
+    public List<Event> boxEvents(CurrentUser user, String boxId) {
+        Context context = context(user);
+        if (!Inputs.id(boxId) || boxRow(context.enterprise_id(), boxId) == null) throw notFound();
+        return db.queryForList(
+                "SELECT e.id,e.type,e.level,e.device_ts,e.received_at FROM events e " +
+                "WHERE e.box_id=? ORDER BY e.received_at DESC,e.id DESC LIMIT 10", boxId)
+            .stream().map(row -> new Event(number(row, "id"),
+                numberOrNull(row, "device_ts") == null ? number(row, "received_at") : number(row, "device_ts"),
+                text(row, "type"), text(row, "level"), eventDescription(text(row, "type")))).toList();
+    }
+
+    private static String eventDescription(String type) {
+        return switch (type == null ? "" : type) {
+            case "ENV_HIGH" -> "环境值超过上限";
+            case "ENV_LOW" -> "环境值低于下限";
+            case "ENV_RECOVERED" -> "环境值恢复";
+            case "IMPACT" -> "设备检测到冲击";
+            case "POSE_CHANGED" -> "设备姿态变化";
+            case "DOOR_EVIDENCE" -> "设备开合证据";
+            case "SENTRY_INTRUSION" -> "哨兵异常提示";
+            case "GEOFENCE_EXIT" -> "离开模拟围栏";
+            case "GEOFENCE_ENTER" -> "返回模拟围栏";
+            case "DEVICE_FAULT" -> "设备故障";
+            default -> "设备状态记录";
+        };
     }
 
     private List<Map<String, Object>> taskRows(long enterpriseId) {

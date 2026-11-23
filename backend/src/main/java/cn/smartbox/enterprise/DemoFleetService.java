@@ -1,68 +1,81 @@
 package cn.smartbox.enterprise;
 
 import java.time.Clock;
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
+import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import cn.smartbox.asset.DemoAssetConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
- * DEMO-only snapshot producer for the seeded SIMULATED boxes. It is disabled by default,
+ * DEMO-only snapshot producer for SIMULATED boxes. It reads database scenarios, is disabled by default,
  * never touches REAL boxes and does not claim to be MQTT/device telemetry.
  */
 @Service
 @ConditionalOnProperty(name = "smartbox.demo.fleet", havingValue = "true")
 public class DemoFleetService {
+    private static final String BOXES_SQL =
+        "SELECT b.box_id,b.demo_scenario," +
+        "MAX(CASE WHEN n.role='ENV' THEN n.node_id END) AS env_node," +
+        "MAX(CASE WHEN n.role='POSE' THEN n.node_id END) AS pose_node " +
+        "FROM boxes b LEFT JOIN nodes n ON n.box_id=b.box_id " +
+        "WHERE b.asset_source='SIMULATED' AND b.demo_enabled=1 " +
+        "GROUP BY b.box_id,b.demo_scenario ORDER BY b.box_id";
+    private static final String BOX_SQL =
+        "SELECT b.box_id,b.demo_scenario," +
+        "MAX(CASE WHEN n.role='ENV' THEN n.node_id END) AS env_node," +
+        "MAX(CASE WHEN n.role='POSE' THEN n.node_id END) AS pose_node " +
+        "FROM boxes b LEFT JOIN nodes n ON n.box_id=b.box_id " +
+        "WHERE b.asset_source='SIMULATED' AND b.demo_enabled=1 AND b.box_id=? " +
+        "GROUP BY b.box_id,b.demo_scenario";
     private final JdbcTemplate db;
-    private final DemoAssetConfig config;
     private final ObjectMapper json;
     private final Clock clock;
+    private final boolean scheduled;
 
-    public DemoFleetService(JdbcTemplate db, DemoAssetConfig config, ObjectMapper json, Clock clock) {
-        this.db = db; this.config = config; this.json = json; this.clock = clock;
+    public DemoFleetService(JdbcTemplate db, ObjectMapper json, Clock clock,
+                            @org.springframework.beans.factory.annotation.Value("${smartbox.demo.fleet.tick:true}") boolean scheduled) {
+        this.db = db; this.json = json; this.clock = clock; this.scheduled = scheduled;
     }
 
     @Scheduled(fixedDelay = 5000)
     public void tick() {
-        JsonNode seed;
-        try {
-            seed = config.seed();
-        } catch (RuntimeException unavailable) {
-            return;
-        }
-        JsonNode boxes = seed.path("simulated_boxes");
-        if (!boxes.isArray()) return;
+        if (!scheduled) return;
         long now = clock.millis();
-        for (JsonNode box : boxes) {
-            String boxId = box.path("box_id").asText("");
-            if (boxId.isBlank() || !"SIMULATED".equals(source(boxId))) continue;
-            String scenario = box.path("scenario").asText("normal");
-            String envNode = box.path("env_node_id").asText("");
-            String poseNode = box.path("pose_node_id").asText("");
-            if ("offline".equals(scenario)) {
-                markOffline(envNode);
-                markOffline(poseNode);
-                continue;
-            }
-            if (!envNode.isBlank()) {
-                runtime(envNode, now);
-                latest(boxId, envNode, "ENV", 71, now, envPayload(boxId, envNode, scenario, now));
-            }
-            if (!poseNode.isBlank()) {
-                runtime(poseNode, now);
-                latest(boxId, poseNode, "POSE", 120, now, posePayload(boxId, poseNode, scenario, now));
-            }
-        }
+        for (Map<String, Object> box : db.queryForList(BOXES_SQL)) apply(box, now);
     }
 
-    private String source(String boxId) {
-        var rows = db.queryForList("SELECT asset_source FROM boxes WHERE box_id=?", boxId);
-        return rows.isEmpty() ? null : rows.getFirst().get("asset_source").toString();
+    /** Applies one box immediately after scenario/enable changes; the next tick is idempotent. */
+    public void refresh(String boxId) {
+        for (Map<String, Object> box : db.queryForList(BOX_SQL, boxId)) apply(box, clock.millis());
+    }
+
+    /** Marks both nodes offline immediately when a simulated asset is disabled. */
+    public void markOffline(String boxId) {
+        db.update("UPDATE node_runtime r JOIN nodes n ON n.node_id=r.node_id SET r.online=0 WHERE n.box_id=?", boxId);
+    }
+
+    private void apply(Map<String, Object> box, long now) {
+        String boxId = text(box, "box_id");
+        String scenario = text(box, "demo_scenario");
+        if (scenario == null || scenario.isBlank()) scenario = "normal";
+        String envNode = text(box, "env_node"), poseNode = text(box, "pose_node");
+        if ("offline".equals(scenario)) {
+            markOffline(boxId);
+            return;
+        }
+        if (envNode != null) {
+            runtime(envNode, now);
+            if (!"stale".equals(scenario)) latest(boxId, envNode, 71, now, envPayload(boxId, envNode, scenario, now));
+        }
+        if (poseNode != null) {
+            runtime(poseNode, now);
+            if (!"stale".equals(scenario)) latest(boxId, poseNode, 120, now, posePayload(boxId, poseNode, scenario, now));
+        }
     }
 
     private void runtime(String node, long now) {
@@ -73,32 +86,26 @@ public class DemoFleetService {
         db.update("UPDATE nodes SET current_boot_id=1,last_received_at=?,updated_at=? WHERE node_id=?", now, now, node);
     }
 
-    private void markOffline(String node) {
-        if (node == null || node.isBlank()) return;
-        db.update("UPDATE node_runtime SET online=0 WHERE node_id=?", node);
-    }
-
-    private void latest(String boxId, String node, String role, int caps, long now, ObjectNode payload) {
+    private void latest(String boxId, String node, int caps, long now, ObjectNode payload) {
         long seq = Math.max(1, (now / 1000) % 4_294_967_295L);
+        long uptime = Math.max(1000, now % 86_400_000L);
         db.update("INSERT INTO node_latest(box_id,node_id,boot_id,property_seq,device_ts,ts_src,uptime_ms," +
                 "time_uncertainty_ms,received_at,payload,updated_at) VALUES(?,?,1,?,?, 'SNTP',?,100,?,?,?) " +
                 "ON DUPLICATE KEY UPDATE boot_id=1,property_seq=VALUES(property_seq),device_ts=VALUES(device_ts)," +
                 "ts_src='SNTP',uptime_ms=VALUES(uptime_ms),time_uncertainty_ms=100,received_at=VALUES(received_at)," +
                 "payload=VALUES(payload),updated_at=VALUES(updated_at)",
-            boxId, node, seq, now, Math.max(1000, now % 86_400_000L), now, payloadJson(payload), now);
+            boxId, node, seq, now, uptime, now, payloadJson(payload), now);
     }
 
     private ObjectNode envPayload(String boxId, String node, String scenario, long now) {
         double temp = switch (scenario) {
             case "env_high" -> 9.2;
             case "impact" -> 5.1;
-            case "completed" -> 4.5;
             default -> 4.8;
         };
         double humi = switch (scenario) {
             case "env_high" -> 62.0;
             case "impact" -> 50.0;
-            case "completed" -> 53.0;
             default -> 55.0;
         };
         int lux = "env_high".equals(scenario) ? 280 : "impact".equals(scenario) ? 300 : 320;
@@ -136,5 +143,10 @@ public class DemoFleetService {
     private String payloadJson(ObjectNode value) {
         try { return json.writeValueAsString(value); }
         catch (Exception invalid) { throw new IllegalStateException("Demo payload serialization failed"); }
+    }
+
+    private static String text(Map<String, Object> row, String key) {
+        Object value = row.get(key);
+        return value == null ? null : value.toString();
     }
 }

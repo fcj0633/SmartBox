@@ -5,7 +5,7 @@ export interface Environment { assessment: string; level: string | null; tempera
 export interface AlarmState { assessment: string; active: boolean | null; level: string | null; active_count: number }
 export interface Node { node_id: string; role: string; caps: number; required: boolean; online: boolean; last_seen_at: number | null; last_received_at: number | null }
 export interface TaskSummary { task_id: number; transport_no: string; status: string; item_name: string | null; box_id: string; box_display_name: string; started_at: number | null; ended_at: number | null }
-export interface Box { box_id: string; display_name: string; asset_source: string; connectivity: string; data_state: string; environment: Environment; alarm: AlarmState; current_transport: TaskSummary | null; last_completed_transport: TaskSummary | null; position: Position | null; last_seen_at: number | null; nodes: Node[] }
+export interface Box { box_id: string; display_name: string; asset_source: string; purpose?: string | null; notes?: string | null; demo_scenario?: string | null; demo_enabled?: boolean; connectivity: string; data_state: string; environment: Environment; alarm: AlarmState; current_transport: TaskSummary | null; last_completed_transport: TaskSummary | null; position: Position | null; last_seen_at: number | null; nodes: Node[] }
 export interface StartCheck { online: boolean; risk: boolean; blockers: string[] }
 export interface Task { task_id: number; transport_no: string; box_id: string; box_display_name: string; status: string; item_name: string | null; item_description: string | null; operator_username: string | null; created_at: number; started_at: number | null; ended_at: number | null; route: Route | null; position: Position | null; start_check: StartCheck }
 export interface Kpis { box_total: number; online: number; partial: number; offline: number; unknown: number; active_transports: number; active_alarm_boxes: number; unknown_alarm_boxes: number; completed_today: number }
@@ -23,6 +23,9 @@ export const assetSourceLabel = (value: string) => value === 'SIMULATED' ? '模�
 export const connectivityLabel = (value: string) => ({ ONLINE: '在线', PARTIAL: '部分离线', OFFLINE: '离线', UNKNOWN: '未知' }[value] ?? value);
 export const taskStatusLabel = (value: string) => ({ READY: '待开始', ACTIVE: '运输中', COMPLETED: '已结束' }[value] ?? value);
 export const taskStatusTone = (value: string) => value === 'ACTIVE' ? 'active' : value === 'READY' ? 'ready' : 'done';
+export const scenarioLabel = (value?: string | null) => ({ normal: '正常演示', env_high: '高温', offline: '离线', stale: '数据过期', impact: '姿态冲击' }[value ?? ''] ?? '未设置');
+export const scenarioTone = (value?: string | null) => value === 'env_high' ? 'warn' : value === 'impact' ? 'critical' : value === 'offline' ? 'critical' : value === 'stale' ? 'warn' : 'neutral';
+export const demoEnabledLabel = (value?: boolean) => value === false ? '已停用' : '模拟运行中';
 export const dataStateLabel = (value: string) => ({ FRESH: '新鲜', STALE: '已过期', INVALID: '无效', UNKNOWN: '未知' }[value] ?? value);
 export const alarmAssessmentLabel = (value: string) => value === 'EVALUATED' ? '已判定' : '判定未知';
 export const alarmLevelLabel = (value: string | null) => ({ CRITICAL: '严重', WARNING: '警告', INFO: '提示' }[value ?? ''] ?? '未知');

@@ -110,14 +110,6 @@
       "level": "WARNING",
       "message": "模拟环境温度超过演示上限",
       "offset_ms": 600000
-    },
-    {
-      "box_id": "BOX-SIM-04",
-      "alarm_key": "IMPACT:pose",
-      "type": "IMPACT",
-      "level": "CRITICAL",
-      "message": "模拟姿态冲击事件",
-      "offset_ms": 300000
     }
   ]
 }

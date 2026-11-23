@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 public class EnterpriseConsoleController {
     private final EnterpriseReadService read;
     private final EnterpriseTransportService transports;
+    private final EnterpriseAssetService assets;
 
-    public EnterpriseConsoleController(EnterpriseReadService read, EnterpriseTransportService transports) {
-        this.read = read; this.transports = transports;
+    public EnterpriseConsoleController(EnterpriseReadService read, EnterpriseTransportService transports,
+                                       EnterpriseAssetService assets) {
+        this.read = read; this.transports = transports; this.assets = assets;
     }
 
     @GetMapping("/overview")
@@ -27,6 +29,11 @@ public class EnterpriseConsoleController {
     @GetMapping("/boxes/{boxId}")
     public Object box(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
         return ApiEnvelope.success(read.box(user, boxId));
+    }
+
+    @GetMapping("/boxes/{boxId}/events")
+    public Object boxEvents(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
+        return ApiEnvelope.success(read.boxEvents(user, boxId));
     }
 
     @GetMapping("/routes")
@@ -41,6 +48,39 @@ public class EnterpriseConsoleController {
     @GetMapping("/transports/{id}")
     public Object task(@AuthenticationPrincipal CurrentUser user, @PathVariable String id) {
         return ApiEnvelope.success(read.taskDetail(user, id(id)));
+    }
+
+    @PostMapping("/boxes")
+    public Object createBox(@AuthenticationPrincipal CurrentUser user, @RequestBody(required = false) JsonNode body) {
+        AssetFields fields = assetFields(body);
+        return ApiEnvelope.success(assets.create(user, fields.displayName(), fields.purpose(), fields.notes(), fields.scenario()));
+    }
+
+    @PostMapping("/boxes/{boxId}/edit")
+    public Object editBox(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId,
+                          @RequestBody(required = false) JsonNode body) {
+        AssetFields fields = assetFields(body);
+        return ApiEnvelope.success(assets.edit(user, boxId, fields.displayName(), fields.purpose(), fields.notes()));
+    }
+
+    @PostMapping("/boxes/{boxId}/scenario")
+    public Object scenario(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId,
+                           @RequestBody(required = false) JsonNode body) {
+        if (body == null || !body.isObject()) throw ApiException.invalid();
+        onlyFields(body, Set.of("scenario"));
+        JsonNode value = body.get("scenario");
+        if (value == null || !value.isTextual()) throw ApiException.invalid();
+        return ApiEnvelope.success(assets.scenario(user, boxId, value.asText()));
+    }
+
+    @PostMapping("/boxes/{boxId}/disable")
+    public Object disable(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
+        return ApiEnvelope.success(assets.disable(user, boxId));
+    }
+
+    @PostMapping("/boxes/{boxId}/enable")
+    public Object enable(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
+        return ApiEnvelope.success(assets.enable(user, boxId));
     }
 
     @PostMapping("/transports")
@@ -79,6 +119,23 @@ public class EnterpriseConsoleController {
     public Object alarms(@AuthenticationPrincipal CurrentUser user) { return ApiEnvelope.success(read.alarms(user)); }
 
     private record Fields(String boxId, String itemName, String itemDescription, String routeCode) {}
+    private record AssetFields(String displayName, String purpose, String notes, String scenario) {}
+
+    private static AssetFields assetFields(JsonNode body) {
+        if (body == null || !body.isObject()) throw ApiException.invalid();
+        onlyFields(body, Set.of("display_name", "purpose", "notes", "scenario"));
+        JsonNode name = body.get("display_name");
+        if (name == null || !name.isTextual()) throw ApiException.invalid();
+        JsonNode purpose = body.get("purpose"), notes = body.get("notes"), scenario = body.get("scenario");
+        if ((purpose != null && !purpose.isNull() && !purpose.isTextual())
+            || (notes != null && !notes.isNull() && !notes.isTextual())
+            || (scenario != null && !scenario.isNull() && !scenario.isTextual()))
+            throw ApiException.invalid();
+        return new AssetFields(name.asText(),
+            purpose == null || purpose.isNull() ? null : purpose.asText(),
+            notes == null || notes.isNull() ? null : notes.asText(),
+            scenario == null || scenario.isNull() ? null : scenario.asText());
+    }
 
     private static Fields fields(JsonNode body, boolean requireBox) {
         if (body == null || !body.isObject()) throw ApiException.invalid();

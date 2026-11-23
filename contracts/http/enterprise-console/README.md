@@ -26,12 +26,18 @@
 | POST | `/enterprise/console/transports/{id}/start` | 开始 ACTIVE；`confirm_risk` 可选布尔 |
 | POST | `/enterprise/console/transports/{id}/finish` | 结束 COMPLETED |
 | GET | `/enterprise/console/alarms` | 只读告警/恢复列表 |
+| POST | `/enterprise/console/boxes` | 创建模拟箱：`display_name,purpose?,notes?,scenario?` |
+| POST | `/enterprise/console/boxes/{id}/edit` | 编辑名称/用途/备注 |
+| POST | `/enterprise/console/boxes/{id}/scenario` | 切换模拟场景 `{scenario}` |
+| POST | `/enterprise/console/boxes/{id}/disable` | 停用模拟输入 |
+| POST | `/enterprise/console/boxes/{id}/enable` | 启用模拟输入 |
+| GET | `/enterprise/console/boxes/{id}/events` | 只读最近设备事件（最多 10 条） |
 
 ## 3. 关键响应字段
 
 - `overview`: `enterprise_id, enterprise_name, refreshed_at, kpis, boxes[], tasks[], recent_activity[]`.
 - `kpis`: `box_total, online, partial, offline, unknown, active_transports, active_alarm_boxes, unknown_alarm_boxes, completed_today`.
-- `box`: `box_id, display_name, asset_source, connectivity, data_state, environment, alarm, current_transport, last_completed_transport, position, last_seen_at, nodes[]`.
+- `box`: `box_id, display_name, asset_source, purpose, notes, demo_scenario, demo_enabled, connectivity, data_state, environment, alarm, current_transport, last_completed_transport, position, last_seen_at, nodes[]`.
 - `task`: `task_id, transport_no, box_id, box_display_name, status, item_name, item_description, operator_username, created_at, started_at, ended_at, route, position, start_check`.
 - `position`: `x, y, place, route_code, route_name, progress, position_at, stale, finished, source`.
 - `alarm`: `assessment, active, level, active_count`.
@@ -49,6 +55,10 @@
 | 409 | `RISK_CONFIRMATION_REQUIRED` | 有活动告警或告警判定未知，未确认 |
 | 409 | `BOX_IN_USE` | 同箱已有 ACTIVE |
 | 409 | `TRANSPORT_NO_CONFLICT` | 运输编号冲突 |
+| 409 | `ASSET_NOT_SIMULATED` | 对 REAL 箱体执行场景/启停 |
+| 409 | `BOX_IN_USE` | ACTIVE 运输中停用模拟输入 |
+| 400 | `INVALID_SCENARIO` | 场景不是 normal/env_high/offline/stale/impact |
+| 409 | `FACT_GENERATION_FAILED` | 场景事实生成失败，场景保持不变 |
 
 ## 5. 示例
 
