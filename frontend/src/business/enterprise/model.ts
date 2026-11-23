@@ -9,6 +9,8 @@ export interface TaskSummary { task_id: number; transport_no: string; status: st
 export interface Box { box_id: string; display_name: string; asset_source: string; purpose?: string | null; notes?: string | null; demo_scenario?: string | null; demo_enabled?: boolean; connectivity: string; data_state: string; environment: Environment; pose?: Pose | null; alarm: AlarmState; current_transport: TaskSummary | null; last_completed_transport: TaskSummary | null; position: Position | null; last_seen_at: number | null; nodes: Node[] }
 export interface SamplePoint { id: number; observed_at: number; received_at: number | null; valid: boolean; temperature: number | null; humidity: number | null; lux: number | null; state: string | null; tilt_deg: number | null; acc_g: number[]; time_quality: string }
 export interface CommandNode { node_id: string; status: string; result: string | null; code: string | null; ack_received_at: number | null }
+export interface CommandOperationNode { node_id: string; request_id: string; status: string; code: string | null; actual_state: Record<string, unknown> }
+export interface CommandOperation { operation_id: string; box_id: string; status: string; nodes: CommandOperationNode[] }
 export interface CommandRow { operation_id: string; cmd: string; status: string; created_at: number; updated_at: number; requested_by: string | null; params: string; nodes: CommandNode[] }
 export interface LogRow { at: number; source: string; title: string; detail: string; level: string }
 export interface StartCheck { online: boolean; risk: boolean; blockers: string[] }
@@ -46,6 +48,7 @@ export const durationText = (route: Route | null) => route == null ? '—' : `${
 export const poseStateLabel = (value: string | null | undefined) => ({ NORMAL: '正常', TILTED: '倾斜', SIDEWAYS: '侧翻', INVERTED: '倒置', UNKNOWN: '未知' }[value ?? ''] ?? '未知');
 export const logSourceLabel = (value: string) => ({ device: '设备', task: '运输', audit: '审计', command: '命令' }[value] ?? value);
 export const commandStatusLabel = (value: string) => ({ PENDING: '待发送', RUNNING: '执行中', SUCCEEDED: '成功', PARTIAL: '部分成功', FAILED: '失败', EXPIRED: '超时' }[value] ?? value);
+export const commandKindLabel = (value: string) => ({ output: '输出控制', sentry: '哨兵', profile: '环境画像', gps_mode: '定位模式', calibrate: '姿态校准' }[value] ?? value);
 export const alarmMessage = (details: string) => {
   try {
     const value = JSON.parse(details) as { message?: string };

@@ -14,6 +14,7 @@ import java.net.http.*;
 import java.nio.file.*;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -66,8 +67,13 @@ class EnterpriseConsoleIT {
     record Reply(int status, JsonNode body) {}
 
     Reply request(String method, String path, String token, JsonNode body) throws Exception {
+        return request(method, path, token, body, Map.of());
+    }
+
+    Reply request(String method, String path, String token, JsonNode body, Map<String, String> headers) throws Exception {
         var builder = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/v1" + path)).timeout(Duration.ofSeconds(15));
         if (token != null) builder.header("Authorization", "Bearer " + token);
+        headers.forEach(builder::header);
         if (body != null) builder.header("Content-Type", "application/json").method(method, HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body)));
         else builder.method(method, HttpRequest.BodyPublishers.noBody());
         var response = http.send(builder.build(), HttpResponse.BodyHandlers.ofString());
@@ -332,6 +338,39 @@ class EnterpriseConsoleIT {
         var commands = request("GET", "/enterprise/console/boxes/" + boxId + "/commands", operator, null);
         assertEquals(200, commands.status());
         assertTrue(commands.body().path("data").toString().contains(operation));
+    }
+
+    @Test void commandSubmissionIdempotencyAndDemoGuard() throws Exception {
+        String operator = login("LOGISTICS_OPERATOR");
+        String boxId = createAsset(operator, "TASK-018 控制箱", "normal").path("box_id").asText();
+        demoFleet.refresh(boxId);
+        ObjectNode body = json.createObjectNode().put("cmd", "output");
+        body.putObject("params").put("kind", "light").put("on", true).put("duration_s", 2);
+        Map<String, String> headers = Map.of("Idempotency-Key", "task018-command-key");
+        var submitted = request("POST", "/enterprise/console/boxes/" + boxId + "/commands", operator, body, headers);
+        assertEquals(202, submitted.status());
+        String operationId = submitted.body().path("data").path("operation_id").asText();
+        assertFalse(operationId.isBlank());
+        var status = request("GET", "/enterprise/console/boxes/" + boxId + "/commands/" + operationId, operator, null);
+        assertEquals(200, status.status());
+        assertEquals(operationId, status.body().path("data").path("operation_id").asText());
+        assertEquals("PENDING", status.body().path("data").path("status").asText());
+        assertEquals(1, status.body().path("data").path("nodes").size());
+
+        var again = request("POST", "/enterprise/console/boxes/" + boxId + "/commands", operator, body, headers);
+        assertEquals(202, again.status());
+        assertEquals(operationId, again.body().path("data").path("operation_id").asText());
+
+        ObjectNode changed = body.deepCopy();
+        changed.withObject("params").put("duration_s", 3);
+        var conflict = request("POST", "/enterprise/console/boxes/" + boxId + "/commands", operator, changed, headers);
+        assertEquals(409, conflict.status());
+
+        assertEquals(200, request("POST", "/enterprise/console/boxes/" + boxId + "/disable", operator, null).status());
+        var disabled = request("POST", "/enterprise/console/boxes/" + boxId + "/commands", operator, body,
+            Map.of("Idempotency-Key", "task018-disabled-key"));
+        assertEquals(409, disabled.status());
+        assertEquals("DEMO_DISABLED", disabled.body().path("error").path("code").asText());
     }
 
     @Test void editOnlyWhileReadyAndValidation() throws Exception {

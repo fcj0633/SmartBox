@@ -202,6 +202,52 @@ paths:
                 properties:
                   data: { type: array, items: { $ref: '#/components/schemas/CommandRow' } }
                   request_id: { type: string }
+    post:
+      tags: [control]
+      summary: Submit an enterprise-scoped command
+      parameters:
+        - { name: boxId, in: path, required: true, schema: { type: string } }
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, minLength: 1, maxLength: 64 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CommandInput' }
+      responses:
+        '202':
+          description: Accepted by the command service; not device success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      operation_id: { type: string }
+                  request_id: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /enterprise/console/boxes/{boxId}/commands/{operationId}:
+    get:
+      tags: [control]
+      summary: Command operation status and per-node results
+      parameters:
+        - { name: boxId, in: path, required: true, schema: { type: string } }
+        - { name: operationId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Operation status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/CommandOperation' }
+                  request_id: { type: string }
+        '404': { $ref: '#/components/responses/Error' }
   /enterprise/console/boxes/{boxId}/logs:
     get:
       tags: [detail]
@@ -630,6 +676,28 @@ components:
         requested_by: { type: [string, 'null'] }
         params: { type: string }
         nodes: { type: array, items: { $ref: '#/components/schemas/CommandNode' } }
+    CommandInput:
+      type: object
+      required: [cmd, params]
+      properties:
+        cmd: { enum: [output, sentry, profile, gps_mode, calibrate] }
+        params: { type: object }
+        target_node_id: { type: string }
+    CommandOperationNode:
+      type: object
+      properties:
+        node_id: { type: string }
+        request_id: { type: string }
+        status: { type: string }
+        code: { type: [string, 'null'] }
+        actual_state: { type: object }
+    CommandOperation:
+      type: object
+      properties:
+        operation_id: { type: string }
+        box_id: { type: string }
+        status: { type: string }
+        nodes: { type: array, items: { $ref: '#/components/schemas/CommandOperationNode' } }
     LogRow:
       type: object
       properties:

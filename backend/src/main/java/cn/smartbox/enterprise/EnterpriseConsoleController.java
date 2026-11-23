@@ -1,9 +1,11 @@
 package cn.smartbox.enterprise;
 
+import java.util.Map;
 import java.util.Set;
 import cn.smartbox.auth.CurrentUser;
 import cn.smartbox.common.*;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +17,12 @@ public class EnterpriseConsoleController {
     private final EnterpriseTransportService transports;
     private final EnterpriseAssetService assets;
     private final EnterpriseDetailService detail;
+    private final EnterpriseControlService controls;
 
     public EnterpriseConsoleController(EnterpriseReadService read, EnterpriseTransportService transports,
-                                       EnterpriseAssetService assets, EnterpriseDetailService detail) {
-        this.read = read; this.transports = transports; this.assets = assets; this.detail = detail;
+                                       EnterpriseAssetService assets, EnterpriseDetailService detail,
+                                       EnterpriseControlService controls) {
+        this.read = read; this.transports = transports; this.assets = assets; this.detail = detail; this.controls = controls;
     }
 
     @GetMapping("/overview")
@@ -53,6 +57,20 @@ public class EnterpriseConsoleController {
     @GetMapping("/boxes/{boxId}/commands")
     public Object commands(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
         return ApiEnvelope.success(detail.commands(user, boxId));
+    }
+
+    @PostMapping("/boxes/{boxId}/commands")
+    public ResponseEntity<Object> command(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId,
+                                          @RequestHeader(value = "Idempotency-Key", required = false) String key,
+                                          @RequestBody JsonNode body) {
+        return ResponseEntity.accepted().body(ApiEnvelope.success(
+            Map.of("operation_id", controls.submit(user, boxId, key, body))));
+    }
+
+    @GetMapping("/boxes/{boxId}/commands/{operationId}")
+    public Object commandOperation(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId,
+                                   @PathVariable String operationId) {
+        return ApiEnvelope.success(controls.operation(user, boxId, operationId));
     }
 
     @GetMapping("/boxes/{boxId}/logs")

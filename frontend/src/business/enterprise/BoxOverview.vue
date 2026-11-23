@@ -5,9 +5,10 @@ import { useSession } from '../../stores/session';
 import BusinessShell from '../BusinessShell.vue';
 import MapScene from './MapScene.vue';
 import SampleChart from './SampleChart.vue';
+import ControlCenter from './ControlCenter.vue';
 import { usePolling } from '../model';
 import {
-  alarmLevelLabel, assetSourceLabel, commandStatusLabel, connectivityLabel, dateTime, demoEnabledLabel,
+  alarmLevelLabel, assetSourceLabel, connectivityLabel, dateTime, demoEnabledLabel,
   environmentTitle, environmentValue, humidityValue, logSourceLabel, poseStateLabel, positionLabel,
   qualityText, scenarioLabel, scenarioTone, taskStatusLabel, taskStatusTone,
   type AlarmRow, type Box, type CommandRow, type Event, type LogRow, type SamplePoint, type Task,
@@ -46,21 +47,6 @@ const relatedTask = computed(() => {
 });
 const completedTasks = computed(() => tasks.value.filter(task => task.status === 'COMPLETED'));
 const poseEvents = computed(() => events.value.filter(event => ['POSE_CHANGED', 'IMPACT'].includes(event.type)));
-const capabilities = computed(() => {
-  const result: { node: string; items: string[] }[] = [];
-  for (const node of box.value?.nodes ?? []) {
-    const items: string[] = [];
-    if ((node.caps & 1) === 1) items.push('画像');
-    if ((node.caps & 2) === 2) items.push('灯');
-    if ((node.caps & 4) === 4) items.push('风扇');
-    if ((node.caps & 8) === 8) items.push('校准');
-    if ((node.caps & 16) === 16) items.push('指示');
-    if ((node.caps & 32) === 32) items.push('GPS');
-    if ((node.caps & 64) === 64) items.push('哨兵');
-    result.push({ node: `${node.node_id} · ${node.role}`, items });
-  }
-  return result;
-});
 const sampleTitle = computed(() => tab.value === 'pose' ? '姿态趋势（倾角）' : '温度趋势');
 const envTableTitle = computed(() => `环境采样（${sampleHours.value} 小时）`);
 async function loadSamples(kind: 'env' | 'pose') {
@@ -135,8 +121,7 @@ watch(tab, () => { if (tab.value === 'environment' && !envSamples.value.length) 
       </section>
 
       <section v-else-if="tab === 'control'" class="detail-tab-panel">
-        <section class="panel"><div class="enterprise-panel-heading"><div><h2>节点能力</h2><p>从节点 caps 推导；本轮不提供提交按钮</p></div><span class="map-mock-label">只读</span></div><div class="capability-list"><div v-for="item in capabilities" :key="item.node" class="capability-row"><strong>{{ item.node }}</strong><span v-for="cap in item.items" :key="cap">{{ cap }}</span><small v-if="!item.items.length">无可用控制能力</small></div></div><p class="data-note">命令提交、PENDING、ACK、失败/超时将在 TASK-018 通过现有命令服务接入；当前只展示能力与历史，不伪造执行。</p></section>
-        <section class="panel"><div class="enterprise-panel-heading"><div><h2>命令历史</h2><p>只读最近 20 次操作及逐节点结果</p></div></div><div class="table-wrap"><table class="enterprise-table"><thead><tr><th>操作</th><th>命令</th><th>状态</th><th>提交</th><th>节点结果</th></tr></thead><tbody><tr v-for="command in commands" :key="command.operation_id"><td>{{ command.operation_id }}</td><td>{{ command.cmd }}</td><td>{{ commandStatusLabel(command.status) }}</td><td>{{ dateTime(command.created_at) }}</td><td><small v-for="node in command.nodes" :key="node.node_id" class="table-subline">{{ node.node_id }} · {{ node.status }} · {{ node.result || '—' }}</small></td></tr></tbody></table><p v-if="!commands.length" class="empty-record">暂无命令记录。</p></div></section>
+        <ControlCenter :box="box" :commands="commands" @changed="refresh" />
       </section>
 
       <section v-else-if="tab === 'logs'" class="panel detail-tab-panel">

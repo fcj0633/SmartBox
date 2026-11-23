@@ -847,3 +847,15 @@
   .sb-enterprise .detail-tabs { flex-wrap: nowrap; overflow-x: auto; }
   .sb-enterprise .detail-tabs button { white-space: nowrap; padding: 9px 11px; }
 }
+/* TASK-018 control center */
+.sb-enterprise .command-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(260px, .7fr); gap: 18px; padding: 0 18px 18px; }
+.sb-enterprise .command-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin-bottom: 12px; }
+.sb-enterprise .command-form-grid .drawer-field { margin: 0; }
+.sb-enterprise .command-result { border: 1px solid #dce5e2; border-radius: 7px; background: #f8fbfa; padding: 12px; min-height: 120px; }
+.sb-enterprise .command-result-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.sb-enterprise .command-result-head strong { font-size: 11px; color: #29443d; overflow-wrap: anywhere; }
+.sb-enterprise .command-node-result { display: grid; gap: 3px; padding: 8px 0; border-top: 1px solid #e6efec; }
+.sb-enterprise .command-node-result strong { font-size: 12px; color: #29443d; }
+.sb-enterprise .command-node-result small { font-size: 11px; color: #7b908b; overflow-wrap: anywhere; }
+.sb-enterprise .detail-tab-panel > .panel > .command-layout + .data-note { margin-top: 0; }
+@media (max-width: 820px) { .sb-enterprise .command-layout { grid-template-columns: 1fr; } .sb-enterprise .command-form-grid { grid-template-columns: 1fr; } }

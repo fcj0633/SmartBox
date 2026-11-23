@@ -35,6 +35,8 @@
 | GET | `/enterprise/console/boxes/{id}/samples` | 环境/姿态样本；`kind=env\|pose`、`hours=1\|6\|24` |
 | GET | `/enterprise/console/boxes/{id}/alarms` | 该箱体告警/恢复 |
 | GET | `/enterprise/console/boxes/{id}/commands` | 最近命令与逐节点结果，只读 |
+| POST | `/enterprise/console/boxes/{id}/commands` | 提交命令；`Idempotency-Key` + `{cmd,params,target_node_id?}`；202 operation_id |
+| GET | `/enterprise/console/boxes/{id}/commands/{operationId}` | 命令状态与逐节点 ACK/结果 |
 | GET | `/enterprise/console/boxes/{id}/logs` | 设备/任务/审计/命令合并日志 |
 
 ## 3. 关键响应字段
@@ -63,6 +65,9 @@
 | 409 | `BOX_IN_USE` | ACTIVE 运输中停用模拟输入 |
 | 400 | `INVALID_SCENARIO` | 场景不是 normal/env_high/offline/stale/impact |
 | 409 | `FACT_GENERATION_FAILED` | 场景事实生成失败，场景保持不变 |
+| 409 | `DEMO_DISABLED` | 模拟输入已停用，拒绝命令 |
+| 409 | `TIME_UNSYNCED` | 目标节点无可靠时间 |
+| 409 | `CONFLICT` | Idempotency-Key 对应不同请求体 |
 
 ## 5. 示例
 
