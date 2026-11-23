@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-/** Additive enterprise console API. Old /enterprise, /rider and /boxes endpoints are untouched. */
+/** Enterprise console API. Legacy /boxes, /rider and guest endpoints are no longer registered. */
 @RestController
 @RequestMapping("/api/v1/enterprise/console")
 public class EnterpriseConsoleController {

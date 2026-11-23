@@ -21,3 +21,4 @@
 - 仓库保留 `firmware/` 源码作为参考，但不提供硬件构建、烧录、测试或联调工具。
 - 后端运行时 schema 位于 `backend/src/main/resources/contracts/effective/`。
 - 没有 `tools/`、`tests/` 或自动化文档校验；验证以构建和手工启动为准。
+- 前端只保留 `/enterprise/**` 企业端路由；旧 `/boxes`、`/rider`、`/track` 已移除。

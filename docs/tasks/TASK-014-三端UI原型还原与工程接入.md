@@ -43,8 +43,8 @@
 | 运输/访客原型 | TransportOverview.vue、Environment.vue、Journey.vue、Trend.vue | 身份→环境→详情→进度的结构、历史展示与缺口；`Trend.vue` 生成的六点模拟曲线**不能进入生产数据层** |
 | 原型外框和视觉规则 | role-design-exploration/src/App.vue、style.css、README、UX-REVIEW | 骑手四导航、访客无底栏、响应式布局及优化依据；`usePreview.ts` 仅模拟状态/动作，不可移植为生产 Store |
 | 正式企业页面 | [frontend/src/business/Enterprise.vue](../../frontend/src/business/Enterprise.vue) | 已请求企业箱体、任务、演示骑手并可分配/收回，但只是通用卡片列表，缺原型侧栏和地图/任务联动 |
-| 正式骑手/详情 | [Rider.vue](../../frontend/src/business/Rider.vue)、[TransportDetail.vue](../../frontend/src/business/TransportDetail.vue) | 已完成创建/绑定/开始/结束/分享验证码请求，缺导航与三步结构；现有详情把物品编辑和开始混在一块 |
-| 正式访客/监测 | [Track.vue](../../frontend/src/business/Track.vue)、[MonitoringPanel.vue](../../frontend/src/business/MonitoringPanel.vue) | 访客短期 token、失效清理、轮询和任务字段是对的；需改变页面顺序、样式与二级查看体验 |
+| 正式骑手/详情 | Rider.vue、TransportDetail.vue | 已完成创建/绑定/开始/结束/分享验证码请求，缺导航与三步结构；现有详情把物品编辑和开始混在一块 |
+| 正式访客/监测 | Track.vue、MonitoringPanel.vue | 访客短期 token、失效清理、轮询和任务字段是对的；需改变页面顺序、样式与二级查看体验 |
 | 正式外框/样式 | [BusinessShell.vue](../../frontend/src/business/BusinessShell.vue)、[business.css](../../frontend/src/business/business.css) | 一套横向顶栏同时用于企业与骑手是设计偏离的根源；应拆成 **EnterpriseLayout / RiderLayout / GuestLayout** 或等效分支 |
 | 正式路由/会话 | [router/index.ts](../../frontend/src/router/index.ts)、[app/App.vue](../../frontend/src/app/App.vue)、[stores/session.ts](../../frontend/src/stores/session.ts) | `/track` 是 `meta.public`，企业/骑手是受控 JWT 路由；`businessHome` 与旧 `box_ids` 不是新企业/骑手资产业务授权 |
 | 真实类型/刷新 | [business/model.ts](../../frontend/src/business/model.ts)、[api/http.ts](../../frontend/src/api/http.ts) | `Task/Asset/Monitoring`、`usePolling`、`session.request`、`SerialRead` 是应保留的业务接入层 |
@@ -183,7 +183,7 @@ P0 必须恢复原型的**侧边栏＋顶部工作区＋地图/运输双栏主�
 
 ## 6. 骑手端：任务优先工作台、四导航和三步准备
 
-**视觉权威**：RiderHome.vue、PrepareFlow.vue、原型 App.vue。正式现状：[Rider.vue](../../frontend/src/business/Rider.vue)、[TransportDetail.vue](../../frontend/src/business/TransportDetail.vue)。
+**视觉权威**：RiderHome.vue、PrepareFlow.vue、原型 App.vue。正式现状：Rider.vue、TransportDetail.vue。
 
 ### 6.1 首页必须恢复的构图
 
@@ -218,7 +218,7 @@ P0 必须恢复原型的**侧边栏＋顶部工作区＋地图/运输双栏主�
 
 ## 7. 普通用户端：访客原型的运输身份＋环境主次顺序
 
-**视觉权威**：原型 TransportOverview 与 原型 App。正式现状：[Track.vue](../../frontend/src/business/Track.vue)。
+**视觉权威**：原型 TransportOverview 与 原型 App。正式现状：Track.vue。
 
 ### 7.1 未验证时：独立验证布局
 
