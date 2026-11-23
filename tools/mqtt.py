@@ -13,6 +13,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action',choices=['prepare','broker','node','unit','integration'])
     parser.add_argument('--config',type=Path)
+    parser.add_argument('--broker-profile',choices=['local','cloud'],default='local')
     parser.add_argument('--run-dir',type=Path)
     parser.add_argument('--role',choices=['ENV','POSE'],default='ENV')
     parser.add_argument('--scenario',choices=['normal','unsynced','invalid','rules-env-high','rules-env-cycle','rules-pose','rules-impact','rules-door','rules-geofence','rules-sentry'],default='normal')
@@ -24,13 +25,16 @@ def main():
         if args.action=='unit':
             return subprocess.run([sys.executable,'-m','unittest','discover','-s','tests/simulator','-p','test_*.py','-v'],cwd=ROOT).returncode
         run_dir=confined(args.run_dir or ROOT/'artifacts/mqtt/TASK-004'/str(time.time_ns()),ROOT)
+        if args.action in ('prepare','integration') and args.broker_profile=='cloud':raise ValueError('This action is local-only; cloud credentials are separately provisioned')
         if args.action=='integration':
             from simulator.scenarios import integration
             return integration(run_dir,args.config)
         config_path=args.config or DEFAULT
         if args.action=='prepare':
             prepare(config_path);print('PASS: local MQTT configuration prepared/verified; credentials not displayed.');return 0
-        config=load(config_path)
+        from broker_profiles import load_profile
+        config=load_profile(args.broker_profile,args.config)
+        if args.action=='broker' and args.broker_profile=='cloud':raise ValueError('Cloud broker is externally managed')
         if args.action=='broker':
             with Broker(config,run_dir) as broker:
                 try:

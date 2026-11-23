@@ -6,6 +6,12 @@
 #include "cmsis_os2.h"
 #include "sb_local_config.h"
 #include "MQTTClient.h"
+#include "sb_tls.h"
+#ifndef SB_BROKER_TLS
+#define SB_BROKER_TLS 0
+#define SB_BROKER_HOST SB_BROKER_IPV4
+#define SB_BROKER_PORT 1883
+#endif
 #include "wifi_device.h"
 #include "wifi_error_code.h"
 #include "lwip/netifapi.h"
@@ -26,6 +32,9 @@ static uint64_t next_diagnostic;
 static SbSntpSchedule sntp_schedule;
 static unsigned backoff=1;static uint32_t boot;
 static int transfer(Network *n,unsigned char *data,int length,int timeout,bool write_mode) {
+#if SB_BROKER_TLS
+    (void)n;return sb_tls_transfer(data,length,timeout,write_mode);
+#else
     SbClock start,now;int total=0;
     if(length<=0||timeout<0||sb_clock_get(&start)!=SB_OK)return -1;
     while(total<length) {
@@ -41,6 +50,7 @@ static int transfer(Network *n,unsigned char *data,int length,int timeout,bool w
         total+=rc;
     }
     return total;
+#endif
 }
 static int read_socket(Network *n,unsigned char *p,int len,int timeout){return transfer(n,p,len,timeout,false);}
 static int write_socket(Network *n,unsigned char *p,int len,int timeout){return transfer(n,p,len,timeout,true);}
@@ -62,8 +72,11 @@ static SbResult publish(const char *suffix,const char *raw,int qos) {
 /* Explicit socket deadlines avoid the SDK sample's unbounded connect(). */
 static int connect_socket(void) {
     struct sockaddr_in addr={0};struct timeval wait={3,0};int fd,flags,rc,error=0;socklen_t size=sizeof(error);fd_set writes;
-    addr.sin_family=AF_INET;addr.sin_port=htons(1883);
-    if(inet_pton(AF_INET,SB_BROKER_IPV4,&addr.sin_addr)!=1)return -1;
+    struct addrinfo hints={0},*result=NULL;
+    hints.ai_family=AF_INET;hints.ai_socktype=SOCK_STREAM;
+    if(getaddrinfo(SB_BROKER_HOST,NULL,&hints,&result)!=0||!result)return -1;
+    addr=*(struct sockaddr_in*)result->ai_addr;freeaddrinfo(result);
+    addr.sin_port=htons(SB_BROKER_PORT);
     fd=socket(AF_INET,SOCK_STREAM,0);if(fd<0)return -1;
     flags=fcntl(fd,F_GETFL,0);if(flags<0||fcntl(fd,F_SETFL,flags|O_NONBLOCK)<0){lwip_close(fd);return -1;}
     rc=connect(fd,(struct sockaddr*)&addr,sizeof(addr));
@@ -74,7 +87,7 @@ static int connect_socket(void) {
 }
 static void disconnect(void) {
     connected=false;client.isconnected=0;
-    if(transport){NetworkDisconnect(&network);transport=false;}
+    if(transport){sb_tls_close();NetworkDisconnect(&network);transport=false;}
     head=count=0;
 }
 static bool wifi_ready(uint64_t now) {
@@ -128,7 +141,14 @@ static void synchronize_time(void) {
 }
 static bool mqtt_connect(void) {
     MQTTPacket_connectData options=MQTTPacket_connectData_initializer;char will[192];unsigned i;
-    if(connect_socket()!=0){printf("SB MQTT TCP connect failed\n");return false;}
+#if SB_BROKER_TLS
+    SbClock clock;
+    if(sb_clock_get(&clock)!=SB_OK||!clock.utc_valid){printf("SB MQTT TLS awaiting SNTP\n");return false;}
+#endif
+    if(connect_socket()!=0){printf("SB MQTT DNS/TCP connect failed\n");return false;}
+#if SB_BROKER_TLS
+    if(sb_tls_open(network.my_socket,SB_BROKER_HOST,SB_MQTT_CA_PEM)!=0){printf("SB MQTT TLS verification/handshake failed\n");return false;}
+#endif
     snprintf(will,sizeof(will),"{\"node_id\":\"%s\",\"boot_id\":%lu,\"online\":false}",sb_config_get()->node_id,(unsigned long)boot);
     snprintf(up,sizeof(up),"box/%s/%s/availability",sb_config_get()->box_id,sb_config_get()->node_id);
     options.MQTTVersion=4;options.clientID.cstring=(char*)sb_config_get()->node_id;options.username.cstring=SB_MQTT_USER;options.password.cstring=SB_MQTT_PASSWORD;

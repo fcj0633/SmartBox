@@ -1,5 +1,12 @@
 # 开发工具导航：检查、构建、运行与联调
 
+## 云端与本地 Broker 选择
+
+[project.py](project.py)默认 `--broker-profile cloud --mode server`，仅启动后端/网页；hardware和simulator选择输入来源，local需显式指定。云端模式不启动/停止Mosquitto、不要求本机1883空闲。
+
+[broker_profiles.py](broker_profiles.py)统一云端配置、TLS信任与后端环境；[cloud_mqtt.py](cloud_mqtt.py)支持prepare、reserve-state、check及有明确同意参数的ACL smoke；[cloud_integration.py](cloud_integration.py)在smartbox_test与18080/15173验证真实云闭环，可加 `--browser`。两种云端主动探测前必须停同身份业务客户端；工具不管理/删除云实例。详细权限、写入、状态预留、配置和回退见[云端指南](../docs/delivery/deployment/EMQX云端部署与迁移.md)。
+
+
 ## 新环境与完整部署
 
 先读[完整部署指南](../docs/delivery/deployment/开发者完整部署指南.md)。以下为新增可复用入口；真实密码不使用命令行参数。

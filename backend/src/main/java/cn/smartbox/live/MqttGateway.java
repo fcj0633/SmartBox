@@ -20,7 +20,14 @@ public class MqttGateway {
     private boolean ready;private long nextConnect;
     public MqttGateway(Environment env,LiveStore store){
         this.env=env;this.store=store;
-        if(enabled()&&(!"smartbox_backend".equals(env.getRequiredProperty("SMARTBOX_MQTT_USER"))||env.getRequiredProperty("SMARTBOX_MQTT_PASSWORD").isBlank()||!env.getProperty("SMARTBOX_MQTT_URL","tcp://127.0.0.1:1883").equals("tcp://127.0.0.1:1883")))throw new IllegalArgumentException("Invalid project MQTT configuration");
+        if(enabled()) {
+            if(!"smartbox_backend".equals(env.getRequiredProperty("SMARTBOX_MQTT_USER")) || env.getRequiredProperty("SMARTBOX_MQTT_PASSWORD").isBlank()) throw new IllegalArgumentException("Invalid project MQTT identity");
+            MqttTransport.validate(env.getProperty("SMARTBOX_MQTT_PROFILE","local"),env.getProperty("SMARTBOX_MQTT_URL","tcp://127.0.0.1:1883"));
+            if("cloud".equals(env.getProperty("SMARTBOX_MQTT_PROFILE"))) {
+                try { MqttTransport.trust(java.nio.file.Path.of(env.getRequiredProperty("SMARTBOX_MQTT_CA_FILE"))); }
+                catch(Exception error) { throw new IllegalArgumentException("Invalid MQTT CA bundle"); }
+            }
+        }
     }
     public boolean enabled(){return env.getProperty("SMARTBOX_MQTT_ENABLED",Boolean.class,false);}
     public boolean ready(){return ready&&client!=null&&client.isConnected();}
@@ -33,7 +40,7 @@ public class MqttGateway {
             if(client!=null)client.close(true);
             String username=env.getRequiredProperty("SMARTBOX_MQTT_USER");
             String endpoint=env.getProperty("SMARTBOX_MQTT_URL","tcp://127.0.0.1:1883");
-            if(!endpoint.equals("tcp://127.0.0.1:1883"))throw new IllegalArgumentException("Local MQTT endpoint required");
+            MqttTransport.validate(env.getProperty("SMARTBOX_MQTT_PROFILE","local"),endpoint);
             client=new MqttAsyncClient(endpoint,username,new MemoryPersistence());
             client.setCallback(new MqttCallback(){
                 public void connectionLost(Throwable cause){ready=false;}
@@ -45,13 +52,30 @@ public class MqttGateway {
             MqttConnectOptions options=new MqttConnectOptions();options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
             options.setCleanSession(true);options.setKeepAliveInterval(60);options.setConnectionTimeout(3);
             options.setUserName(username);options.setPassword(env.getRequiredProperty("SMARTBOX_MQTT_PASSWORD").toCharArray());
-            client.connect(options).waitForCompletion(4000);
+            if("cloud".equals(env.getProperty("SMARTBOX_MQTT_PROFILE"))) {
+                options.setSocketFactory(MqttTransport.trust(java.nio.file.Path.of(env.getRequiredProperty("SMARTBOX_MQTT_CA_FILE"))));
+                options.setHttpsHostnameVerificationEnabled(true);
+            }
+            options.setConnectionTimeout(10);
+            client.connect(options).waitForCompletion(12000);
             List<String> topics=new ArrayList<>();
             for(var node:store.rows("SELECT node_id,box_id FROM nodes"))for(String suffix:List.of("property","heartbeat","event","command_ack","availability"))
                 topics.add("box/"+node.get("box_id")+"/"+node.get("node_id")+"/"+suffix);
             if(!topics.isEmpty())client.subscribe(topics.toArray(String[]::new),topics.stream().mapToInt(x->1).toArray()).waitForCompletion(4000);
             ready=true;
-        }catch(Exception error){ready=false;}
+        }catch(Exception error){
+            ready=false;
+            org.slf4j.LoggerFactory.getLogger(MqttGateway.class).warn("MQTT connect failed ({})",failureCategory(error));
+        }
+    }
+    static String failureCategory(Throwable error) {
+        for(Throwable x=error;x!=null;x=x.getCause()) {
+            if(x instanceof java.net.UnknownHostException)return "DNS";
+            if(x instanceof javax.net.ssl.SSLException || x instanceof java.security.cert.CertificateException)return "TLS";
+            if(x instanceof java.net.SocketTimeoutException || x instanceof java.net.ConnectException)return "NETWORK";
+            if(x instanceof MqttException m && (m.getReasonCode()==4 || m.getReasonCode()==5))return "AUTHENTICATION";
+        }
+        return "CONNECTION_OR_SUBSCRIPTION";
     }
     public synchronized boolean publish(String topic,byte[] data){
         if(!ready())return false;

@@ -71,7 +71,8 @@ class IdentityState:
             or not 0 <= self.value['sentry_revision'] <= 2**64-1):
             raise ValueError('Invalid identity state')
     def reserve(self):
-        if self.value['boot_id'] == U32: raise ValueError('Identity exhausted')
+        limit=self.value.get('boot_limit',U32)
+        if type(limit) is not int or not 0<=limit<=U32 or self.value['boot_id'] >= limit: raise ValueError('Identity exhausted')
         new = {**self.value, 'boot_id': self.value['boot_id'] + 1}
         atomic_json(self.path, new)
         self.value = new

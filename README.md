@@ -1,5 +1,12 @@
 # SmartBox：物流箱监测与控制原型
 
+## 默认云端 Broker（2026-11-23）
+
+日常启动默认使用 EMQX Cloud Serverless、TLS8883、独立账号认证，本地 Mosquitto 保留为显式备用。首次使用先按[云端部署与迁移](docs/delivery/deployment/EMQX云端部署与迁移.md)创建实例、配置账号/ACL及本地忽略文件，再执行 `.venv\Scripts\python.exe tools/project.py start --mode server`。网页仍是本机5173；server不要求板在线，hardware等待真实板，simulator需独立代次准备。旧本地模拟启动请显式加 `--broker-profile local`。
+
+当前云端软件、固件与板端验证分别记录于[迁移报告](docs/testing/reports/EMQX云端迁移验证报告.md)。公网TLS由后端、模拟器和固件实现，浏览器不直连MQTT；这不升级完整业务算法或长期可靠性验收。下文原本机/LAN拓扑作为local模式阅读。
+
+
 SmartBox 是一个基于 **两块 BearPi-HM Nano、Java 后端、MySQL、Vue 和 MQTT** 的物流箱状态监测与控制原型。项目把环境、姿态等设备观测汇总到服务端，再向不同角色展示授权信息，并提供远程输出控制。
 
 如果你第一次接触这个仓库，建议按本文顺序阅读：先理解项目和两块开发板，再看系统如何协作，最后选择软件模拟或真实双板部署。**不需要一开始就阅读所有源码，也不需要先安装开发板 SDK。**

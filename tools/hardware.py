@@ -51,9 +51,13 @@ def known_boots():
                 node,boot=row.split('\t');role=node.removeprefix('BOX-0001-');result[role]=max(result[role],int(boot))
     return result
 
-def prepare(path=DEFAULT,mqtt_path=ROOT/'secrets/mqtt.local.json'):
-    path=confined(path,ROOT);value=json.loads(path.read_text(encoding='utf-8'));wifi(value);address,subnet=network(value)
-    mqtt=load(mqtt_path,ROOT);base=confined(ROOT/'secrets/hardware',ROOT);base.mkdir(parents=True,exist_ok=True)
+def prepare(path=DEFAULT,mqtt_path=None,broker_profile='local'):
+    path=confined(path,ROOT);value=json.loads(path.read_text(encoding='utf-8'));wifi(value)
+    from broker_profiles import load_profile
+    mqtt=load_profile(broker_profile,mqtt_path) if broker_profile=='cloud' else load(mqtt_path or ROOT/'secrets/mqtt.local.json',ROOT)
+    cloud=broker_profile=='cloud'
+    address,subnet=(mqtt['broker']['host'],None) if cloud else network(value)
+    base=confined(ROOT/'secrets/hardware',ROOT);base.mkdir(parents=True,exist_ok=True)
     confined(GENERATED,ROOT)
     with FileLock(base/'provision.lock'):
         ledger=confined(base/'boot-reservations.json',ROOT)
@@ -77,29 +81,37 @@ def prepare(path=DEFAULT,mqtt_path=ROOT/'secrets/mqtt.local.json'):
             literal='"'+''.join(chr(b) if 32<=b<127 and b not in (34,92) else '\\%03o'%b for b in v.encode('utf-8'))+'"'
             lines.append('#define '+k+' '+literal)
         define('SB_WIFI_SSID',value['wifi_ssid']);define('SB_WIFI_PASSWORD',value['wifi_password']);define('SB_BROKER_IPV4',address);define('SB_NTP_SERVER',value['ntp_server'])
+        define('SB_BROKER_HOST',address)
+        lines.extend(['#define SB_BROKER_PORT '+str(mqtt['broker']['port']),'#define SB_BROKER_TLS '+('1' if cloud else '0')])
+        if cloud:define('SB_MQTT_CA_PEM',Path(mqtt['broker']['ca_file']).read_text(encoding='ascii'))
         for role in ('ENV','POSE'):
             lines.append('#if defined(SB_ROLE_ENV)' if role=='ENV' else '#else')
             define('SB_MQTT_USER',mqtt['accounts'][role]['username']);define('SB_MQTT_PASSWORD',mqtt['accounts'][role]['password'])
             lines.extend(['#define SB_BOOT_FLOOR '+str(bounds[role]['floor'])+'u','#define SB_BOOT_LIMIT '+str(bounds[role]['limit'])+'u'])
         lines.extend(['#endif','#endif',''])
         GENERATED.write_text('\n'.join(lines),encoding='utf-8')
-        broker=copy.deepcopy(mqtt);b=broker['broker'];b.update(mode='hardware',bind_ipv4=address,allowed_subnet=subnet,config=str(base/'mosquitto.conf'))
-        template=(ROOT/'deploy/mosquitto/mosquitto.hardware.conf.template').read_text(encoding='utf-8')
-        password_ref,acl_ref=broker_file_references(b)
-        Path(b['config']).write_text(template.replace('PASSWORD_FILE',password_ref).replace('ACL_FILE',acl_ref).replace('BIND_IPV4',address),encoding=broker_config_encoding())
-        atomic_json(base/'mqtt.local.json',broker)
-        atomic_json(base/'provisioning.json',{'format':1,'box_id':'BOX-0001','generations':bounds,'broker_ipv4':address,'allowed_subnet':subnet,'note':'Each firmware may only connect inside its allocated boot range. Keep ledger and evidence.'})
-        load(base/'mqtt.local.json',ROOT,allow_hardware=True)
+        if not cloud:
+            broker=copy.deepcopy(mqtt);b=broker['broker'];b.update(mode='hardware',bind_ipv4=address,allowed_subnet=subnet,config=str(base/'mosquitto.conf'))
+            template=(ROOT/'deploy/mosquitto/mosquitto.hardware.conf.template').read_text(encoding='utf-8')
+            password_ref,acl_ref=broker_file_references(b)
+            Path(b['config']).write_text(template.replace('PASSWORD_FILE',password_ref).replace('ACL_FILE',acl_ref).replace('BIND_IPV4',address),encoding=broker_config_encoding())
+            atomic_json(base/'mqtt.local.json',broker)
+            atomic_json(base/'provisioning.json',{'format':1,'box_id':'BOX-0001','generations':bounds,'broker_ipv4':address,'allowed_subnet':subnet,'note':'Each firmware may only connect inside its allocated boot range. Keep ledger and evidence.'})
+            load(base/'mqtt.local.json',ROOT,allow_hardware=True)
+        else:
+            atomic_json(base/'cloud-provisioning.json',{'format':1,'box_id':'BOX-0001','generations':bounds,'broker_profile':'cloud','host':address,'port':8883})
     print('Hardware configuration and generation ranges prepared; credentials not displayed.')
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('action',choices=['check','prepare','broker'])
     p.add_argument('--config',type=Path,default=DEFAULT);p.add_argument('--run-dir',type=Path)
+    p.add_argument('--broker-profile',choices=['local','cloud'],default='local');p.add_argument('--mqtt-config',type=Path)
     a=p.parse_args()
     try:
         if a.action=='check':wifi(json.loads(confined(a.config,ROOT).read_text(encoding='utf-8')));print('Wi-Fi fields valid; credentials not displayed.')
-        elif a.action=='prepare':prepare(a.config)
+        elif a.action=='prepare':prepare(a.config,a.mqtt_config,a.broker_profile)
         else:
+            if a.broker_profile=='cloud':raise ValueError('Cloud broker is externally managed; use project.py start')
             import time
             from simulator.broker import Broker
             if not a.run_dir:raise ValueError('New evidence directory required')

@@ -66,28 +66,31 @@ def recover_record():
     for child in value.get('children',[]):
         current=process_stamp(child['pid'])
         if current and (not child.get('stamp') or current==child['stamp']):raise ValueError('An owned or unverified child remains alive')
-    if any(port_open(p) for p in (1883,8080,5173)):raise ValueError('Inspect occupied ports before recovering a session record')
+    ports=(8080,5173) if value.get('broker_profile')=='cloud' else (1883,8080,5173)
+    if any(port_open(p) for p in ports):raise ValueError('Inspect occupied ports before recovering a session record')
     state.rename(directory/('recovered-record-'+str(time.time_ns())+'.json'))
     print('Dead session record archived; no process stopped.');return 0
 
-def serve(mode,config):
+def serve(mode,config,broker_profile='cloud',mqtt_config=None):
     from backend import local_environment,java_executable,JAR
     from frontend import node_command,frontend_environment,stop_owned
     from simulator.config import load
     from simulator.broker import Broker,port_open
-    if any(port_open(p) for p in (1883,8080,5173)):raise ValueError('Required port occupied; nothing stopped')
+    ports=(8080,5173) if broker_profile=='cloud' else (1883,8080,5173)
+    if any(port_open(p) for p in ports):raise ValueError('Required port occupied; nothing stopped')
     if not JAR.is_file():raise ValueError('Build backend first')
     web=node_command('dev')
-    mqtt_path=ROOT/('secrets/mqtt.local.json' if mode=='simulator' else 'secrets/hardware/mqtt.local.json')
-    mqtt=load(mqtt_path,allow_hardware=mode=='hardware')
+    from broker_profiles import load_profile,backend_environment,CLOUD_DEFAULT
+    mqtt_path=mqtt_config or (CLOUD_DEFAULT if broker_profile=='cloud' else ROOT/('secrets/hardware/mqtt.local.json' if mode=='hardware' else 'secrets/mqtt.local.json'))
+    mqtt=load_profile(broker_profile,mqtt_path,hardware=mode=='hardware')
     env=local_environment(config,'dev');account=mqtt['accounts']['backend']
     if env.get('SERVER_ADDRESS','127.0.0.1')!='127.0.0.1' or env.get('SERVER_PORT','8080')!='8080':
         raise ValueError('Development supervisor requires loopback HTTP on port 8080')
-    env.update(SMARTBOX_MQTT_ENABLED='true',SMARTBOX_MQTT_URL='tcp://127.0.0.1:1883',SMARTBOX_MQTT_USER=account['username'],SMARTBOX_MQTT_PASSWORD=account['password'])
+    env.update(backend_environment(mqtt))
     directory=ROOT/'artifacts/development'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
     directory.mkdir(parents=True,exist_ok=False)
     state=ROOT/'artifacts/development-running.json';nonce=uuid.uuid4().hex
-    record={'pid':os.getpid(),'stamp':process_stamp(os.getpid()),'mode':mode,'nonce':nonce,'directory':str(directory),'stop_file':str(directory/'stop.request'),'children':[]}
+    record={'pid':os.getpid(),'stamp':process_stamp(os.getpid()),'mode':mode,'broker_profile':broker_profile,'nonce':nonce,'directory':str(directory),'stop_file':str(directory/'stop.request'),'children':[]}
     if not record['stamp']:raise ValueError('Cannot verify own process identity')
     # The exclusive record prevents two supervisors racing between port checks.
     with state.open('x') as stream:json.dump(record,stream)
@@ -99,9 +102,9 @@ def serve(mode,config):
         from simulator.storage import atomic_json
         atomic_json(state,record)
         return p
-    broker=Broker(mqtt,directory/'broker')
+    broker=Broker(mqtt,directory/'broker') if broker_profile=='local' else None
     try:
-        broker.start()
+        if broker:broker.start()
         launch('backend',[java_executable(env),'-jar',str(JAR)],env,ROOT/'backend')
         deadline=time.monotonic()+90
         while not port_open(8080):
@@ -110,7 +113,7 @@ def serve(mode,config):
             time.sleep(.3)
         if mode=='simulator':
             for role in ('ENV','POSE'):
-                launch(role,[sys.executable,str(ROOT/'tools/mqtt.py'),'node','--role',role,'--config',str(mqtt_path),'--run-dir',str(directory/role),'--stop-file',str(directory/'nodes.stop')])
+                launch(role,[sys.executable,str(ROOT/'tools/mqtt.py'),'node','--role',role,'--config',str(mqtt_path),'--broker-profile',broker_profile,'--run-dir',str(directory/role),'--stop-file',str(directory/'nodes.stop')])
         launch('frontend',web+['--host','127.0.0.1','--port','5173','--strictPort'],frontend_environment(),ROOT/'frontend')
         print('Starting http://127.0.0.1:5173 ; Ctrl+C or project.py stop ends only this session.',flush=True)
         while True:
@@ -128,19 +131,21 @@ def serve(mode,config):
         for child in reversed(children):
             try:stop_owned(child)
             except (OSError,subprocess.SubprocessError) as error:errors.append(type(error).__name__)
-        try:broker.stop()
+        try:
+            if broker:broker.stop()
         except (OSError,subprocess.SubprocessError) as error:errors.append(type(error).__name__)
         for log in logs:log.close()
         if errors or any(child.poll() is None for child in children):raise ValueError('Cleanup incomplete; process record retained')
         state.unlink()
-    if any(port_open(p) for p in (1883,8080,5173)):raise ValueError('Port remains occupied; inspect ownership manually')
+    if any(port_open(p) for p in ports):raise ValueError('Port remains occupied; inspect ownership manually')
     return 0
 
-def doctor(workspace):
+def doctor(workspace,broker_profile='cloud'):
     rows={name:bool(shutil.which(name)) for name in ('git','java','mvn.cmd' if os.name=='nt' else 'mvn','node','npm.cmd' if os.name=='nt' else 'npm','mysql','ssh')}
     rows['python']=sys.version.split()[0]
     rows['backend_config']=(ROOT/'secrets/backend.local.json').is_file()
-    rows['mqtt_config']=(ROOT/'secrets/mqtt.local.json').is_file()
+    rows['mqtt_profile']=broker_profile
+    rows['mqtt_config']=(ROOT/('secrets/mqtt.cloud.local.json' if broker_profile=='cloud' else 'secrets/mqtt.local.json')).is_file()
     rows['workspace_config']=workspace.is_file()
     from simulator.broker import port_open
     rows['occupied_ports']=[p for p in (1883,8080,5173) if port_open(p)]
@@ -158,17 +163,21 @@ def main():
     p.add_argument('--workspace',type=Path,default=ROOT/'secrets/workspace.local.json')
     p.add_argument('--config',type=Path,default=ROOT/'secrets/backend.local.json')
     p.add_argument('--mysql-port',type=int,default=3306)
-    p.add_argument('--mode',choices=['simulator','hardware'],default='simulator')
+    p.add_argument('--mode',choices=['simulator','hardware','server'],default='server')
+    p.add_argument('--broker-profile',choices=['cloud','local'],default='cloud')
+    p.add_argument('--mqtt-config',type=Path)
     p.add_argument('--bundle',type=Path);p.add_argument('--destination')
     a=p.parse_args()
     try:
-        if a.action=='doctor':return doctor(a.workspace)
+        if a.action=='doctor':return doctor(a.workspace,a.broker_profile)
         if a.action=='init':
             from development_config import initialize,write_new
             initialize(ROOT,a.mysql_port)
             if not a.workspace.exists():write_new(a.workspace,{'format':1,'ubuntu':{'host':'CHANGE_ME','user':'bearpi','port':22,'key':str(Path.home()/'.ssh/id_ed25519_smartbox'),'sdk':'/home/bearpi/smartbox-sdk/sdk','tool_paths':['/home/bearpi/smartbox-sdk/toolchains/gn','/home/bearpi/smartbox-sdk/toolchains/ninja','/home/bearpi/smartbox-sdk/toolchains/gcc_riscv32/bin']}})
-            from simulator.config import prepare
-            prepare();print('Local configuration prepared; existing secrets retained. Edit workspace before Ubuntu operations.');return 0
+            if a.broker_profile=='local':
+                from simulator.config import prepare
+                prepare()
+            print('Database/workspace configuration prepared; existing secrets retained. Cloud MQTT credentials require cloud_mqtt.py prepare.');return 0
         if a.action=='db-init':
             from development_config import provision
             provision(a.config,getpass.getpass('Local MySQL root password (not saved): '));print('Project databases and restricted accounts provisioned. Build, then backend.py bootstrap.');return 0
@@ -181,7 +190,7 @@ def main():
         if a.action=='build':return invoke('backend.py','build','--config',a.config) or invoke('frontend.py','build')
         if a.action in ('status','stop'):return stop_status(a.action=='stop')
         if a.action=='recover-state':return recover_record()
-        if a.action=='start':return serve(a.mode,a.config)
+        if a.action=='start':return serve(a.mode,a.config,a.broker_profile,a.mqtt_config)
         if a.action=='firmware-build':
             value=read_workspace(a.workspace);c=connection(value)
             command=['--transport','ssh','--host',c.host,'--user',c.user,'--port',c.port,'--key',c.key,'--remote-sdk',c.remote_sdk]

@@ -1,5 +1,10 @@
 # 项目Mosquitto：账号隔离与两种监听模式
 
+## 适用范围
+
+此目录保留显式local模式及故障回归。日常默认已切换为[EMQX云端](../emqx/README.md)，cloud不启动本机Mosquitto；下面的回环/LAN监听和原Windows服务约束继续适用于local。云端TLS与授权配置见[迁移指南](../../docs/delivery/deployment/EMQX云端部署与迁移.md)。
+
+
 Broker是节点与后端之间的MQTT中转，不做业务保存或JSON权限判断。当前使用现有Windows Mosquitto独立项目进程，不启动旧Windows服务、不覆盖全局配置。端口1883占用时拒绝，不停止其他项目。
 
 ## 1. 受控模板与私有运行文件

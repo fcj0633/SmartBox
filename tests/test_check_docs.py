@@ -64,11 +64,18 @@ class DocumentationChecks(unittest.TestCase):
             target=cls.seed/"frontend"/relative
             target.parent.mkdir(parents=True,exist_ok=True)
             shutil.copy2(ROOT/"frontend"/relative,target)
+        # Existing role prototype README links are checked too; copy only public sources.
+        for directory in ("src", "tests"):
+            shutil.copytree(ROOT/"frontend/role-design-exploration"/directory,
+                            cls.seed/"frontend/role-design-exploration"/directory,
+                            dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__"))
         # Only the tracked artifact guide; no runtime evidence or credentials are copied.
         shutil.copy2(ROOT/"artifacts/README.md",cls.seed/"artifacts/README.md")
         shutil.copytree(ROOT/"tools/simulator",cls.seed/"tools/simulator",dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copytree(ROOT/"tests/simulator",cls.seed/"tests/simulator",dirs_exist_ok=True,ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copytree(ROOT/"deploy/mosquitto",cls.seed/"deploy/mosquitto",dirs_exist_ok=True)
+        # Public cloud CA/template only; no secrets or deployment runtime state.
+        shutil.copytree(ROOT/"deploy/emqx",cls.seed/"deploy/emqx",dirs_exist_ok=True)
         # Public dependency metadata only; never copy downloaded SDKs or private config.
         (cls.seed/"deploy/sdk").mkdir(parents=True,exist_ok=True)
         shutil.copy2(ROOT/"deploy/sdk/sources.json",cls.seed/"deploy/sdk/sources.json")

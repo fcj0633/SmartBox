@@ -1,5 +1,12 @@
 # SmartBox 固件目录与核心代码阅读指南
 
+## 云端 TLS 传输
+
+固件新增[sb_tls.c](services/sb_tls.c)与[sb_tls.h](include/sb_tls.h)，由网络线程独占，提供握手、加密读写及资源释放；[sb_network_real.c](services/sb_network_real.c)负责DNS/TCP与MQTT调度。云端使用域名/SNI、TLS1.2、服务器CA、每角色账号，证书链/域名/日期均验证；SDK未启用自动日期检查，适配层逐张核验有效期，未校时先继续本地采集并等待SNTP。local构建仍支持原1883路径，不自动降级。
+
+云端配置需[hardware.py](../tools/hardware.py)显式prepare，生成忽略头文件并预留启动区间；随后分别编译烧录。电脑IP变化不再要求改Broker域名，但Wi-Fi、CA、账号或域名变化仍需更新固件。实际证据及未验范围见[云端迁移报告](../docs/testing/reports/EMQX云端迁移验证报告.md)，操作见[云端指南](../docs/delivery/deployment/EMQX云端部署与迁移.md)。
+
+
 新电脑获取 SDK、SSH 构建及烧录的完整步骤见[部署指南](../docs/delivery/deployment/开发者完整部署指南.md)。SDK 独立交付，`tools/project.py firmware-build` 通过 SSH 受控同步，不强制要求映射盘；传统映射构建入口继续保留。
 
 这个目录保存运行在 **BearPi-HM Nano** 上的 SmartBox 固件源码，使用 **C、CMSIS-RTOS2 和既有 OpenHarmony SDK**。它负责板端采集、样本快照、Wi-Fi/MQTT、时间质量以及真实输出控制；后端、数据库和网页属于仓库其他工程。

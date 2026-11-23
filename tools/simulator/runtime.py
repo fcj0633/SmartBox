@@ -4,6 +4,8 @@ from collections import deque
 import json
 from pathlib import Path
 import random
+import socket
+import ssl
 import time
 import paho.mqtt.client as mqtt
 from .config import DOWN
@@ -19,6 +21,7 @@ class Node:
         self.connections=0;self.published=0;self.box_count=0;self.model=None
         self.retry=0;self.retry_at=0;self.resubscribe=False;self.rng=random.Random(seed)
         self.protocol=Protocol();self.client=None;self.needs_connect=True
+        self.connection_error=None
     def topic(self,suffix):return 'box/BOX-0001/'+self.config['accounts'][self.role]['username']+'/'+suffix
     def receive(self,client,userdata,message):
         if len(message.payload)>1536 or len(self.received)==32:
@@ -26,7 +29,9 @@ class Node:
         self.received.append((message.topic,bytes(message.payload),message.qos,message.retain))
     def connected_callback(self,client,userdata,flags,reason,properties):
         self.connected=not reason.is_failure;self.ready=False
-        if not self.connected:return
+        if not self.connected:
+            self.connection_error='AUTHENTICATION_OR_CONNECTION';return
+        self.connection_error=None
         self.connections+=1;self.resubscribe=True
     def disconnected_callback(self,client,userdata,flags,reason,properties):
         self.connected=False;self.ready=False;self.needs_connect=True
@@ -68,7 +73,7 @@ class Node:
             except (Rejected,ValueError,UnicodeError):return
     def save(self):
         atomic_json(self.run_dir/(self.role+'.status.json'),{**self.model.snapshot(),'ready':self.ready,
-                    'connections':self.connections,'retry_count':self.retry,'retry_in_s':max(0,round(self.retry_at-time.monotonic(),3)),'dropped':self.drops,'published':self.published,'pid':__import__('os').getpid()})
+                    'connections':self.connections,'connection_error':self.connection_error,'retry_count':self.retry,'retry_in_s':max(0,round(self.retry_at-time.monotonic(),3)),'dropped':self.drops,'published':self.published,'pid':__import__('os').getpid()})
     def run(self,stop_file=None):
         self.run_dir.mkdir(parents=True,exist_ok=True)
         node=self.config['accounts'][self.role]['username'];state_dir=Path(self.config['state_dir'])
@@ -76,7 +81,9 @@ class Node:
             identity=IdentityState(state_dir,node)
             self.model=Model(self.role,identity,self.seed,self.scenario!='unsynced',self.scenario=='invalid')
             self.client=mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,client_id=node,clean_session=True,protocol=mqtt.MQTTv311,reconnect_on_failure=False)
-            self.client.connect_timeout=3
+            from broker_profiles import configure_client
+            configure_client(self.client,self.config)
+            self.client.connect_timeout=5
             self.client.username_pw_set(node,self.config['accounts'][self.role]['password'])
             self.client.will_set(self.topic('availability'),pack({'node_id':node,'boot_id':self.model.boot,'online':False}),qos=1,retain=False)
             self.client.on_connect=self.connected_callback;self.client.on_disconnect=self.disconnected_callback
@@ -90,9 +97,10 @@ class Node:
                     if self.needs_connect and now>=self.retry_at:
                         self.ready=False;previously_ready=False;self.subscriptions.clear()
                         try:
-                            self.client.connect('127.0.0.1',1883,keepalive=60)
+                            self.client.connect(self.config['broker']['host'],self.config['broker']['port'],keepalive=60)
                             self.needs_connect=False
-                        except OSError:pass
+                        except OSError as error:
+                            self.connection_error='TLS' if isinstance(error,ssl.SSLError) else 'DNS' if isinstance(error,socket.gaierror) else 'NETWORK'
                         delay=[1,2,4,8,16,30][min(self.retry,5)]
                         self.retry_at=now+delay*(1+self.rng.uniform(0,.2));self.retry+=1
                     result=self.client.loop(timeout=.05)

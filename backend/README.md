@@ -1,5 +1,10 @@
 # SmartBox 后端：接入、可靠保存、授权查询与控制
 
+## 云端连接配置
+
+MQTT支持显式cloud/local profile：cloud要求 `ssl://部署域名:8883`、指定服务器CA和域名验证；local保持原回环TCP。`MqttTransport`负责端点与信任锚，`MqttGateway`仍负责有界接收和订阅。异常只记录DNS/TLS/认证/连接类别，不打印凭据。配置由[统一工具](../tools/project.py)注入，见[云端指南](../docs/delivery/deployment/EMQX云端部署与迁移.md)；HTTP与数据库仍在本机，业务事务/确认不交给Broker。
+
+
 首次建库和新电脑配置见[完整部署指南](../docs/delivery/deployment/开发者完整部署指南.md)。`tools/project.py db-init` 显式初始化项目库/受限账号；Flyway 与业务初始化仍由后端执行。默认 MySQL 3306，允许显式本机端口用于独立部署演练，库名、账号和测试清理保护不放宽。
 
 这是运行在开发电脑上的单Maven Spring Boot应用。它不直接读取传感器，而是从MQTT接收节点消息，核对注册身份与契约，把事实保存到MySQL，再为网页提供授权REST/WS视图和命令操作结果。当前已有服务端/模拟闭环和基础真实双板接入证据；不是只有早期认证骨架。

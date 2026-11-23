@@ -1,5 +1,10 @@
 # 文档导航：按问题找到需求、设计与证据
 
+## 云端接入入口
+
+新的默认运行方式见[EMQX云端部署与迁移](delivery/deployment/EMQX云端部署与迁移.md)；技术边界见[ADR-004](management/decisions/ADR-004-云端Broker与TLS接入.md)，实际软件/构建/板端覆盖见[迁移报告](testing/reports/EMQX云端迁移验证报告.md)。云端替换MQTT中转，其他服务仍本机运行；历史local报告保持原样。
+
+
 首次取得代码请按[开发者完整部署指南](delivery/deployment/开发者完整部署指南.md)操作；各 TASK 保留当时交付记录，当前工具、配置和 SDK 安装流程以部署指南为入口。
 
 这里保存SmartBox的产品规则、实现设计、开发任务、操作指南和验收记录。**当前P0/P1与TASK-007基础真实双板验证已完成，完整业务算法、设备Flash可靠性和最终验收未完成。** 当前能力先看[项目入口](../README.md)与[进度](management/当前进度.md)，不要从某份早期报告的“下一项任务”推断今天的状态。
