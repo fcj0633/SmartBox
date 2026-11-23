@@ -133,3 +133,12 @@ check为类型和[单元/组件](tests/unit/core.test.ts)，build生成dist；br
 公开track在Router和App同时绕过登录约束；访客令牌独立于JWT，仅内存，刷新失效。任务请求复用无损JSON和业务错误码，10秒串行轮询，卸载取消，403/404清除资源。旧boxes保持独立权限。
 
 [真实浏览器脚本](tests/transport-live.cjs)不拦截最终API，[单元检查](tests/unit/business.test.ts)覆盖公开路由、UNKNOWN与错误码。运行见[指南](../docs/development/guides/三端运输业务启动与验收.md)，来源和限制见[报告](../docs/testing/reports/TASK-013-三端运输业务联调报告.md)。实体手机、实板和公网未验收。
+
+
+## TASK-014 三端原型还原
+
+正式入口仍为 `/enterprise`、`/rider`、`/track`。骑手新增 `/rider/boxes`、`/rider/history`、`/rider/account`、`/rider/prepare`，均受 COURIER 保护。三种[角色布局](src/business/layouts)隔离视觉；[共享组件](src/business/components)展示任务身份、UNKNOWN 环境、真实采样缺口、阶段与只读设备事件。原型仅提供布局和本地图标，不导入其 Mock Store。企业地图明确示意，无真实资产伪坐标；统计限定接口最近 50 项。
+
+准备草稿通过服务端任务 ID 恢复，更换箱体需确认另建，结果不明不自动重试；登录只恢复同角色内部业务地址。访客维持独立内存授权，二级页面不扩展请求范围。旧设备页与控制保持原路径及权限。
+
+[受控检查](tests/task014-ui.cjs)覆盖三尺寸和错误路径；在独立前端 15174 与现有 Chromium 缓存下运行 `node frontend/tests/task014-ui.cjs`。真实流程沿用[原联调工具](../tools/transport_view.py)，仅明确授权的专用 smartbox_test 可清理，运行方法见[指南](../docs/development/guides/三端运输业务启动与验收.md)。21 项单元/组件、12 项旧设备浏览器、三端受控与真实软件验证及视觉差异见[实施报告](../docs/testing/reports/TASK-014-三端UI原型还原与接入报告.md)。实板、真实 GPS 和生产安全不在本次验收范围。

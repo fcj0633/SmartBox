@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useSession } from '../stores/session';
 
 const session = useSession();
 const router = useRouter();
+const route = useRoute();
 const username = ref(import.meta.env.VITE_DEFAULT_LOGIN_USERNAME || '');
 const password = ref(import.meta.env.VITE_DEFAULT_LOGIN_PASSWORD || '');
 async function login() {
@@ -16,7 +17,10 @@ async function login() {
     if (session.user?.role==='COURIER') home='/rider';
     else if(session.user?.role==='LOGISTICS_OPERATOR') { try { await session.request('/enterprise/boxes');home='/enterprise'; } catch { /* Unregistered operators retain their device workspace. */ } }
     session.businessHome=home;
-    await router.replace(home);
+    const next=typeof route.query.next==='string'?route.query.next:'';
+    const target=next.startsWith('/')&&!next.startsWith('//')?router.resolve(next):null;
+    // Only resume a protected business page for the authenticated role; never follow an external URL.
+    await router.replace(target?.meta.business&&target.meta.role===session.user?.role?next:home);
   }
 }
 </script>

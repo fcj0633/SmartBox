@@ -1,0 +1,634 @@
+/* Only the selected route direction is transferred. No other prototype theme or mock state is imported. */
+.sb-enterprise {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f8f9 !important
+}
+
+.sb-enterprise .enterprise-sidebar {
+  width: 216px;
+  flex-shrink: 0;
+  background: #182c3a;
+  color: #c1d0d5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 28px 16px
+}
+
+.sb-enterprise .enterprise-sidebar .brand {
+  color: white;
+  padding: 0 4px;
+  font-size: 19px
+}
+
+.sb-enterprise .enterprise-sidebar .brand>strong {
+  font-size: 19px;
+  letter-spacing: 1px
+}
+
+.sb-enterprise .enterprise-sidebar .brand-symbol {
+  background: #e9a35422;
+  border: 1px solid #e9a35466;
+  width: 34px;
+  height: 34px
+}
+
+.sb-enterprise .enterprise-workspace {
+  display: grid;
+  gap: 8px;
+  margin: 28px 0;
+  padding: 18px 14px;
+  border: 1px solid #ffffff20;
+  border-radius: 7px;
+  background: #ffffff06
+}
+
+.sb-enterprise .enterprise-workspace small {
+  font-size: 12px;
+  color: #9aacb9
+}
+
+.sb-enterprise .enterprise-workspace strong {
+  font-size: 15px;
+  color: white
+}
+
+.sb-enterprise .nav-label {
+  font-size: 12px;
+  color: #91a9b8;
+  padding: 8px 12px
+}
+
+.sb-enterprise .enterprise-sidebar nav {
+  display: grid;
+  gap: 8px
+}
+
+.sb-enterprise .enterprise-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  min-height: 48px
+}
+
+.sb-enterprise .enterprise-sidebar nav a:hover {
+  background: #ffffff10
+}
+
+.sb-enterprise .enterprise-sidebar nav a.selected {
+  background: #e9a35422;
+  color: #fff1dc;
+  border-left: 3px solid #e9a354
+}
+
+.sb-enterprise .sidebar-account {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding: 32px 12px 0;
+  border-top: 1px solid #ffffff12
+}
+
+.sb-enterprise .sidebar-account button {
+  background: none;
+  color: #d6e1e6;
+  border: 0;
+  padding: 8px 0;
+  text-align: left
+}
+
+.sb-enterprise .enterprise-workarea {
+  flex: 1;
+  min-width: 0
+}
+
+.sb-enterprise .enterprise-topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 32px;
+  background: white;
+  border-bottom: 1px solid #e1e8ea;
+  font-size: 13px;
+  color: #627a85
+}
+
+.sb-enterprise .main-content {
+  max-width: none;
+  margin: 0;
+  padding: 28px 32px 48px
+}
+
+.sb-enterprise .product-footer {
+  margin: 0 32px;
+  max-width: none
+}
+
+.sb-enterprise .page-title {
+  margin-bottom: 20px
+}
+
+.sb-enterprise .enterprise-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 1.2fr;
+  background: white;
+  border: 1px solid #dce5e2;
+  border-radius: 9px;
+  padding: 20px 0;
+  margin-bottom: 24px
+}
+
+.sb-enterprise .enterprise-kpis>div {
+  padding: 0 24px;
+  border-right: 1px solid #e5ebea
+}
+
+.sb-enterprise .enterprise-kpis span {
+  display: block;
+  font-size: 13px;
+  color: #627a85
+}
+
+.sb-enterprise .enterprise-kpis strong {
+  font-size: 29px;
+  display: block;
+  margin-top: 9px
+}
+
+.sb-enterprise .enterprise-kpis small {
+  font-size: 13px;
+  font-weight: 400;
+  color: #627a85
+}
+
+.sb-enterprise .enterprise-kpis p {
+  font-size: 12px;
+  align-self: center;
+  padding: 0 24px;
+  color: #627a85
+}
+
+.sb-enterprise .enterprise-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24px 0;
+  gap: 20px
+}
+
+.sb-enterprise .enterprise-toolbar nav {
+  display: flex;
+  gap: 24px
+}
+
+.sb-enterprise .enterprise-toolbar nav a {
+  padding: 10px 0;
+  font-size: 14px
+}
+
+.sb-enterprise .enterprise-toolbar nav a.active {
+  border-bottom: 2px solid #d48c41;
+  color: #94602d
+}
+
+.sb-enterprise .enterprise-toolbar label {
+  font-size: 13px;
+  color: #627a85;
+  display: flex;
+  gap: 12px;
+  align-items: center
+}
+
+.sb-enterprise .enterprise-toolbar input {
+  padding: 10px 12px;
+  border: 1px solid #d1dedd;
+  border-radius: 6px;
+  background: white;
+  width: 260px;
+  max-width: 100%;
+  font-size: 13px
+}
+
+.sb-enterprise .route-dashboard-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.35fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: stretch
+}
+
+.sb-enterprise .route-dashboard-layout.tasks-only {
+  grid-template-columns: 1fr
+}
+
+.sb-enterprise .route-map-panel,
+.sb-enterprise .route-task-panel {
+  border: 1px solid #dce5e2;
+  border-radius: 9px;
+  overflow: hidden;
+  background: white
+}
+
+.sb-enterprise .enterprise-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 20px
+}
+
+.sb-enterprise .enterprise-panel-heading h2 {
+  font-size: 18px
+}
+
+.sb-enterprise .enterprise-panel-heading p {
+  font-size: 12px;
+  color: #627a85;
+  margin-top: 6px
+}
+
+.sb-enterprise .map-mock-label {
+  font-size: 12px;
+  color: #8d6329;
+  background: #fff0dc;
+  padding: 5px 8px;
+  white-space: nowrap;
+  border-radius: 5px
+}
+
+.sb-enterprise .enterprise-map {
+  position: relative;
+  min-height: 400px;
+  height: calc(100% - 90px);
+  background: #eef3f1
+}
+
+.sb-enterprise .enterprise-map>svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%
+}
+
+.sb-enterprise .map-river {
+  fill: none;
+  stroke: #d6e8e5;
+  stroke-width: 25;
+  opacity: .8
+}
+
+.sb-enterprise .map-river.second {
+  stroke-width: 15
+}
+
+.sb-enterprise .map-road {
+  fill: none;
+  stroke: #ffffffc9;
+  stroke-width: 4
+}
+
+.sb-enterprise .map-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background: #eef3f12e
+}
+
+.sb-enterprise .map-empty>span {
+  font-size: 12px;
+  color: #8d6329;
+  background: #fff9ef;
+  padding: 7px 12px;
+  border-radius: 5px
+}
+
+.sb-enterprise .map-empty h3 {
+  margin-top: 20px;
+  font-size: 24px;
+  color: #57716c
+}
+
+.sb-enterprise .map-empty p {
+  font-size: 14px;
+  color: #6b807b;
+  margin-top: 12px
+}
+
+.sb-enterprise .map-watermark {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  color: #738a85;
+  font-size: 12px;
+  padding: 6px 8px;
+  background: #ffffffb0;
+  border-radius: 4px
+}
+
+.sb-enterprise .enterprise-task-scroll {
+  max-height: 390px;
+  overflow: auto;
+  padding: 0 14px
+}
+
+.sb-enterprise .route-task-row {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 18px 10px;
+  border: 0;
+  border-bottom: 1px solid #e8efec;
+  background: white;
+  text-align: left;
+  min-height: 100px
+}
+
+.sb-enterprise .route-task-row.active-route-task {
+  background: #edf7f3;
+  border-radius: 6px
+}
+
+.sb-enterprise .task-marker {
+  height: 7px;
+  width: 7px;
+  background: #abb8bd;
+  border-radius: 50%;
+  flex-shrink: 0
+}
+
+.sb-enterprise .task-marker.ACTIVE {
+  background: #147b67
+}
+
+.sb-enterprise .task-marker.READY {
+  background: #d59848
+}
+
+.sb-enterprise .task-main {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 5px
+}
+
+.sb-enterprise .task-main strong {
+  font-size: 14px;
+  overflow-wrap: anywhere
+}
+
+.sb-enterprise .task-main small {
+  font-size: 12px;
+  color: #6f8587;
+  overflow-wrap: anywhere
+}
+
+.sb-enterprise .route-task-row>span:last-child {
+  font-size: 12px;
+  white-space: nowrap;
+  color: #647c7e
+}
+
+.sb-enterprise .enterprise-task-detail {
+  display: block;
+  padding: 20px;
+  color: #9e6932;
+  font-size: 13px
+}
+
+.sb-enterprise .enterprise-selected {
+  margin-top: 24px
+}
+
+.sb-enterprise .enterprise-selected .environment {
+  max-width: 650px
+}
+
+.sb-enterprise .enterprise-assets {
+  margin-top: 24px
+}
+
+.sb-enterprise .enterprise-asset-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 0;
+  border-top: 1px solid #e1e9e5;
+  font-size: 14px
+}
+
+.sb-enterprise .enterprise-asset-row>div {
+  display: grid;
+  gap: 7px
+}
+
+.sb-enterprise .enterprise-asset-row small {
+  color: #6f8587
+}
+
+.sb-enterprise .enterprise-asset-row form {
+  display: flex;
+  gap: 12px;
+  align-items: center
+}
+
+.sb-enterprise .enterprise-asset-row select {
+  padding: 12px;
+  border: 1px solid #bfd1c8;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 0;
+  max-width: 200px;
+  background: white
+}
+
+.sb-enterprise .sb-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0)
+}
+
+@media(max-width:1100px) {
+  .sb-enterprise .enterprise-sidebar {
+    width: 184px;
+    padding: 24px 12px
+  }
+
+  .sb-enterprise .main-content {
+    padding: 24px
+  }
+
+  .sb-enterprise .route-dashboard-layout {
+    grid-template-columns: minmax(0, 1.3fr) minmax(240px, 1fr)
+  }
+
+  .sb-enterprise .enterprise-asset-row {
+    flex-wrap: wrap
+  }
+
+  .sb-enterprise .enterprise-kpis>div,
+  .sb-enterprise .enterprise-kpis p {
+    padding: 0 16px
+  }
+}
+
+@media(max-width:850px) {
+  .sb-enterprise .enterprise-sidebar {
+    width: 150px;
+    padding: 24px 10px
+  }
+
+  .sb-enterprise .enterprise-sidebar .brand>strong {
+    font-size: 13px;
+    letter-spacing: 0
+  }
+
+  .sb-enterprise .enterprise-sidebar .brand {
+    gap: 6px
+  }
+
+  .sb-enterprise .enterprise-workspace {
+    padding: 12px 8px
+  }
+
+  .sb-enterprise .enterprise-sidebar nav a {
+    gap: 8px;
+    font-size: 13px;
+    padding: 13px 8px
+  }
+
+  .sb-enterprise .main-content {
+    padding: 24px 20px
+  }
+
+  .sb-enterprise .route-dashboard-layout {
+    grid-template-columns: 1fr
+  }
+
+  .sb-enterprise .enterprise-map {
+    height: 320px;
+    min-height: 320px
+  }
+
+  .sb-enterprise .enterprise-kpis {
+    grid-template-columns: repeat(3, 1fr)
+  }
+
+  .sb-enterprise .enterprise-kpis p {
+    grid-column: 1/-1;
+    padding-top: 14px
+  }
+
+  .sb-enterprise .enterprise-toolbar {
+    flex-wrap: wrap
+  }
+
+  .sb-enterprise .enterprise-toolbar input {
+    width: 230px
+  }
+
+  .sb-enterprise .enterprise-asset-row>div {
+    width: 100%
+  }
+
+  .sb-enterprise .enterprise-task-scroll {
+    max-height: 320px
+  }
+
+  .sb-enterprise .enterprise-topbar {
+    padding: 20px;
+    font-size: 12px
+  }
+
+  .sb-enterprise .enterprise-panel-heading {
+    padding: 16px
+  }
+}
+
+@media(max-width:600px) {
+  .sb-enterprise {
+    display: block
+  }
+
+  .sb-enterprise .enterprise-sidebar {
+    min-height: 0;
+    width: 100%;
+    padding: 16px 20px
+  }
+
+  .sb-enterprise .enterprise-sidebar .brand>strong {
+    font-size: 18px
+  }
+
+  .sb-enterprise .enterprise-workspace,
+  .sb-enterprise .nav-label,
+  .sb-enterprise .sidebar-account {
+    display: none
+  }
+
+  .sb-enterprise .enterprise-sidebar nav {
+    display: flex;
+    gap: 12px;
+    overflow: auto;
+    margin-top: 14px
+  }
+
+  .sb-enterprise .enterprise-sidebar nav a {
+    font-size: 12px;
+    white-space: nowrap;
+    min-height: 40px
+  }
+
+  .sb-enterprise .enterprise-sidebar nav svg {
+    display: none
+  }
+
+  .sb-enterprise .enterprise-topbar {
+    padding: 14px 20px
+  }
+
+  .sb-enterprise .enterprise-kpis strong {
+    font-size: 24px
+  }
+
+  .sb-enterprise .enterprise-kpis>div {
+    padding: 0 12px
+  }
+
+  .sb-enterprise .enterprise-kpis span {
+    font-size: 12px
+  }
+
+  .sb-enterprise .enterprise-map {
+    height: 300px;
+    min-height: 300px
+  }
+
+  .sb-enterprise .enterprise-asset-row form {
+    flex-wrap: wrap
+  }
+
+  .sb-enterprise .enterprise-asset-row select {
+    max-width: 180px
+  }
+
+  .sb-enterprise .product-footer {
+    margin: 0 20px
+  }
+
+  .sb-enterprise .enterprise-sidebar nav a.selected {
+    border-left: 0;
+    border-bottom: 2px solid #e9a354
+  }
+}
