@@ -31,13 +31,17 @@
 | POST | `/enterprise/console/boxes/{id}/scenario` | 切换模拟场景 `{scenario}` |
 | POST | `/enterprise/console/boxes/{id}/disable` | 停用模拟输入 |
 | POST | `/enterprise/console/boxes/{id}/enable` | 启用模拟输入 |
-| GET | `/enterprise/console/boxes/{id}/events` | 只读最近设备事件（最多 10 条） |
+| GET | `/enterprise/console/boxes/{id}/events` | 只读设备事件；`limit` 10–100 |
+| GET | `/enterprise/console/boxes/{id}/samples` | 环境/姿态样本；`kind=env\|pose`、`hours=1\|6\|24` |
+| GET | `/enterprise/console/boxes/{id}/alarms` | 该箱体告警/恢复 |
+| GET | `/enterprise/console/boxes/{id}/commands` | 最近命令与逐节点结果，只读 |
+| GET | `/enterprise/console/boxes/{id}/logs` | 设备/任务/审计/命令合并日志 |
 
 ## 3. 关键响应字段
 
 - `overview`: `enterprise_id, enterprise_name, refreshed_at, kpis, boxes[], tasks[], recent_activity[]`.
 - `kpis`: `box_total, online, partial, offline, unknown, active_transports, active_alarm_boxes, unknown_alarm_boxes, completed_today`.
-- `box`: `box_id, display_name, asset_source, purpose, notes, demo_scenario, demo_enabled, connectivity, data_state, environment, alarm, current_transport, last_completed_transport, position, last_seen_at, nodes[]`.
+- `box`: `box_id, display_name, asset_source, purpose, notes, demo_scenario, demo_enabled, connectivity, data_state, environment, pose, alarm, current_transport, last_completed_transport, position, last_seen_at, nodes[]`.
 - `task`: `task_id, transport_no, box_id, box_display_name, status, item_name, item_description, operator_username, created_at, started_at, ended_at, route, position, start_check`.
 - `position`: `x, y, place, route_code, route_name, progress, position_at, stale, finished, source`.
 - `alarm`: `assessment, active, level, active_count`.

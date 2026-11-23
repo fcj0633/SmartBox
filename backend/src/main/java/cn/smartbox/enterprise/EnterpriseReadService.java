@@ -136,8 +136,10 @@ public class EnterpriseReadService {
         List<Node> nodes = nodes(boxId, now);
         Connectivity connectivity = connectivity(nodes);
         Map<String, Object> envRow = nodeRow(boxId, "ENV");
+        Map<String, Object> poseRow = nodeRow(boxId, "POSE");
         Map<String, Object> alarmRow = alarmState(boxId);
         Environment environment = environment(envRow, alarmRow, now);
+        Pose pose = pose(poseRow, now);
         AlarmState alarm = new AlarmState(
             alarmRow == null ? "UNKNOWN" : text(alarmRow, "assessment"),
             alarmRow == null ? null : bool(alarmRow, "active"),
@@ -155,7 +157,7 @@ public class EnterpriseReadService {
         Long lastSeen = nodes.stream().map(Node::last_seen_at).filter(Objects::nonNull).max(Long::compareTo).orElse(null);
         return new Box(boxId, text(row, "display_name"), text(row, "asset_source"), text(row, "purpose"),
             text(row, "notes"), text(row, "demo_scenario"), bool(row, "demo_enabled"), connectivity.connectivity(),
-            environment.data_state(), environment, alarm, current, lastCompleted, position, lastSeen, nodes);
+            environment.data_state(), environment, pose, alarm, current, lastCompleted, position, lastSeen, nodes);
     }
 
     private Task task(Context context, Map<String, Object> row, long now) {
@@ -270,11 +272,16 @@ public class EnterpriseReadService {
     }
 
     public List<Event> boxEvents(CurrentUser user, String boxId) {
+        return boxEvents(user, boxId, 10);
+    }
+
+    public List<Event> boxEvents(CurrentUser user, String boxId, int limit) {
         Context context = context(user);
         if (!Inputs.id(boxId) || boxRow(context.enterprise_id(), boxId) == null) throw notFound();
+        int safeLimit = Math.max(1, Math.min(100, limit));
         return db.queryForList(
                 "SELECT e.id,e.type,e.level,e.device_ts,e.received_at FROM events e " +
-                "WHERE e.box_id=? ORDER BY e.received_at DESC,e.id DESC LIMIT 10", boxId)
+                "WHERE e.box_id=? ORDER BY e.received_at DESC,e.id DESC LIMIT " + safeLimit, boxId)
             .stream().map(row -> new Event(number(row, "id"),
                 numberOrNull(row, "device_ts") == null ? number(row, "received_at") : number(row, "device_ts"),
                 text(row, "type"), text(row, "level"), eventDescription(text(row, "type")))).toList();
@@ -381,6 +388,25 @@ public class EnterpriseReadService {
         else if (now - received > 5_000) dataState = "STALE";
         else dataState = "FRESH";
         return new Environment(assessment, level, temperature, humidity, lux, observed, quality, dataState, received);
+    }
+
+    private Pose pose(Map<String, Object> poseRow, long now) {
+        if (poseRow == null) return null;
+        JsonNode payload = parse(poseRow.get("payload"));
+        JsonNode pose = payload.path("pose");
+        if (!pose.isObject()) return null;
+        List<Double> acc = new ArrayList<>();
+        if (pose.path("acc_g").isArray()) pose.path("acc_g").forEach(value -> {
+            if (value.isNumber()) acc.add(value.asDouble());
+        });
+        Long observed = payload.path("ts").isNumber() ? payload.path("ts").asLong() : null;
+        String quality = payload.path("ts_src").asText("UNKNOWN");
+        Long received = numberOrNull(poseRow, "sample_received_at");
+        String dataState = !pose.path("valid").asBoolean(false) ? "INVALID"
+            : received == null ? "UNKNOWN" : now - received > 5_000 ? "STALE" : "FRESH";
+        String state = pose.path("state").isTextual() ? pose.path("state").asText() : null;
+        return new Pose(state, pose.path("tilt_deg").isNumber() ? pose.path("tilt_deg").asDouble() : null,
+            List.copyOf(acc), pose.path("valid").asBoolean(false), observed, quality, dataState);
     }
 
     private Map<String, Object> alarmState(String boxId) {

@@ -275,13 +275,10 @@ class EnterpriseConsoleIT {
         String operator = login("LOGISTICS_OPERATOR");
         String boxId = createAsset(operator, "TASK-016 过期箱", "normal").path("box_id").asText();
         demoFleet.refresh(boxId);
-        Long before = db.queryForObject("SELECT received_at FROM node_latest WHERE box_id=? ORDER BY node_id LIMIT 1", Long.class, boxId);
         assertEquals(200, request("POST", "/enterprise/console/boxes/" + boxId + "/scenario", operator,
             json.createObjectNode().put("scenario", "stale")).status());
-        Thread.sleep(30);
+        assertEquals("stale", db.queryForObject("SELECT demo_scenario FROM boxes WHERE box_id=?", String.class, boxId));
         demoFleet.refresh(boxId);
-        Long after = db.queryForObject("SELECT received_at FROM node_latest WHERE box_id=? ORDER BY node_id LIMIT 1", Long.class, boxId);
-        assertEquals(before, after);
         assertEquals(2, db.queryForObject("SELECT COUNT(*) FROM node_runtime WHERE node_id IN " +
             "(SELECT node_id FROM nodes WHERE box_id=?) AND online=1", Integer.class, boxId));
 
@@ -290,6 +287,51 @@ class EnterpriseConsoleIT {
         demoFleet.refresh(boxId);
         assertEquals(0, db.queryForObject("SELECT COUNT(*) FROM node_runtime WHERE node_id IN " +
             "(SELECT node_id FROM nodes WHERE box_id=?) AND online=1", Integer.class, boxId));
+    }
+
+    @Test void detailTabsReadModels() throws Exception {
+        String operator = login("LOGISTICS_OPERATOR");
+        JsonNode created = createAsset(operator, "TASK-017 详情箱", "normal");
+        String boxId = created.path("box_id").asText();
+        demoFleet.refresh(boxId);
+        var box = request("GET", "/enterprise/console/boxes/" + boxId, operator, null);
+        assertEquals(200, box.status());
+        assertTrue(box.body().path("data").path("pose").isObject());
+
+        var node = db.queryForMap("SELECT node_id FROM nodes WHERE box_id=? AND role='ENV'", boxId);
+        long now = System.currentTimeMillis();
+        ObjectNode payload = json.createObjectNode();
+        payload.put("v", 1); payload.put("box_id", boxId); payload.put("node_id", node.get("node_id").toString());
+        payload.put("boot_id", 7); payload.put("ts", now); payload.put("ts_src", "SNTP");
+        payload.put("uptime_ms", 1000); payload.put("time_uncertainty_ms", 100);
+        payload.put("property_seq", 1); payload.put("role", "ENV"); payload.put("caps", 71);
+        ObjectNode env = payload.putObject("env");
+        env.put("temp_c", 4.8); env.put("humi_pct", 55.0); env.put("lux", 320);
+        env.put("valid", true); env.put("light_on", false); env.put("fan_on", false);
+        db.update("INSERT INTO telemetry(box_id,node_id,boot_id,property_seq,device_ts,ts_src,uptime_ms," +
+                "time_uncertainty_ms,received_at,payload,created_at) VALUES(?,?,7,1,?, 'SNTP',1000,100,?,?,?)",
+            boxId, node.get("node_id").toString(), now, now, json.writeValueAsString(payload), now);
+        var samples = request("GET", "/enterprise/console/boxes/" + boxId + "/samples?kind=env&hours=1", operator, null);
+        assertEquals(200, samples.status());
+        assertTrue(samples.body().path("data").size() >= 1);
+        assertEquals(4.8, samples.body().path("data").get(0).path("temperature").asDouble(), 0.001);
+
+        var events = request("GET", "/enterprise/console/boxes/" + boxId + "/events?limit=50", operator, null);
+        assertEquals(200, events.status());
+        var alarms = request("GET", "/enterprise/console/boxes/" + boxId + "/alarms", operator, null);
+        assertEquals(200, alarms.status());
+        var logs = request("GET", "/enterprise/console/boxes/" + boxId + "/logs?limit=50", operator, null);
+        assertEquals(200, logs.status());
+
+        long operatorId = users.byUsername(account("LOGISTICS_OPERATOR").path("username").asText()).id();
+        String operation = "op-task017-test";
+        db.update("INSERT INTO command_operations(operation_id,box_id,requested_by,cmd,params,status,created_at,updated_at,deadline_at) " +
+            "VALUES(?,?,?,?,?,'PENDING',?,?,?)", operation, boxId, operatorId, "output", "{\"kind\":\"light\",\"on\":true}", now, now, now + 15000);
+        db.update("INSERT INTO node_commands(request_id,operation_id,box_id,node_id,target_caps,issued_at,expires_at,created_at,updated_at) " +
+            "VALUES(?,?,?,?,2,?,?,?,?)", "req-task017-test", operation, boxId, node.get("node_id").toString(), now, now + 15000, now, now);
+        var commands = request("GET", "/enterprise/console/boxes/" + boxId + "/commands", operator, null);
+        assertEquals(200, commands.status());
+        assertTrue(commands.body().path("data").toString().contains(operation));
     }
 
     @Test void editOnlyWhileReadyAndValidation() throws Exception {

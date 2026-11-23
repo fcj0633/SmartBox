@@ -819,3 +819,31 @@
 .sb-enterprise .scenario-option small { font-size: 11px; color: #7b908b; line-height: 1.5; }
 .sb-enterprise .row-actions { display: flex; gap: 8px; align-items: center; }
 .sb-enterprise .row-actions .text-button { white-space: nowrap; }
+/* TASK-017 detail tabs */
+.sb-enterprise .detail-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 16px; border-bottom: 1px solid #dce5e2; }
+.sb-enterprise .detail-tabs button { border: 0; background: none; padding: 10px 14px; font-size: 13px; color: #627a85; cursor: pointer; border-bottom: 2px solid transparent; }
+.sb-enterprise .detail-tabs button.tab-current { color: #147b67; border-bottom-color: #147b67; font-weight: 600; }
+.sb-enterprise .detail-tab-panel { display: grid; gap: 18px; margin-top: 18px; }
+.sb-enterprise .detail-tab-panel > .panel { border: 1px solid #dce5e2; border-radius: 9px; background: white; overflow: hidden; }
+.sb-enterprise .detail-chart-wrap { padding: 0 18px 16px; }
+.sb-enterprise .detail-chart-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.sb-enterprise .detail-chart-title strong { font-size: 13px; color: #29443d; }
+.sb-enterprise .detail-chart-title small { font-size: 11px; color: #7b908b; }
+.sb-enterprise .detail-trend { position: relative; }
+.sb-enterprise .detail-trend svg { width: 100%; height: 180px; overflow: visible; }
+.sb-enterprise .detail-trend .grid-line { stroke: #e8efec; stroke-width: 1; fill: none; }
+.sb-enterprise .detail-trend .data-line { stroke: #147b67; stroke-width: 2.5; fill: none; stroke-linejoin: round; }
+.sb-enterprise .detail-trend .chart-labels { display: flex; justify-content: space-between; font-size: 10px; color: #7b908b; }
+.sb-enterprise .detail-trend .chart-x { display: flex; justify-content: space-between; font-size: 10px; color: #7b908b; margin-top: 4px; }
+.sb-enterprise .panel-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sb-enterprise .text-button.selected { color: #147b67; font-weight: 700; }
+.sb-enterprise .capability-list { padding: 0 18px 16px; display: grid; gap: 8px; }
+.sb-enterprise .capability-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid #edf2f0; padding: 9px 0; }
+.sb-enterprise .capability-row strong { font-size: 12px; color: #29443d; min-width: 190px; }
+.sb-enterprise .capability-row > span { font-size: 11px; color: #147b67; background: #e7f5ef; border-radius: 4px; padding: 3px 7px; }
+.sb-enterprise .capability-row small { font-size: 11px; color: #7b908b; }
+.sb-enterprise .activity-dot.audit { background: #6b54a8; } .sb-enterprise .activity-dot.command { background: #376b9b; } .sb-enterprise .activity-dot.task { background: #147b67; }
+@media (max-width: 820px) {
+  .sb-enterprise .detail-tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .sb-enterprise .detail-tabs button { white-space: nowrap; padding: 9px 11px; }
+}

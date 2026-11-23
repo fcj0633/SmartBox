@@ -89,12 +89,19 @@ public class DemoFleetService {
     private void latest(String boxId, String node, int caps, long now, ObjectNode payload) {
         long seq = Math.max(1, (now / 1000) % 4_294_967_295L);
         long uptime = Math.max(1000, now % 86_400_000L);
+        String body = payloadJson(payload);
         db.update("INSERT INTO node_latest(box_id,node_id,boot_id,property_seq,device_ts,ts_src,uptime_ms," +
                 "time_uncertainty_ms,received_at,payload,updated_at) VALUES(?,?,1,?,?, 'SNTP',?,100,?,?,?) " +
                 "ON DUPLICATE KEY UPDATE boot_id=1,property_seq=VALUES(property_seq),device_ts=VALUES(device_ts)," +
                 "ts_src='SNTP',uptime_ms=VALUES(uptime_ms),time_uncertainty_ms=100,received_at=VALUES(received_at)," +
                 "payload=VALUES(payload),updated_at=VALUES(updated_at)",
-            boxId, node, seq, now, uptime, now, payloadJson(payload), now);
+            boxId, node, seq, now, uptime, now, body, now);
+        // Simulated history uses the same telemetry shape as MQTT ingestion so detail charts are server-backed.
+        db.update("INSERT INTO telemetry(box_id,node_id,boot_id,property_seq,device_ts,ts_src,uptime_ms," +
+                "time_uncertainty_ms,received_at,payload,created_at) VALUES(?,?,1,?,?, 'SNTP',?,100,?,?,?) " +
+                "ON DUPLICATE KEY UPDATE device_ts=VALUES(device_ts),ts_src='SNTP',uptime_ms=VALUES(uptime_ms)," +
+                "time_uncertainty_ms=100,received_at=VALUES(received_at),payload=VALUES(payload)",
+            boxId, node, seq, now, uptime, now, body, now);
     }
 
     private ObjectNode envPayload(String boxId, String node, String scenario, long now) {

@@ -14,10 +14,11 @@ public class EnterpriseConsoleController {
     private final EnterpriseReadService read;
     private final EnterpriseTransportService transports;
     private final EnterpriseAssetService assets;
+    private final EnterpriseDetailService detail;
 
     public EnterpriseConsoleController(EnterpriseReadService read, EnterpriseTransportService transports,
-                                       EnterpriseAssetService assets) {
-        this.read = read; this.transports = transports; this.assets = assets;
+                                       EnterpriseAssetService assets, EnterpriseDetailService detail) {
+        this.read = read; this.transports = transports; this.assets = assets; this.detail = detail;
     }
 
     @GetMapping("/overview")
@@ -32,8 +33,32 @@ public class EnterpriseConsoleController {
     }
 
     @GetMapping("/boxes/{boxId}/events")
-    public Object boxEvents(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
-        return ApiEnvelope.success(read.boxEvents(user, boxId));
+    public Object boxEvents(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId,
+                            @RequestParam(required = false, defaultValue = "10") int limit) {
+        return ApiEnvelope.success(detail.events(user, boxId, limit));
+    }
+
+    @GetMapping("/boxes/{boxId}/samples")
+    public Object samples(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId,
+                          @RequestParam(required = false, defaultValue = "env") String kind,
+                          @RequestParam(required = false, defaultValue = "6") int hours) {
+        return ApiEnvelope.success(detail.samples(user, boxId, kind, hours));
+    }
+
+    @GetMapping("/boxes/{boxId}/alarms")
+    public Object boxAlarms(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
+        return ApiEnvelope.success(detail.alarms(user, boxId));
+    }
+
+    @GetMapping("/boxes/{boxId}/commands")
+    public Object commands(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId) {
+        return ApiEnvelope.success(detail.commands(user, boxId));
+    }
+
+    @GetMapping("/boxes/{boxId}/logs")
+    public Object logs(@AuthenticationPrincipal CurrentUser user, @PathVariable String boxId,
+                       @RequestParam(required = false, defaultValue = "50") int limit) {
+        return ApiEnvelope.success(detail.logs(user, boxId, limit));
     }
 
     @GetMapping("/routes")
