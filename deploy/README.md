@@ -21,4 +21,4 @@
 
 新数据库完成初始化和种子加载后，总览应是 **1 个实物 + 5 个模拟箱体 = 6 个**。多次导入旧测试数据会累积更多箱体；重建数据库即可恢复。
 
-`bootstrap.example.json` 中的 `admin/admin` 仅用于本地演示，部署到共享环境前必须替换密码。仓库不包含 EMQX、Mosquitto、SDK、真实板或测试配置。
+`bootstrap.example.json` 中的 `admin/admin` 仅用于本地演示，部署到共享环境前必须替换密码。MQTT 只使用远程 TLS Broker；仓库不包含本地 Mosquitto、Broker、SDK、真实板或测试配置。

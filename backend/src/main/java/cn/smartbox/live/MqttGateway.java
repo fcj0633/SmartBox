@@ -13,6 +13,7 @@ import jakarta.annotation.PreDestroy;
 /** One client owner, bounded callback handoff, no SQL on the MQTT callback thread. */
 @Component
 public class MqttGateway {
+    private static final String DEFAULT_ENDPOINT="ssl://z789ffe0.ala.cn-hangzhou.emqxsl.cn:8883";
     public record Packet(String topic,byte[] payload,int qos,boolean retained){}
     private final ArrayBlockingQueue<Packet> incoming=new ArrayBlockingQueue<>(256);
     public final AtomicLong dropped=new AtomicLong();
@@ -22,11 +23,9 @@ public class MqttGateway {
         this.env=env;this.store=store;
         if(enabled()) {
             if(!"smartbox_backend".equals(env.getRequiredProperty("SMARTBOX_MQTT_USER")) || env.getRequiredProperty("SMARTBOX_MQTT_PASSWORD").isBlank()) throw new IllegalArgumentException("Invalid project MQTT identity");
-            MqttTransport.validate(env.getProperty("SMARTBOX_MQTT_PROFILE","local"),env.getProperty("SMARTBOX_MQTT_URL","tcp://127.0.0.1:1883"));
-            if("cloud".equals(env.getProperty("SMARTBOX_MQTT_PROFILE"))) {
-                try { MqttTransport.trust(java.nio.file.Path.of(env.getRequiredProperty("SMARTBOX_MQTT_CA_FILE"))); }
-                catch(Exception error) { throw new IllegalArgumentException("Invalid MQTT CA bundle"); }
-            }
+            MqttTransport.validate(env.getProperty("SMARTBOX_MQTT_URL",DEFAULT_ENDPOINT));
+            try { MqttTransport.trust(java.nio.file.Path.of(env.getRequiredProperty("SMARTBOX_MQTT_CA_FILE"))); }
+            catch(Exception error) { throw new IllegalArgumentException("Invalid MQTT CA bundle"); }
         }
     }
     public boolean enabled(){return env.getProperty("SMARTBOX_MQTT_ENABLED",Boolean.class,false);}
@@ -39,8 +38,8 @@ public class MqttGateway {
         try{
             if(client!=null)client.close(true);
             String username=env.getRequiredProperty("SMARTBOX_MQTT_USER");
-            String endpoint=env.getProperty("SMARTBOX_MQTT_URL","tcp://127.0.0.1:1883");
-            MqttTransport.validate(env.getProperty("SMARTBOX_MQTT_PROFILE","local"),endpoint);
+            String endpoint=env.getProperty("SMARTBOX_MQTT_URL",DEFAULT_ENDPOINT);
+            MqttTransport.validate(endpoint);
             client=new MqttAsyncClient(endpoint,username,new MemoryPersistence());
             client.setCallback(new MqttCallback(){
                 public void connectionLost(Throwable cause){ready=false;}
@@ -52,10 +51,8 @@ public class MqttGateway {
             MqttConnectOptions options=new MqttConnectOptions();options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
             options.setCleanSession(true);options.setKeepAliveInterval(60);options.setConnectionTimeout(3);
             options.setUserName(username);options.setPassword(env.getRequiredProperty("SMARTBOX_MQTT_PASSWORD").toCharArray());
-            if("cloud".equals(env.getProperty("SMARTBOX_MQTT_PROFILE"))) {
-                options.setSocketFactory(MqttTransport.trust(java.nio.file.Path.of(env.getRequiredProperty("SMARTBOX_MQTT_CA_FILE"))));
-                options.setHttpsHostnameVerificationEnabled(true);
-            }
+            options.setSocketFactory(MqttTransport.trust(java.nio.file.Path.of(env.getRequiredProperty("SMARTBOX_MQTT_CA_FILE"))));
+            options.setHttpsHostnameVerificationEnabled(true);
             options.setConnectionTimeout(10);
             client.connect(options).waitForCompletion(12000);
             List<String> topics=new ArrayList<>();
