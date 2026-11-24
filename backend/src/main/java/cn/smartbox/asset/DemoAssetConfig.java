@@ -17,6 +17,7 @@ public class DemoAssetConfig {
         if(file==null||file.isBlank()){seed=null;riders=Set.of();return;}
         try {
             Path path=Path.of(file);
+            if(!Files.isRegularFile(path)) path=Path.of("..").resolve(path).normalize();
             if(!Files.isRegularFile(path)||Files.isSymbolicLink(path)||Files.size(path)>1048576)throw new IllegalArgumentException();
             seed=json.readTree(Files.readString(path));
             if(!seed.isObject()||!seed.path("rider_usernames").isArray())throw new IllegalArgumentException();

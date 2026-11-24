@@ -103,95 +103,51 @@ flowchart TB
 
 运行时的消息 Schema 在 `backend/src/main/resources/contracts/effective/common.schema.json`，由 `ContractValidator` 从 Classpath 加载。
 
-## 3. 本地部署（不需要开发板或 MQTT Broker）
+## 3. 本地部署（默认开箱即用）
 
-以下使用 **Windows PowerShell**，在仓库根目录操作。需要：
+> 本仓库按项目所有者要求提交了固定演示数据库/MQTT 配置，**公开仓库中的凭据可被任何人使用**。只适合演示/开发环境，不要用于生产。
 
-- **JDK 21、Maven**
-- **MySQL 8**
-- **Node.js 22+、npm**
+### 前置条件
 
-> 首次部署请使用**全新空数据库**。当前精简仓的 Flyway 只有 `V1__current_schema.sql`；旧工程的 V1～V17 数据库不能直接套用这个合并基线，必须先备份并迁移/重建。不要对保存了重要数据的库执行删除操作。
+- JDK 21
+- Maven 3.9+
+- MySQL 8（建议 8.4）
+- Node.js 22+ / npm
+- Windows PowerShell（以下命令均可直接执行）
 
-### 3.1 创建本地数据库和两个账号
+### 1. 初始化数据库
 
-使用 MySQL 管理员执行（将示例密码替换为本机自定密码）：
-
-```sql
-CREATE DATABASE smartbox_dev
-  CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-
-CREATE USER 'smartbox_app'@'127.0.0.1'
-  IDENTIFIED BY 'CHANGE_APP_PASSWORD';
-CREATE USER 'smartbox_migrator'@'127.0.0.1'
-  IDENTIFIED BY 'CHANGE_MIGRATION_PASSWORD';
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON smartbox_dev.*
-  TO 'smartbox_app'@'127.0.0.1';
-GRANT ALL PRIVILEGES ON smartbox_dev.*
-  TO 'smartbox_migrator'@'127.0.0.1';
-```
-
-后端 `LocalSettings` 会校验开发环境必须是 `smartbox_dev`，应用账号为 `smartbox_app`，迁移账号为 `smartbox_migrator`，MySQL URL 使用 `127.0.0.1`。请不要直接沿用不符合这些限制的其他数据库名称或账号。
-
-### 3.2 设置后端环境变量
-
-在 **PowerShell 终端 A（仓库根目录）**：
+用 MySQL 管理员执行仓库内固定初始化脚本：
 
 ```powershell
-$env:SPRING_PROFILES_ACTIVE = "dev"
-
-$env:SMARTBOX_DB_URL = "jdbc:mysql://127.0.0.1:3306/smartbox_dev?connectionTimeZone=UTC&characterEncoding=UTF-8"
-$env:SMARTBOX_MIGRATION_URL = $env:SMARTBOX_DB_URL
-
-$env:SMARTBOX_DB_USER = "smartbox_app"
-$env:SMARTBOX_DB_PASSWORD = "CHANGE_APP_PASSWORD"
-$env:SMARTBOX_MIGRATION_USER = "smartbox_migrator"
-$env:SMARTBOX_MIGRATION_PASSWORD = "CHANGE_MIGRATION_PASSWORD"
-
-# 为本次本地运行创建至少 32 字节的 JWT 密钥。
-$keyBytes = New-Object byte[] 32
-$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-$rng.GetBytes($keyBytes)
-$rng.Dispose()
-$env:SMARTBOX_JWT_SECRET_BASE64 = [Convert]::ToBase64String($keyBytes)
-
-# 默认只演示数据库模拟箱体，不连接真实 MQTT Broker。
-$env:SMARTBOX_MQTT_ENABLED = "false"
-
-$env:SMARTBOX_BOOTSTRAP_FILE = (Resolve-Path "deploy/demo/bootstrap.example.json").Path
-$env:SMARTBOX_ASSET_SEED_FILE = (Resolve-Path "deploy/demo/enterprise-v2.seed.example.json").Path
+Get-Content deploy/demo/mysql-init.sql -Raw | mysql -u root -p
 ```
 
-环境变量仅对当前 PowerShell 会话及它启动的子进程生效。更改数据库密码需同步修改对应变量；**不要将真实密码或密钥提交到 Git**。
+脚本会创建空库 `smartbox_dev`、`smartbox_app`（运行账号）和 `smartbox_migrator`（迁移账号），密码已随仓库固定。
 
-### 3.3 首次初始化账号与演示资产
+MySQL 8.4 默认使用 `caching_sha2_password`；本项目 JDBC URL 已包含 `allowPublicKeyRetrieval=true&useSSL=false`，用于本地开发连接。若使用其他 MySQL 版本/认证方式，按详细文档调整。
 
-在同一个终端、仍位于仓库根目录执行：
+### 2. 首次初始化账号和演示资产
+
+在仓库根目录执行：
 
 ```powershell
-mvn -f backend/pom.xml spring-boot:run "-Dspring-boot.run.arguments=--smartbox.bootstrap=true --smartbox.assets.bootstrap=true"
+mvn -B -f backend/pom.xml spring-boot:run "-Dspring-boot.run.arguments=--smartbox.bootstrap=true --smartbox.assets.bootstrap=true --SMARTBOX_MQTT_ENABLED=false"
 ```
 
-这一步自动执行 Flyway 建表，然后载入 [账号示例](deploy/demo/bootstrap.example.json) 和 [企业演示数据](deploy/demo/enterprise-v2.seed.example.json)，完成后**自动退出，不会常驻 Web 服务**。
+该命令执行 Flyway 的 `V1__current_schema.sql`，创建 `admin/admin`、`BOX-0001` 和 5 个模拟箱体，完成后自动退出。
 
-默认初始化账号为 `admin / admin`（**仅允许在隔离的本地演示中使用**）。密码在数据库中以哈希形式保存。
-
-### 3.4 启动后端
+### 3. 启动后端
 
 ```powershell
-mvn -f backend/pom.xml spring-boot:run "-Dspring-boot.run.arguments=--server.port=8080 --smartbox.demo.fleet=true"
+mvn -B -f backend/pom.xml spring-boot:run "-Dspring-boot.run.arguments=--server.port=8080 --smartbox.demo.fleet=true"
 ```
 
-启用 `smartbox.demo.fleet=true` 后，后端定期产生模拟箱体数据。健康检查：
+后端默认读取已提交的 `deploy/demo/mqtt.cloud.json`，自动连接固定远程 Broker；没有该配置时才进入模拟模式。默认不再需要手工设置数据库、JWT、MQTT 环境变量。
 
-```powershell
-Invoke-WebRequest http://127.0.0.1:8080/actuator/health
-```
+### 4. 启动前端
 
-### 3.5 启动前端
-
-打开 **PowerShell 终端 B**：
+另开 PowerShell：
 
 ```powershell
 cd frontend
@@ -199,16 +155,26 @@ npm ci
 npm run dev
 ```
 
-浏览器打开 **http://127.0.0.1:5173**，用本地演示账号登录。Vite 默认将 `/api` 请求代理到 `http://127.0.0.1:8080`。
+打开 http://127.0.0.1:5173，使用 `admin/admin` 登录。
 
-构建检查（可选）：
+### 5. 验证
 
 ```powershell
-mvn -f backend/pom.xml -DskipTests package
+Invoke-WebRequest http://127.0.0.1:8080/actuator/health
+mvn -B -f backend/pom.xml -DskipTests package
+npm --prefix frontend ci
 npm --prefix frontend run build
 ```
 
-**完整部署说明、旧库注意事项和常见错误：**[前后端启动](docs/operations/前后端启动.md)。以上步骤仅针对本地演示，尚不等于已经配置好公网生产部署、HTTPS 或前端静态资源反向代理。
+预期：
+
+- health 200；
+- MQTT 已配置且连接时 health 200；未连接时 health 503；
+- 登录成功；
+- 总览 6 个箱体：`BOX-0001` + `BOX-SIM-01`～`BOX-SIM-05`；
+- 开发板在线时 `BOX-0001` 显示 ONLINE。
+
+完整步骤、MySQL 8.4 说明、LocalSettings 约束和故障排查见[前后端启动](docs/operations/前后端启动.md)。
 
 ## 4. 如何体验主要功能？
 
@@ -236,7 +202,7 @@ ENV/POSE 开发板
                  Vue 浏览器
 ```
 
-当前后端只支持 **`ssl://<DNS域名>:8883`** 的远程 TLS Broker，要求配置 MQTT 账号、密码和 CA 文件。启用 `SMARTBOX_MQTT_ENABLED=true` 前，必须准备好对应 Broker、节点身份、ACL、板端固件与网络条件。**没有本地 1883 Broker 回退。**
+当前后端固定使用远程 EMQX Broker 的 **TLS 8883**，仓库已提交固定演示配置和 CA。后端启动后会读取 `deploy/demo/mqtt.cloud.json` 自动连接；没有本地 1883 Broker 回退。真实板仍需节点注册、ACL、固件和网络条件。
 
 当前 `main` **不提供 SDK、编译烧录工具、Broker 部署或真实硬件联调**。固件源码可用于阅读系统设计；已有可运行固件与完整硬件开发流程需使用完整工程环境。参考：[真实开发板接入说明](docs/operations/真实开发板接入.md)和[固件源码导读](firmware/README.md)。
 

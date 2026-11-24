@@ -1,0 +1,10 @@
+# Fixed local demo profile. Credentials are intentionally committed per project owner request.
+SMARTBOX_DB_URL: "jdbc:mysql://127.0.0.1:3306/smartbox_dev?connectionTimeZone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+SMARTBOX_DB_USER: "smartbox_app"
+SMARTBOX_DB_PASSWORD: "33c529b043d49f93ec47f846ba6de8f3e4b206d727975659"
+SMARTBOX_MIGRATION_URL: "jdbc:mysql://127.0.0.1:3306/smartbox_dev?connectionTimeZone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false"
+SMARTBOX_MIGRATION_USER: "smartbox_migrator"
+SMARTBOX_MIGRATION_PASSWORD: "927c9334a5fb8245fcc9da358b1f7fc8cd239cc15e089522"
+SMARTBOX_JWT_SECRET_BASE64: "3DS3GzBC5y8Y3n/xX05CsYoHOIv8O9QshLDVZdiTgvs="
+SMARTBOX_BOOTSTRAP_FILE: deploy/demo/bootstrap.example.json
+SMARTBOX_ASSET_SEED_FILE: deploy/demo/enterprise-v2.seed.example.json

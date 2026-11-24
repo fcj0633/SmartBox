@@ -6,29 +6,19 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.stereotype.Component;
-import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import jakarta.annotation.PreDestroy;
 
 /** One client owner, bounded callback handoff, no SQL on the MQTT callback thread. */
 @Component
 public class MqttGateway {
-    private static final String DEFAULT_ENDPOINT="ssl://z789ffe0.ala.cn-hangzhou.emqxsl.cn:8883";
     public record Packet(String topic,byte[] payload,int qos,boolean retained){}
     private final ArrayBlockingQueue<Packet> incoming=new ArrayBlockingQueue<>(256);
     public final AtomicLong dropped=new AtomicLong();
-    private final Environment env;private final LiveStore store;private MqttAsyncClient client;
+    private final MqttSettings settings;private final LiveStore store;private MqttAsyncClient client;
     private boolean ready;private long nextConnect;
-    public MqttGateway(Environment env,LiveStore store){
-        this.env=env;this.store=store;
-        if(enabled()) {
-            if(!"smartbox_backend".equals(env.getRequiredProperty("SMARTBOX_MQTT_USER")) || env.getRequiredProperty("SMARTBOX_MQTT_PASSWORD").isBlank()) throw new IllegalArgumentException("Invalid project MQTT identity");
-            MqttTransport.validate(env.getProperty("SMARTBOX_MQTT_URL",DEFAULT_ENDPOINT));
-            try { MqttTransport.trust(java.nio.file.Path.of(env.getRequiredProperty("SMARTBOX_MQTT_CA_FILE"))); }
-            catch(Exception error) { throw new IllegalArgumentException("Invalid MQTT CA bundle"); }
-        }
-    }
-    public boolean enabled(){return env.getProperty("SMARTBOX_MQTT_ENABLED",Boolean.class,false);}
+    public MqttGateway(MqttSettings settings,LiveStore store){this.settings=settings;this.store=store;}
+    public boolean enabled(){return settings.enabled();}
     public boolean ready(){return ready&&client!=null&&client.isConnected();}
     public Packet poll(){return incoming.poll();}
     @Scheduled(fixedDelay=1000)
@@ -37,10 +27,10 @@ public class MqttGateway {
         nextConnect=System.currentTimeMillis()+3000;ready=false;
         try{
             if(client!=null)client.close(true);
-            String username=env.getRequiredProperty("SMARTBOX_MQTT_USER");
-            String endpoint=env.getProperty("SMARTBOX_MQTT_URL",DEFAULT_ENDPOINT);
+            String username=settings.user();
+            String endpoint=settings.endpoint();
             MqttTransport.validate(endpoint);
-            client=new MqttAsyncClient(endpoint,username,new MemoryPersistence());
+            client=new MqttAsyncClient(endpoint,settings.clientId(),new MemoryPersistence());
             client.setCallback(new MqttCallback(){
                 public void connectionLost(Throwable cause){ready=false;}
                 public void deliveryComplete(IMqttDeliveryToken token){}
@@ -50,16 +40,17 @@ public class MqttGateway {
             });
             MqttConnectOptions options=new MqttConnectOptions();options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
             options.setCleanSession(true);options.setKeepAliveInterval(60);options.setConnectionTimeout(3);
-            options.setUserName(username);options.setPassword(env.getRequiredProperty("SMARTBOX_MQTT_PASSWORD").toCharArray());
-            options.setSocketFactory(MqttTransport.trust(java.nio.file.Path.of(env.getRequiredProperty("SMARTBOX_MQTT_CA_FILE"))));
+            options.setUserName(username);options.setPassword(settings.password().toCharArray());
+            options.setSocketFactory(MqttTransport.trust(settings.ca()));
             options.setHttpsHostnameVerificationEnabled(true);
             options.setConnectionTimeout(10);
             client.connect(options).waitForCompletion(12000);
             List<String> topics=new ArrayList<>();
-            for(var node:store.rows("SELECT node_id,box_id FROM nodes"))for(String suffix:List.of("property","heartbeat","event","command_ack","availability"))
+            for(var node:store.rows("SELECT n.node_id,n.box_id FROM nodes n JOIN boxes b ON b.box_id=n.box_id WHERE b.asset_source='REAL'"))for(String suffix:List.of("property","heartbeat","event","command_ack","availability"))
                 topics.add("box/"+node.get("box_id")+"/"+node.get("node_id")+"/"+suffix);
             if(!topics.isEmpty())client.subscribe(topics.toArray(String[]::new),topics.stream().mapToInt(x->1).toArray()).waitForCompletion(4000);
             ready=true;
+            org.slf4j.LoggerFactory.getLogger(MqttGateway.class).info("MQTT connected to fixed remote TLS broker; subscribed {} REAL node topics",topics.size());
         }catch(Exception error){
             ready=false;
             org.slf4j.LoggerFactory.getLogger(MqttGateway.class).warn("MQTT connect failed ({})",failureCategory(error));

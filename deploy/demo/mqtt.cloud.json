@@ -1,0 +1,35 @@
+{
+  "format": 1,
+  "box_id": "BOX-0001",
+  "deployment_id": "z789ffe0",
+  "broker": {
+    "mode": "cloud",
+    "host": "z789ffe0.ala.cn-hangzhou.emqxsl.cn",
+    "port": 8883,
+    "tls": true,
+    "ca_file": "emqxsl-ca.crt"
+  },
+  "state_dir": "C:\\Users\\Administrator\\Desktop\\SmartBox\\secrets\\cloud\\state",
+  "accounts": {
+    "ENV": {
+      "username": "BOX-0001-ENV",
+      "password": "_XIP9w8Mx92WwGk76sZLk4p9i88W9-xfamXuiZ-2rXo"
+    },
+    "POSE": {
+      "username": "BOX-0001-POSE",
+      "password": "UYEYVcGaR_jXVJj-U0y2ZiUFllXAP5eO8xXWUnX7LkU"
+    },
+    "backend": {
+      "username": "smartbox_backend",
+      "password": "MptGj0kg3aWPAvFr9aLqcMjSFkGmmuNzlYuMfiBaGzA"
+    },
+    "control": {
+      "username": "smartbox_test_control",
+      "password": "GYhwohditNC5UIG0fFetGyW9AteNqG8fV0N8XYSXmsM"
+    },
+    "observer": {
+      "username": "smartbox_test_observer",
+      "password": "MqbP0Pd9tjdneiXJ1SCTvEVA_WubiHjNo-Pi3on2Tjg"
+    }
+  }
+}

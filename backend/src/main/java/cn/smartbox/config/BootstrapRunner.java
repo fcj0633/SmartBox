@@ -14,6 +14,7 @@ public class BootstrapRunner implements ApplicationRunner {
     public BootstrapRunner(BootstrapService service,Environment env,ObjectMapper json){this.service=service;this.env=env;this.json=json;}
     @Override public void run(ApplicationArguments args)throws Exception {
         Path path=Path.of(env.getRequiredProperty("SMARTBOX_BOOTSTRAP_FILE"));
+        if(!Files.isRegularFile(path)) path=Path.of("..").resolve(path).normalize();
         if(!Files.isRegularFile(path)||Files.size(path)>1024*1024)throw new IllegalArgumentException("Invalid local initialization file");
         service.initialize(json.readTree(Files.readString(path)));System.out.println("SmartBox controlled initialization completed; no credentials displayed.");
     }
